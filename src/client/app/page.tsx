@@ -1,5 +1,7 @@
 "use client"
 
+import { AuthHeader } from "@/components/auth-header";
+import { Web3Zone } from "@/components/web3zone";
 import { UserButton } from "@civic/auth-web3/react";
 
 export default function CivicAuthDemo() {
@@ -13,8 +15,9 @@ export default function CivicAuthDemo() {
             Comprehensive demonstration of Civic Auth Web3 features using @civic/auth-web3/nextjs
           </p>
         </div>
-        <div className="flex justify-center my-8">
-          <UserButton />
+        <div className="flex justify-center my-8">          
+          <AuthHeader />
+          <Web3Zone />
         </div>
       </div>
     </div>
