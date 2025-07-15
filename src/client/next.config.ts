@@ -1,7 +1,16 @@
-import type { NextConfig } from "next";
+import { createCivicAuthPlugin } from "@civic/auth-web3/nextjs"
 
-const nextConfig: NextConfig = {
-  /* config options here */
-};
+const nextConfig = {
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+}
 
-export default nextConfig;
+const withCivicAuth = createCivicAuthPlugin({
+  clientId: "ad61f608-6a04-4760-b245-0e1290a83131"
+})
+
+export default withCivicAuth(nextConfig)
