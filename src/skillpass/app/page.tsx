@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useUser } from "@civic/auth-web3/react";
 import { useRouter } from "next/navigation";
+import { ArrowRight, CheckCircle, Star } from "lucide-react";
 
 export default function HomePage() {
   const { user, signIn } = useUser()
@@ -166,6 +167,66 @@ export default function HomePage() {
                 <p className="text-muted-foreground">
                   Build your reputation score through quality endorsements and community validation.
                 </p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+            {/* Benefits Section */}
+            <section className="px-6 py-24">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            <div>
+              <h2 className="text-3xl md:text-4xl font-bold mb-6">
+                Why Choose SkillPass?
+              </h2>
+              <div className="space-y-6">
+                <div className="flex items-start space-x-4">
+                  <CheckCircle className="w-6 h-6 text-primary mt-1 flex-shrink-0" />
+                  <div>
+                    <h3 className="font-semibold mb-2">Decentralized Validation</h3>
+                    <p className="text-muted-foreground">
+                      No central authority - your skills are validated by the community.
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-start space-x-4">
+                  <CheckCircle className="w-6 h-6 text-primary mt-1 flex-shrink-0" />
+                  <div>
+                    <h3 className="font-semibold mb-2">Reputation Staking</h3>
+                    <p className="text-muted-foreground">
+                      Endorsers stake their reputation, ensuring quality validation.
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-start space-x-4">
+                  <CheckCircle className="w-6 h-6 text-primary mt-1 flex-shrink-0" />
+                  <div>
+                    <h3 className="font-semibold mb-2">Public Profiles</h3>
+                    <p className="text-muted-foreground">
+                      Showcase your validated skills to employers and collaborators.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <Card className="glass-strong">
+              <CardContent className="p-8">
+                <div className="text-center mb-6">
+                  <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Star className="w-8 h-8 text-primary" />
+                  </div>
+                  <h3 className="text-2xl font-bold mb-2">Join the Future</h3>
+                  <p className="text-muted-foreground">
+                    Be part of the next generation of professional validation
+                  </p>
+                </div>
+                <Button className="w-full" size="lg">
+                  Create Your Profile
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Button>
               </CardContent>
             </Card>
           </div>

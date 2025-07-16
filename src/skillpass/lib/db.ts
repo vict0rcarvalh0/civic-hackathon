@@ -1,372 +1,152 @@
-import { promises as fs } from "fs"
-import path from "path"
-import { randomUUID } from "crypto"
-import { sendMail } from "./email"
+import { drizzle } from 'drizzle-orm/postgres-js'
+import postgres from 'postgres'
+import { pgTable, text, integer, timestamp, boolean, jsonb, decimal } from 'drizzle-orm/pg-core'
 
-/* ---------- Types ---------- */
+const connectionString = process.env.DATABASE_URL!
 
-export interface Skill {
-  id: string
-  userId: string
-  name: string
-  description: string
-  category: string
-  level: "Beginner" | "Intermediate" | "Advanced" | "Expert"
-  endorsements: Endorsement[]
-  totalStaked: number
-  reputationScore: number
-  created: string
-  updated: string
-}
+// Skip transform DEV
+const client = postgres(connectionString, { prepare: false })
+export const db = drizzle(client)
 
-export interface Endorsement {
-  id: string
-  skillId: string
-  endorserId: string
-  endorserAddress: string
-  endorserName?: string
-  stakeAmount: number
-  stakeCurrency: string
-  transactionHash: string
-  message?: string
-  created: string
-}
-
-export interface UserProfile {
-  userId: string
-  address: string
-  displayName?: string
-  bio?: string
-  avatar?: string
-  totalReputationScore: number
-  skillsCount: number
-  endorsementsReceived: number
-  endorsementsGiven: number
-  created: string
-  updated: string
-}
-
-/* ---------- File helpers ---------- */
-
-const dataDir = path.join(process.cwd(), "data")
-const skillsFile = path.join(dataDir, "skills.json")
-const endorsementsFile = path.join(dataDir, "endorsements.json")
-const profilesFile = path.join(dataDir, "profiles.json")
-
-async function ensureSkillsFile() {
-  await fs.mkdir(dataDir, { recursive: true })
-  try {
-    await fs.access(skillsFile)
-  } catch {
-    await fs.writeFile(skillsFile, "[]")
-  }
-}
-
-async function ensureEndorsementsFile() {
-  await fs.mkdir(dataDir, { recursive: true })
-  try {
-    await fs.access(endorsementsFile)
-  } catch {
-    await fs.writeFile(endorsementsFile, "[]")
-  }
-}
-
-async function ensureProfilesFile() {
-  await fs.mkdir(dataDir, { recursive: true })
-  try {
-    await fs.access(profilesFile)
-  } catch {
-    await fs.writeFile(profilesFile, "[]")
-  }
-}
-
-async function readSkills(): Promise<Skill[]> {
-  await ensureSkillsFile()
-  const raw = await fs.readFile(skillsFile, "utf8")
-  return JSON.parse(raw) as Skill[]
-}
-
-async function writeSkills(skills: Skill[]) {
-  await fs.writeFile(skillsFile, JSON.stringify(skills, null, 2))
-}
-
-async function readEndorsements(): Promise<Endorsement[]> {
-  await ensureEndorsementsFile()
-  const raw = await fs.readFile(endorsementsFile, "utf8")
-  return JSON.parse(raw) as Endorsement[]
-}
-
-async function writeEndorsements(endorsements: Endorsement[]) {
-  await fs.writeFile(endorsementsFile, JSON.stringify(endorsements, null, 2))
-}
-
-async function readProfiles(): Promise<UserProfile[]> {
-  await ensureProfilesFile()
-  const raw = await fs.readFile(profilesFile, "utf8")
-  return JSON.parse(raw) as UserProfile[]
-}
-
-async function writeProfiles(profiles: UserProfile[]) {
-  await fs.writeFile(profilesFile, JSON.stringify(profiles, null, 2))
-}
-
-/* ---------- Skills CRUD ---------- */
-
-export async function getSkillsByUser(userId: string): Promise<Skill[]> {
-  const skills = await readSkills()
-  const endorsements = await readEndorsements()
+// Skills table
+export const skills = pgTable('skills', {
+  id: text('id').primaryKey(), // NFT token ID
+  userId: text('user_id').notNull(),
+  walletAddress: text('wallet_address').notNull(),
+  category: text('category').notNull(),
+  name: text('name').notNull(),
+  description: text('description').notNull(),
   
-  return skills
-    .filter((s) => s.userId === userId)
-    .map((skill) => ({
-      ...skill,
-      endorsements: endorsements.filter((e) => e.skillId === skill.id),
-    }))
-}
-
-export async function getSkill(userId: string, id: string): Promise<Skill | undefined> {
-  const skills = await readSkills()
-  const endorsements = await readEndorsements()
+  // Blockchain data
+  tokenId: text('token_id').unique(),
+  contractAddress: text('contract_address'),
+  blockNumber: integer('block_number'),
+  transactionHash: text('transaction_hash'),
   
-  const skill = skills.find((s) => s.userId === userId && s.id === id)
-  if (!skill) return undefined
+  // Metadata
+  ipfsHash: text('ipfs_hash'),
+  metadataUri: text('metadata_uri'),
+  evidence: jsonb('evidence'), // Links, certificates, portfolio items
   
-  return {
-    ...skill,
-    endorsements: endorsements.filter((e) => e.skillId === skill.id),
-  }
-}
-
-export async function addSkill(
-  userId: string,
-  payload: {
-    name: string
-    description: string
-    category: string
-    level: "Beginner" | "Intermediate" | "Advanced" | "Expert"
-  },
-): Promise<Skill> {
-  const skills = await readSkills()
-  const id = randomUUID()
-  const created = new Date().toISOString()
-
-  const newSkill: Skill = {
-    id,
-    userId,
-    name: payload.name,
-    description: payload.description,
-    category: payload.category,
-    level: payload.level,
-    endorsements: [],
-    totalStaked: 0,
-    reputationScore: 0,
-    created,
-    updated: created,
-  }
-
-  skills.push(newSkill)
-  await writeSkills(skills)
-  return newSkill
-}
-
-export async function updateSkill(
-  userId: string,
-  id: string,
-  patch: Partial<Omit<Skill, "id" | "created" | "userId" | "endorsements" | "totalStaked" | "reputationScore">>,
-): Promise<Skill | undefined> {
-  const skills = await readSkills()
-  const index = skills.findIndex((s) => s.userId === userId && s.id === id)
-  if (index === -1) return undefined
-
-  skills[index] = {
-    ...skills[index],
-    ...patch,
-    updated: new Date().toISOString(),
-  }
-
-  await writeSkills(skills)
-  return skills[index]
-}
-
-export async function deleteSkill(userId: string, id: string): Promise<boolean> {
-  const skills = await readSkills()
-  const index = skills.findIndex((s) => s.userId === userId && s.id === id)
-  if (index === -1) return false
-
-  skills.splice(index, 1)
-  await writeSkills(skills)
+  // Metrics (cached from blockchain)
+  totalStaked: decimal('total_staked', { precision: 18, scale: 0 }).default('0'),
+  endorsementCount: integer('endorsement_count').default(0),
+  verified: boolean('verified').default(false),
   
-  // Also remove associated endorsements
-  const endorsements = await readEndorsements()
-  const filteredEndorsements = endorsements.filter((e) => e.skillId !== id)
-  await writeEndorsements(filteredEndorsements)
+  // Status
+  status: text('status').default('pending'), // pending, minted, challenged, verified
   
-  return true
-}
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+})
 
-/* ---------- Endorsements CRUD ---------- */
-
-export async function addEndorsement(
-  skillId: string,
-  endorserId: string,
-  payload: {
-    endorserAddress: string
-    endorserName?: string
-    stakeAmount: number
-    stakeCurrency: string
-    transactionHash: string
-    message?: string
-  },
-): Promise<Endorsement | null> {
-  const skills = await readSkills()
-  const endorsements = await readEndorsements()
+// Endorsements table
+export const endorsements = pgTable('endorsements', {
+  id: text('id').primaryKey(),
+  skillId: text('skill_id').references(() => skills.id),
+  endorserId: text('endorser_id').notNull(),
+  endorserWallet: text('endorser_wallet').notNull(),
   
-  const skill = skills.find((s) => s.id === skillId)
-  if (!skill) return null
-
-  const id = randomUUID()
-  const created = new Date().toISOString()
-
-  const newEndorsement: Endorsement = {
-    id,
-    skillId,
-    endorserId,
-    endorserAddress: payload.endorserAddress,
-    endorserName: payload.endorserName,
-    stakeAmount: payload.stakeAmount,
-    stakeCurrency: payload.stakeCurrency,
-    transactionHash: payload.transactionHash,
-    message: payload.message,
-    created,
-  }
-
-  endorsements.push(newEndorsement)
-  await writeEndorsements(endorsements)
-
-  // Update skill's total staked and reputation score
-  const skillIndex = skills.findIndex((s) => s.id === skillId)
-  if (skillIndex !== -1) {
-    skills[skillIndex].totalStaked += payload.stakeAmount
-    skills[skillIndex].reputationScore = calculateReputationScore(skills[skillIndex], endorsements.filter(e => e.skillId === skillId))
-    skills[skillIndex].updated = created
-    await writeSkills(skills)
-  }
-
-  return newEndorsement
-}
-
-export async function getEndorsementsBySkill(skillId: string): Promise<Endorsement[]> {
-  const endorsements = await readEndorsements()
-  return endorsements.filter((e) => e.skillId === skillId)
-}
-
-/* ---------- User Profiles CRUD ---------- */
-
-export async function getUserProfile(userId: string): Promise<UserProfile | undefined> {
-  const profiles = await readProfiles()
-  return profiles.find((p) => p.userId === userId)
-}
-
-export async function createOrUpdateProfile(
-  userId: string,
-  address: string,
-  payload: {
-    displayName?: string
-    bio?: string
-    avatar?: string
-  },
-): Promise<UserProfile> {
-  const profiles = await readProfiles()
-  const existingIndex = profiles.findIndex((p) => p.userId === userId)
+  // Staking info
+  stakedAmount: decimal('staked_amount', { precision: 18, scale: 0 }).notNull(),
+  evidence: text('evidence'), // Why they're endorsing
   
-  const skills = await getSkillsByUser(userId)
-  const endorsements = await readEndorsements()
+  // Blockchain data
+  transactionHash: text('transaction_hash'),
+  blockNumber: integer('block_number'),
   
-  const totalReputationScore = skills.reduce((sum, skill) => sum + skill.reputationScore, 0)
-  const endorsementsReceived = endorsements.filter(e => 
-    skills.some(s => s.id === e.skillId)
-  ).length
-  const endorsementsGiven = endorsements.filter(e => e.endorserId === userId).length
-
-  const profileData: UserProfile = {
-    userId,
-    address,
-    displayName: payload.displayName,
-    bio: payload.bio,
-    avatar: payload.avatar,
-    totalReputationScore,
-    skillsCount: skills.length,
-    endorsementsReceived,
-    endorsementsGiven,
-    created: existingIndex !== -1 ? profiles[existingIndex].created : new Date().toISOString(),
-    updated: new Date().toISOString(),
-  }
-
-  if (existingIndex !== -1) {
-    profiles[existingIndex] = profileData
-  } else {
-    profiles.push(profileData)
-  }
-
-  await writeProfiles(profiles)
-  return profileData
-}
-
-/* ---------- Utility Functions ---------- */
-
-function calculateReputationScore(skill: Skill, endorsements: Endorsement[]): number {
-  if (endorsements.length === 0) return 0
+  // Status
+  active: boolean('active').default(true),
+  challenged: boolean('challenged').default(false),
+  resolved: boolean('resolved').default(false),
   
-  // Simple reputation algorithm: 
-  // Base score from number of endorsements + weighted by stake amounts
-  const baseScore = endorsements.length * 10
-  const stakeScore = endorsements.reduce((sum, e) => sum + Math.log(e.stakeAmount + 1), 0)
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+})
+
+// User profiles table
+export const userProfiles = pgTable('user_profiles', {
+  id: text('id').primaryKey(),
+  walletAddress: text('wallet_address').unique().notNull(),
   
-  return Math.round(baseScore + stakeScore)
-}
-
-export async function getLeaderboard(category?: string, limit: number = 10): Promise<Skill[]> {
-  const skills = await readSkills()
-  const endorsements = await readEndorsements()
+  // Profile info
+  displayName: text('display_name'),
+  bio: text('bio'),
+  avatar: text('avatar'),
+  website: text('website'),
+  twitter: text('twitter'),
+  linkedin: text('linkedin'),
   
-  let filteredSkills = skills
-  if (category) {
-    filteredSkills = skills.filter(s => s.category.toLowerCase() === category.toLowerCase())
-  }
+  // Reputation metrics (cached)
+  reputationScore: decimal('reputation_score', { precision: 18, scale: 0 }).default('0'),
+  totalSkills: integer('total_skills').default(0),
+  totalEndorsements: integer('total_endorsements').default(0),
+  verifiedSkills: integer('verified_skills').default(0),
   
-  // Add endorsements to skills
-  const skillsWithEndorsements = filteredSkills.map(skill => ({
-    ...skill,
-    endorsements: endorsements.filter(e => e.skillId === skill.id)
-  }))
+  // Activity
+  lastActive: timestamp('last_active'),
+  joinedAt: timestamp('joined_at').defaultNow(),
   
-  // Sort by reputation score
-  return skillsWithEndorsements
-    .sort((a, b) => b.reputationScore - a.reputationScore)
-    .slice(0, limit)
-}
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+})
 
-// Legacy functions for backward compatibility (will be removed)
-export async function getLinksByUser(userId: string): Promise<any[]> {
-  return []
-}
+// Challenges table
+export const challenges = pgTable('challenges', {
+  id: text('id').primaryKey(),
+  skillId: text('skill_id').references(() => skills.id),
+  challengerId: text('challenger_id').notNull(),
+  challengerWallet: text('challenger_wallet').notNull(),
+  
+  reason: text('reason').notNull(),
+  evidence: jsonb('evidence'), // Evidence why skill is invalid
+  
+  // Blockchain data
+  transactionHash: text('transaction_hash'),
+  blockNumber: integer('block_number'),
+  challengeEndTime: timestamp('challenge_end_time'),
+  
+  // Resolution
+  resolved: boolean('resolved').default(false),
+  skillIsValid: boolean('skill_is_valid'),
+  resolvedAt: timestamp('resolved_at'),
+  resolverWallet: text('resolver_wallet'),
+  
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+})
 
-export async function getLink(userId: string, id: string): Promise<any> {
-  return undefined
-}
+// Blockchain events table (for syncing)
+export const blockchainEvents = pgTable('blockchain_events', {
+  id: text('id').primaryKey(),
+  contractAddress: text('contract_address').notNull(),
+  eventName: text('event_name').notNull(),
+  blockNumber: integer('block_number').notNull(),
+  transactionHash: text('transaction_hash').notNull(),
+  eventData: jsonb('event_data').notNull(),
+  processed: boolean('processed').default(false),
+  
+  createdAt: timestamp('created_at').defaultNow(),
+})
 
-export async function addLink(userId: string, payload: any): Promise<any> {
-  return null
-}
+// IPFS uploads table
+export const ipfsUploads = pgTable('ipfs_uploads', {
+  id: text('id').primaryKey(),
+  userId: text('user_id').notNull(),
+  hash: text('hash').unique().notNull(),
+  originalName: text('original_name'),
+  mimeType: text('mime_type'),
+  size: integer('size'),
+  purpose: text('purpose'), // skill-evidence, profile-avatar, etc.
+  
+  createdAt: timestamp('created_at').defaultNow(),
+})
 
-export async function updateLink(userId: string, id: string, patch: any): Promise<any> {
-  return undefined
-}
-
-export async function deleteLink(userId: string, id: string): Promise<boolean> {
-  return false
-}
-
-export async function recordPayment(id: string, amount: number, currency: string, txHash: string): Promise<any> {
-  return undefined
-}
+export type Skill = typeof skills.$inferSelect
+export type NewSkill = typeof skills.$inferInsert
+export type Endorsement = typeof endorsements.$inferSelect
+export type NewEndorsement = typeof endorsements.$inferInsert
+export type UserProfile = typeof userProfiles.$inferSelect
+export type NewUserProfile = typeof userProfiles.$inferInsert
+export type Challenge = typeof challenges.$inferSelect
+export type NewChallenge = typeof challenges.$inferInsert

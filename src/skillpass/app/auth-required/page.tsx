@@ -30,7 +30,7 @@ export default function AuthRequiredPage() {
         </p>
         
         <div className="space-y-4">
-          <Link href="/">
+        <Link href="/">
             <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white">
               Go to Home & Login
             </Button>
@@ -40,7 +40,7 @@ export default function AuthRequiredPage() {
             <Button variant="outline" className="w-full bg-white/5 border-white/10 text-gray-300 hover:bg-white/10 hover:text-white">
               Learn How SkillPass Works
             </Button>
-          </Link>
+        </Link>
         </div>
       </div>
     </div>

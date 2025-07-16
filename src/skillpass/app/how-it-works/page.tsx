@@ -117,7 +117,7 @@ export default function HowItWorksPage() {
                   <CardContent className="p-8">
                     <div className={`bg-${item.gradient}-600 w-16 h-16 rounded-xl flex items-center justify-center mb-6`}>
                       <item.icon className="w-8 h-8 text-white" />
-                    </div>
+                        </div>
                     <h4 className="text-xl font-semibold text-white mb-4">Step {item.step}</h4>
                     <p className="text-gray-400 mb-6">
                       {item.step === "01" && "Secure authentication powered by Civic's decentralized identity platform."}
@@ -135,9 +135,9 @@ export default function HowItWorksPage() {
                           {item.step === "04" && "Ongoing"}
                         </span>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                      </div>
+                    </CardContent>
+                  </Card>
               </div>
             ))}
           </div>
@@ -230,11 +230,11 @@ export default function HowItWorksPage() {
           <h2 className="text-4xl font-bold text-white mb-6">Ready to Validate Your Skills?</h2>
           <p className="text-xl text-gray-400 mb-10">
             Join professionals who are building trust through peer validation. Start your journey today.
-          </p>
+              </p>
           <Button size="lg" className="bg-purple-600 hover:bg-purple-700 text-white">
             Create Your Profile
-            <ArrowRight className="ml-2 w-5 h-5" />
-          </Button>
+                  <ArrowRight className="ml-2 w-5 h-5" />
+                </Button>
         </div>
       </section>
     </div>

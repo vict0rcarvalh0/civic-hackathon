@@ -153,7 +153,7 @@ export default function DashboardNavigation() {
                       <Bell className="w-5 h-5" />
                       {unreadCount > 0 && (
                         <Badge className="absolute -top-1 -right-1 w-5 h-5 p-0 bg-red-500 text-white text-xs flex items-center justify-center">
-                          {unreadCount}
+                            {unreadCount}
                         </Badge>
                       )}
                     </Button>
@@ -166,15 +166,15 @@ export default function DashboardNavigation() {
                       ) : (
                         <div className="space-y-2 max-h-64 overflow-y-auto">
                           {notifications.slice(0, 5).map((notif) => (
-                            <div
+                        <div
                               key={notif.id}
                               className={`p-3 rounded-lg border cursor-pointer hover:bg-white/5 transition-colors ${
                                 notif.read
                                   ? "bg-white/[0.02] border-white/5"
                                   : "bg-purple-600/10 border-purple-500/20"
-                              }`}
+                          }`}
                               onClick={() => markAsRead(notif.id)}
-                            >
+                        >
                               <div className="flex items-start space-x-3">
                                 {getNotificationIcon(notif.type)}
                                 <div className="flex-1 min-w-0">
@@ -183,15 +183,15 @@ export default function DashboardNavigation() {
                                   </h5>
                                   <p className="text-xs text-gray-400 mt-1">
                                     {notif.message}
-                                  </p>
+                              </p>
                                   <div className="flex items-center mt-2 text-xs text-gray-500">
                                     <Clock className="w-3 h-3 mr-1" />
                                     {notif.time}
                                   </div>
-                                </div>
-                              </div>
                             </div>
-                          ))}
+                          </div>
+                        </div>
+                      ))}
                         </div>
                       )}
                     </div>
@@ -283,7 +283,7 @@ export default function DashboardNavigation() {
               </Link>
               <div className="pt-4 border-t border-white/10">
                 <div className="flex items-center space-x-4">
-                  <ChainSelector />
+                <ChainSelector />
                   {!user && <AuthButton />}
                 </div>
               </div>

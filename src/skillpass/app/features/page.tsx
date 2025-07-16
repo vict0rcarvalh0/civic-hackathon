@@ -248,7 +248,7 @@ export default function FeaturesPage() {
           <h2 className="text-4xl font-bold text-white mb-6">Enterprise-Grade Security</h2>
           <p className="text-xl text-gray-400 mb-12 max-w-3xl mx-auto">
             Your professional reputation is valuable. We protect it with the highest security standards.
-          </p>
+            </p>
 
           <div className="grid md:grid-cols-3 gap-8">
             {[
@@ -288,11 +288,11 @@ export default function FeaturesPage() {
           <h2 className="text-4xl font-bold text-white mb-6">Ready to Build Your Reputation?</h2>
           <p className="text-xl text-gray-400 mb-10">
             Join thousands of professionals who are already validating their skills on SkillPass.
-          </p>
+              </p>
           <Button size="lg" className="bg-purple-600 hover:bg-purple-700 text-white">
             Start Building Your Profile
-            <ArrowRight className="ml-2 w-5 h-5" />
-          </Button>
+                  <ArrowRight className="ml-2 w-5 h-5" />
+                </Button>
         </div>
       </section>
     </div>

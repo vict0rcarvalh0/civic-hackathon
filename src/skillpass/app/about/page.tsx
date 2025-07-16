@@ -97,9 +97,9 @@ export default function AboutPage() {
                 </p>
                 <p className="text-lg text-gray-400 leading-relaxed">
                   This creates a virtuous cycle: validators are incentivized to be honest and thorough, while skilled professionals get the recognition they deserve backed by real economic value.
-                </p>
-              </div>
-            </div>
+            </p>
+          </div>
+                  </div>
             <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
               <CardContent className="p-8">
                 <div className="space-y-6">
@@ -119,7 +119,7 @@ export default function AboutPage() {
                     <div>
                       <h4 className="font-semibold text-white">Community Driven</h4>
                       <p className="text-gray-400 text-sm">Peer validation with economic incentives</p>
-                    </div>
+                </div>
                   </div>
                   <div className="flex items-center space-x-4">
                     <div className="bg-blue-600 w-12 h-12 rounded-lg flex items-center justify-center">
@@ -176,8 +176,8 @@ export default function AboutPage() {
                   <h3 className="text-xl font-semibold text-white mb-2">{member.name}</h3>
                   <p className="text-purple-300 text-sm mb-4">{member.role}</p>
                   <p className="text-gray-400 text-sm">{member.description}</p>
-                </CardContent>
-              </Card>
+              </CardContent>
+            </Card>
             ))}
           </div>
         </div>
@@ -186,20 +186,20 @@ export default function AboutPage() {
       {/* Connect Section */}
       <section className="py-20 px-4 sm:px-6 lg:px-8 relative">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl font-bold text-white mb-6">Join Our Mission</h2>
+              <h2 className="text-4xl font-bold text-white mb-6">Join Our Mission</h2>
           <p className="text-xl text-gray-400 mb-10">
             Help us build a fairer, more transparent way to validate professional skills. Your expertise and feedback are invaluable.
-          </p>
+              </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
             <Button size="lg" className="bg-purple-600 hover:bg-purple-700 text-white">
               Start Your Profile
-              <ArrowRight className="ml-2 w-5 h-5" />
-            </Button>
+                  <ArrowRight className="ml-2 w-5 h-5" />
+                </Button>
             <Button size="lg" variant="outline" className="bg-white/5 border-white/10 text-gray-300 hover:bg-white/10 hover:text-white">
               Join Community
-            </Button>
-          </div>
+                </Button>
+              </div>
 
           <div className="flex justify-center space-x-6">
             {[

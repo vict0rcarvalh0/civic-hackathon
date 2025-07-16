@@ -108,7 +108,7 @@ export default function WalletActions({
               {walletAddress ? (
                 <>
                   <div className="p-4 bg-white rounded-xl">
-                    <QRCodeSVG value={walletAddress} size={200} />
+                  <QRCodeSVG value={walletAddress} size={200} />
                   </div>
                   <p className="font-mono break-all text-sm text-gray-300">{walletAddress}</p>
                   <CopyButton

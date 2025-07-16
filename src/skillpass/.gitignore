@@ -24,6 +24,7 @@ data
 # Local Environment Variables
 .env*.local
 .env
+.env.backup
 
 # Log files
 npm-debug.log*
