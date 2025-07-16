@@ -79,6 +79,13 @@ export default function DashboardPage() {
   const [isAddingSkill, setIsAddingSkill] = useState(false);
   const [walletConnected, setWalletConnected] = useState(false);
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
+  const [reputationData, setReputationData] = useState({
+    balance: "0",
+    score: "0",
+    loading: false
+  });
+  const [networkError, setNetworkError] = useState<string | null>(null);
+  const [currentNetwork, setCurrentNetwork] = useState<{chainId: string, name: string} | null>(null);
   const [isEndorseDialogOpen, setIsEndorseDialogOpen] = useState(false);
   const [selectedSkill, setSelectedSkill] = useState<Skill | null>(null);
   const [isEndorsing, setIsEndorsing] = useState(false);
@@ -103,6 +110,11 @@ export default function DashboardPage() {
         if (connected) {
           const address = await getConnectedAddress();
           setWalletAddress(address);
+          
+          // Fetch reputation data from blockchain
+          if (address) {
+            await fetchReputationData(address);
+          }
         }
       } catch (error) {
         console.error("Error checking wallet connection:", error);
@@ -115,7 +127,15 @@ export default function DashboardPage() {
     if (typeof window !== "undefined" && window.ethereum) {
       const handleAccountsChanged = (accounts: string[]) => {
         setWalletConnected(accounts.length > 0);
-        setWalletAddress(accounts.length > 0 ? accounts[0] : null);
+        const newAddress = accounts.length > 0 ? accounts[0] : null;
+        setWalletAddress(newAddress);
+        
+        // Fetch reputation data for new address
+        if (newAddress) {
+          fetchReputationData(newAddress);
+        } else {
+          setReputationData({ balance: "0", score: "0", loading: false });
+        }
       };
 
       window.ethereum.on('accountsChanged', handleAccountsChanged);
@@ -124,6 +144,59 @@ export default function DashboardPage() {
       };
     }
   }, []);
+
+  const fetchReputationData = async (address: string) => {
+    try {
+      setReputationData(prev => ({ ...prev, loading: true }));
+      setNetworkError(null);
+      
+      // Import Web3 utilities
+      const { skillPassContracts, getCurrentNetwork } = await import('@/lib/web3');
+      
+      // Get current network info
+      const network = await getCurrentNetwork();
+      setCurrentNetwork(network);
+      
+      // Fetch reputation data using smart fallback (RPC -> mock)
+      console.log("🧠 Dashboard: Using smart fallback method - tries RPC then mock");
+      const reputation = await skillPassContracts.getUserReputationSmart(address);
+      
+      setReputationData({
+        balance: parseFloat(reputation.balance).toFixed(2),
+        score: parseFloat(reputation.score).toFixed(0),
+        loading: false
+      });
+      
+      console.log("✅ Reputation data updated:", reputation);
+    } catch (error: any) {
+      console.error("❌ Error fetching reputation data:", error);
+      setReputationData(prev => ({ ...prev, loading: false }));
+      
+      // Check if it's a network error
+      if (error.message?.includes('Wrong network') || error.message?.includes('Smart contracts not found')) {
+        setNetworkError(error.message);
+      } else {
+        setNetworkError(`Failed to fetch reputation data: ${error.message}`);
+      }
+    }
+  };
+
+  const handleSwitchNetwork = async () => {
+    try {
+      const { switchToCorrectNetwork } = await import('@/lib/web3');
+      await switchToCorrectNetwork();
+      
+      // Refresh data after network switch
+      if (walletAddress) {
+        await fetchReputationData(walletAddress);
+      }
+      
+      toast.success("Network switched successfully!");
+    } catch (error: any) {
+      console.error("Error switching network:", error);
+      toast.error(`Failed to switch network: ${error.message}`);
+    }
+  };
 
   useEffect(() => {
     if (user) {
@@ -168,6 +241,9 @@ export default function DashboardPage() {
       
       toast.dismiss(loadingToast);
       toast.success("MetaMask connected successfully!");
+      
+      // Fetch reputation data immediately after connecting
+      await fetchReputationData(address);
     } catch (error: any) {
       console.error('Error connecting MetaMask:', error);
       
@@ -269,6 +345,11 @@ export default function DashboardPage() {
         
         // Refresh dashboard data
         await loadDashboardData();
+        
+        // Refresh reputation data in case user received REPR tokens
+        if (walletAddress) {
+          await fetchReputationData(walletAddress);
+        }
       } else {
         toast.error(result.error || "Failed to save skill to database");
       }
@@ -364,6 +445,11 @@ export default function DashboardPage() {
         
         // Refresh dashboard data
         await loadDashboardData();
+        
+        // Refresh reputation data to show updated balance
+        if (walletAddress) {
+          await fetchReputationData(walletAddress);
+        }
       } else {
         toast.error(result.error || "Failed to save endorsement to database");
       }
@@ -568,6 +654,95 @@ export default function DashboardPage() {
                   <Badge className="bg-green-600/20 text-green-300 border-green-500/30">
                     Connected
                   </Badge>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Network Error Alert */}
+          {networkError && (
+            <Card className="bg-red-600/10 border-red-500/30 backdrop-blur-sm">
+              <CardContent className="p-6">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-start space-x-3">
+                    <AlertCircle className="w-5 h-5 text-red-400 mt-0.5" />
+                    <div className="flex-1">
+                      <h3 className="text-red-300 font-medium mb-2">Network Configuration Issue</h3>
+                      <div className="text-red-200/80 text-sm whitespace-pre-line mb-4">
+                        {networkError}
+                      </div>
+                      {currentNetwork && (
+                        <div className="text-xs text-red-200/60 mb-3">
+                          Current network: {currentNetwork.name} (Chain ID: {currentNetwork.chainId})
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <Button
+                    onClick={handleSwitchNetwork}
+                    variant="outline"
+                    size="sm"
+                    className="bg-red-600/20 border-red-500/50 text-red-300 hover:bg-red-600/30"
+                  >
+                    Switch Network
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Reputation Overview - Only show when wallet connected */}
+          {walletConnected && (
+            <Card className="bg-gradient-to-r from-purple-600/10 to-pink-600/10 border-purple-500/30 backdrop-blur-sm">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-4">
+                    <div className="w-12 h-12 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full flex items-center justify-center">
+                      <Star className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-white">Your Reputation</h3>
+                      <p className="text-purple-200/80 text-sm">Real-time blockchain data</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-8">
+                    <div className="text-center">
+                      <div className="flex items-center space-x-2">
+                        <p className="text-2xl font-bold text-purple-300">
+                          {reputationData.loading ? (
+                            <Loader2 className="w-6 h-6 animate-spin" />
+                          ) : (
+                            reputationData.balance
+                          )}
+                        </p>
+                        <span className="text-purple-400 text-sm font-medium">REPR</span>
+                      </div>
+                      <p className="text-sm text-purple-200/70">Token Balance</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-2xl font-bold text-pink-300">
+                        {reputationData.loading ? (
+                          <Loader2 className="w-6 h-6 animate-spin" />
+                        ) : (
+                          reputationData.score
+                        )}
+                      </p>
+                      <p className="text-sm text-purple-200/70">Reputation Score</p>
+                    </div>
+                    <Button
+                      onClick={() => fetchReputationData(walletAddress!)}
+                      variant="outline"
+                      size="sm"
+                      disabled={reputationData.loading}
+                      className="bg-purple-600/20 border-purple-500/50 text-purple-300 hover:bg-purple-600/30"
+                    >
+                      {reputationData.loading ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        "Refresh"
+                      )}
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>

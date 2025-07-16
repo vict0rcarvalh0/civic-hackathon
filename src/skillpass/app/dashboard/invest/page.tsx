@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { useUser } from "@civic/auth-web3/react";
+import { isWalletConnected, getConnectedAddress } from "@/lib/web3";
 import { 
   Wallet, 
   Search, 
@@ -56,6 +57,15 @@ export default function InvestPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [sortBy, setSortBy] = useState("newest");
+  const [walletConnected, setWalletConnected] = useState(false);
+  const [walletAddress, setWalletAddress] = useState<string | null>(null);
+  const [reputationData, setReputationData] = useState({
+    balance: "0",
+    score: "0",
+    loading: false
+  });
+  const [networkError, setNetworkError] = useState<string | null>(null);
+  const [currentNetwork, setCurrentNetwork] = useState<{chainId: string, name: string} | null>(null);
 
   // Endorsement modal state
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -72,6 +82,80 @@ export default function InvestPage() {
       loadSkillsForEndorsement();
     }
   }, [user]);
+
+  useEffect(() => {
+    const checkWalletAndFetchReputation = async () => {
+      try {
+        const connected = await isWalletConnected();
+        setWalletConnected(connected);
+        
+        if (connected) {
+          const address = await getConnectedAddress();
+          setWalletAddress(address);
+          
+          if (address) {
+            await fetchReputationData(address);
+          }
+        }
+      } catch (error) {
+        console.error("Error checking wallet:", error);
+      }
+    };
+
+    if (user) {
+      checkWalletAndFetchReputation();
+    }
+  }, [user]);
+
+  const fetchReputationData = async (address: string) => {
+    try {
+      setReputationData(prev => ({ ...prev, loading: true }));
+      setNetworkError(null);
+      
+      const { skillPassContracts, getCurrentNetwork } = await import('@/lib/web3');
+      
+      // Get current network info
+      const network = await getCurrentNetwork();
+      setCurrentNetwork(network);
+
+      // Fetch reputation data using smart fallback (RPC -> mock)
+      console.log("🧠 Invest page: Using smart fallback method - tries RPC then mock");
+      const reputation = await skillPassContracts.getUserReputationSmart(address);
+      
+      setReputationData({
+        balance: parseFloat(reputation.balance).toFixed(2),
+        score: parseFloat(reputation.score).toFixed(0),
+        loading: false
+      });
+    } catch (error: any) {
+      console.error("Error fetching reputation data:", error);
+      setReputationData(prev => ({ ...prev, loading: false }));
+      
+      // Check if it's a network error
+      if (error.message?.includes('Wrong network') || error.message?.includes('Smart contracts not found')) {
+        setNetworkError(error.message);
+      } else {
+        setNetworkError(`Failed to fetch reputation data: ${error.message}`);
+      }
+    }
+  };
+
+  const handleSwitchNetwork = async () => {
+    try {
+      const { switchToCorrectNetwork } = await import('@/lib/web3');
+      await switchToCorrectNetwork();
+      
+      // Refresh data after network switch
+      if (walletAddress) {
+        await fetchReputationData(walletAddress);
+      }
+      
+      toast.success("Network switched successfully!");
+    } catch (error: any) {
+      console.error("Error switching network:", error);
+      toast.error(`Failed to switch network: ${error.message}`);
+    }
+  };
 
   useEffect(() => {
     filterAndSortSkills();
@@ -301,23 +385,89 @@ export default function InvestPage() {
                     <Wallet className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-white">Civic Wallet</h3>
-                    <p className="text-gray-400 font-mono">{user.wallet?.address || "Connected via Civic"}</p>
+                    <h3 className="text-lg font-semibold text-white">
+                      {walletConnected ? "MetaMask Connected" : "Civic Connected"}
+                    </h3>
+                    <p className="text-gray-400 font-mono text-sm">
+                      {walletAddress || user.wallet?.address || "Connected via Civic"}
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-6">
                   <div className="text-center">
-                    <p className="text-2xl font-bold text-purple-400">{user.wallet?.balance || "0"}</p>
-                    <p className="text-sm text-gray-400">REPR Tokens</p>
+                    <div className="flex items-center space-x-2">
+                      <p className="text-2xl font-bold text-purple-400">
+                        {reputationData.loading ? (
+                          <Loader2 className="w-6 h-6 animate-spin" />
+                        ) : (
+                          reputationData.balance
+                        )}
+                      </p>
+                      <span className="text-purple-300 text-sm font-medium">REPR</span>
+                    </div>
+                    <p className="text-sm text-gray-400">Available to Stake</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-2xl font-bold text-blue-400">{user.reputation || "0"}</p>
+                    <p className="text-2xl font-bold text-blue-400">
+                      {reputationData.loading ? (
+                        <Loader2 className="w-6 h-6 animate-spin" />
+                      ) : (
+                        reputationData.score
+                      )}
+                    </p>
                     <p className="text-sm text-gray-400">Reputation Score</p>
                   </div>
+                  {walletConnected && (
+                    <Button
+                      onClick={() => fetchReputationData(walletAddress!)}
+                      variant="outline"
+                      size="sm"
+                      disabled={reputationData.loading}
+                      className="bg-purple-600/20 border-purple-500/50 text-purple-300 hover:bg-purple-600/30"
+                    >
+                      {reputationData.loading ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        "Refresh"
+                      )}
+                    </Button>
+                  )}
                 </div>
               </div>
             </CardContent>
           </Card>
+
+          {/* Network Error Alert */}
+          {networkError && (
+            <Card className="bg-red-600/10 border-red-500/30 backdrop-blur-sm">
+              <CardContent className="p-6">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-start space-x-3">
+                    <AlertCircle className="w-5 h-5 text-red-400 mt-0.5" />
+                    <div className="flex-1">
+                      <h3 className="text-red-300 font-medium mb-2">Network Configuration Issue</h3>
+                      <div className="text-red-200/80 text-sm whitespace-pre-line mb-4">
+                        {networkError}
+                      </div>
+                      {currentNetwork && (
+                        <div className="text-xs text-red-200/60 mb-3">
+                          Current network: {currentNetwork.name} (Chain ID: {currentNetwork.chainId})
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <Button
+                    onClick={handleSwitchNetwork}
+                    variant="outline"
+                    size="sm"
+                    className="bg-red-600/20 border-red-500/50 text-red-300 hover:bg-red-600/30"
+                  >
+                    Switch Network
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Filters and Search */}
           <Card className="bg-white/5 border-white/10 backdrop-blur-sm">

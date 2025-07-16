@@ -1,20 +1,20 @@
 // Contract configuration for SkillPass
 export const CONTRACTS = {
-  // Local development (Anvil)
+  // Sepolia testnet (default)
+  sepolia: {
+    ReputationToken: "0x8F840F2d5df100C5c3b0C3d181c3EFA3d6C5068A",
+    SkillNFT: "0x45b1f38d1adfB5A9FFAA81b996a53bE78A33cF0c",
+    SkillStaking: "0x1FFA789d597E95923fe40bfE2A386DA379Ec4293",
+    rpcUrl: "https://eth-sepolia.g.alchemy.com/v2/demo", // Alchemy demo endpoint with CORS
+    chainId: 11155111
+  },
+  // Local development (Anvil) - kept for development
   localhost: {
     ReputationToken: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
     SkillNFT: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512", 
     SkillStaking: "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
     rpcUrl: "http://127.0.0.1:8545",
     chainId: 31337
-  },
-  // Add other networks as needed
-  sepolia: {
-    ReputationToken: "",
-    SkillNFT: "",
-    SkillStaking: "",
-    rpcUrl: "https://sepolia.infura.io/v3/YOUR_KEY",
-    chainId: 11155111
   }
 }
 
@@ -48,10 +48,10 @@ export const ABIS = {
 
 // Helper to get current network configuration
 export function getNetworkConfig(chainId?: number) {
-  const currentChainId = chainId || 31337 // Default to localhost
+  const currentChainId = chainId || 11155111 // Default to Sepolia
   
-  if (currentChainId === 31337) return CONTRACTS.localhost
   if (currentChainId === 11155111) return CONTRACTS.sepolia
+  if (currentChainId === 31337) return CONTRACTS.localhost
   
   throw new Error(`Unsupported chain ID: ${currentChainId}`)
 } 
