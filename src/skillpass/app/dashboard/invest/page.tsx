@@ -26,6 +26,7 @@ import {
   CheckCircle,
   AlertCircle
 } from "lucide-react";
+import SkillDetailDialog from "@/components/ui/skill-detail-dialog";
 
 // Types
 interface SkillForEndorsement {
@@ -76,6 +77,10 @@ export default function InvestPage() {
     evidence: ""
   });
   const [isEndorsing, setIsEndorsing] = useState(false);
+  
+  // Skill detail dialog state
+  const [isSkillDetailOpen, setIsSkillDetailOpen] = useState(false);
+  const [selectedSkillForDetail, setSelectedSkillForDetail] = useState<SkillForEndorsement | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -188,6 +193,21 @@ export default function InvestPage() {
       evidence: ""
     });
     setIsDialogOpen(true);
+  };
+
+  const openInvestmentDialog = (skill: SkillForEndorsement) => {
+    setSelectedSkill(skill);
+    setEndorsementForm({
+      skillId: skill.id,
+      stakedAmount: "",
+      evidence: ""
+    });
+    setIsDialogOpen(true);
+  };
+
+  const openSkillDetail = (skill: SkillForEndorsement) => {
+    setSelectedSkillForDetail(skill);
+    setIsSkillDetailOpen(true);
   };
 
   const handleSubmitEndorsement = async () => {
@@ -443,7 +463,7 @@ export default function InvestPage() {
                     <p className="text-sm text-gray-400">Available to Stake</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-2xl font-bold text-blue-400">
+                    <p className="text-2xl font-bold text-purple-300">
                       {reputationData.loading ? (
                         <Loader2 className="w-6 h-6 animate-spin" />
                       ) : (
@@ -634,7 +654,7 @@ export default function InvestPage() {
                     <div className="grid grid-cols-2 gap-4 mb-4">
                       <div className="text-center">
                         <div className="flex items-center justify-center gap-1 mb-1">
-                          <ThumbsUp className="w-4 h-4 text-blue-400" />
+                          <ThumbsUp className="w-4 h-4 text-purple-300" />
                           <span className="text-lg font-bold text-white">{skill.endorsementCount}</span>
                         </div>
                         <p className="text-xs text-gray-400">Endorsements</p>
@@ -682,12 +702,12 @@ export default function InvestPage() {
                         onClick={() => handleEndorseClick(skill)}
                         className="flex-1 bg-purple-600 hover:bg-purple-700 text-white"
                       >
-                        <DollarSign className="w-4 h-4 mr-2" />
-                        Endorse
+                        Invest
                       </Button>
                       <Button
                         variant="ghost"
                         size="sm"
+                        onClick={() => openSkillDetail(skill)}
                         className="text-gray-400 hover:text-white"
                       >
                         <Eye className="w-4 h-4" />
@@ -810,6 +830,13 @@ export default function InvestPage() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Skill Detail Dialog */}
+      <SkillDetailDialog
+        isOpen={isSkillDetailOpen}
+        onClose={() => setIsSkillDetailOpen(false)}
+        skill={selectedSkillForDetail}
+      />
     </div>
   );
 }

@@ -15,6 +15,13 @@
       "when": 1752691393416,
       "tag": "0001_worthless_jimmy_woo",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1752692875817,
+      "tag": "0002_hesitant_bromley",
+      "breakpoints": true
     }
   ]
 }

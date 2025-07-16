@@ -1,4 +1,4 @@
-import { Sparkles, Twitter, Github, Linkedin, Mail, MapPin } from "lucide-react"
+import { Twitter, Github, Linkedin, Mail, MapPin, Briefcase } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
@@ -33,7 +33,7 @@ export default function Footer() {
           <div className="lg:col-span-2">
             <div className="flex items-center space-x-2 mb-6">
               <div className="w-10 h-10 bg-purple-600 rounded-lg flex items-center justify-center">
-                <Sparkles className="w-5 h-5 text-white" />
+                <Briefcase className="w-5 h-5 text-white" />
               </div>
               <span className="text-2xl font-bold">SkillPass</span>
             </div>

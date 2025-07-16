@@ -27,6 +27,7 @@ import {
   Heart,
   DollarSign
 } from "lucide-react";
+import SkillDetailDialog from "@/components/ui/skill-detail-dialog";
 
 // Types
 interface DashboardStats {
@@ -101,6 +102,10 @@ export default function DashboardPage() {
     description: "",
     evidence: ""
   });
+  
+  // Skill detail dialog state
+  const [isSkillDetailOpen, setIsSkillDetailOpen] = useState(false);
+  const [selectedSkillForDetail, setSelectedSkillForDetail] = useState<Skill | null>(null);
 
   // Check MetaMask connection status
   useEffect(() => {
@@ -479,6 +484,11 @@ export default function DashboardPage() {
     setIsEndorseDialogOpen(true);
   };
 
+  const openSkillDetail = (skill: Skill) => {
+    setSelectedSkillForDetail(skill);
+    setIsSkillDetailOpen(true);
+  };
+
   // Show loading if checking authentication
   if (isLoading) {
     return (
@@ -850,7 +860,7 @@ export default function DashboardPage() {
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white">
+                          <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white" onClick={() => openSkillDetail(skill)}>
                             <Eye className="w-4 h-4" />
                           </Button>
                         </div>
@@ -970,6 +980,13 @@ export default function DashboardPage() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Skill Detail Dialog */}
+      <SkillDetailDialog
+        isOpen={isSkillDetailOpen}
+        onClose={() => setIsSkillDetailOpen(false)}
+        skill={selectedSkillForDetail}
+      />
     </div>
   );
 }

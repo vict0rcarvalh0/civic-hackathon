@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Menu, X, Sparkles } from "lucide-react"
+import { Menu, X, Briefcase } from "lucide-react"
 import Link from "next/link"
 import AuthButton from "./AuthButton"
 import ChainSelector from "./chain-selector"
@@ -18,7 +18,7 @@ export default function Navigation() {
             {/* Logo */}
             <Link href="/" className="flex items-center space-x-2 group">
               <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center group-hover:bg-purple-500 transition-colors">
-                <Sparkles className="w-4 h-4 text-white" />
+                <Briefcase className="w-4 h-4 text-white" />
               </div>
               <span className="text-xl font-bold text-white">
                 SkillPass

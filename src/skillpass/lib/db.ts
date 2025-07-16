@@ -31,7 +31,7 @@ export const skills = pgTable('skills', {
   // Metrics (cached from blockchain)
   totalStaked: decimal('total_staked', { precision: 18, scale: 0 }).default('0'),
   endorsementCount: integer('endorsement_count').default(0),
-  verified: boolean('verified').default(false),
+  verified: boolean('verified').default(true), // Auto-verify skills by default
   
   // Status
   status: text('status').default('pending'), // pending, minted, challenged, verified

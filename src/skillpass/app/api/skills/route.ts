@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
       image: "https://skillpass.app/placeholder-skill.png",
       attributes: [
         { trait_type: "Category", value: category },
-        { trait_type: "Verified", value: false },
+        { trait_type: "Verified", value: true }, // Auto-verify skills
         { trait_type: "Created", value: new Date().toISOString() }
       ]
     }
@@ -52,8 +52,8 @@ export async function POST(request: NextRequest) {
       metadataUri: metadataUri,
       totalStaked: '0',
       endorsementCount: 0,
-      verified: false,
-      status: tokenId ? 'active' : 'pending', // Active if minted on blockchain
+      verified: true, // Auto-verify new skills
+      status: tokenId ? 'verified' : 'verified', // Mark as verified instead of pending
       createdAt: new Date(),
       updatedAt: new Date()
     }
@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
           reputationScore: '0',
           totalSkills: 1,
           totalEndorsements: 0,
-          verifiedSkills: 0,
+          verifiedSkills: 1, // New skill is auto-verified
           lastActive: new Date(),
           joinedAt: new Date(),
           createdAt: new Date(),
@@ -89,6 +89,7 @@ export async function POST(request: NextRequest) {
         await db.update(userProfiles)
           .set({ 
             totalSkills: (existingProfile[0].totalSkills || 0) + 1,
+            verifiedSkills: (existingProfile[0].verifiedSkills || 0) + 1, // Increment verified skills
             updatedAt: new Date()
           })
           .where(eq(userProfiles.walletAddress, userWallet))

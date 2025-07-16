@@ -16,17 +16,16 @@ import {
   Bell,
   Settings,
   LogOut,
-  Sparkles,
   Shield,
   ChevronDown,
   Menu,
   X,
   Home,
   Wallet,
-  LinkIcon,
   BarChart3,
   DollarSign,
   Clock,
+  Briefcase,
 } from "lucide-react"
 import {
   DropdownMenu,
@@ -95,7 +94,7 @@ export default function DashboardNavigation() {
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2 group">
             <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center group-hover:bg-purple-500 transition-colors">
-              <Sparkles className="w-4 h-4 text-white" />
+              <Briefcase className="w-4 h-4 text-white" />
             </div>
             <span className="text-xl font-bold text-white">
               SkillPass
