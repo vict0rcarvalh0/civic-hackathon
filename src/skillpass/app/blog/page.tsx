@@ -7,68 +7,72 @@ import Link from "next/link"
 
 export default function BlogPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 pt-20">
-      {/* Hero Section */}
-      <section className="pt-16 pb-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-400/20 to-green-400/20 rounded-full blur-3xl"></div>
-          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-green-400/20 to-blue-400/20 rounded-full blur-3xl"></div>
-        </div>
+    <div className="min-h-screen bg-black pt-20 relative overflow-hidden">
+      {/* Atmospheric Bubbles */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-20 left-10 w-16 h-16 bg-gradient-to-r from-purple-500/15 to-pink-500/15 rounded-full blur-xl animate-pulse"></div>
+        <div className="absolute top-40 right-20 w-24 h-24 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-full blur-2xl animate-bounce" style={{ animationDelay: '2s', animationDuration: '3s' }}></div>
+        <div className="absolute bottom-40 left-20 w-20 h-20 bg-gradient-to-r from-pink-500/12 to-blue-500/12 rounded-full blur-xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+        <div className="absolute bottom-20 right-32 w-32 h-32 bg-gradient-to-r from-purple-500/8 to-pink-500/8 rounded-full blur-3xl animate-bounce" style={{ animationDelay: '3s', animationDuration: '4s' }}></div>
+        <div className="absolute top-60 left-1/3 w-28 h-28 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-full blur-2xl animate-pulse" style={{ animationDelay: '1.5s' }}></div>
+      </div>
 
-        <div className="max-w-7xl mx-auto text-center relative">
+      {/* Hero Section */}
+      <section className="pt-16 pb-20 px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="max-w-7xl mx-auto text-center">
           <h1 className="text-5xl md:text-6xl font-bold mb-6 leading-tight">
-            <span className="text-gray-900">Authora</span>{" "}
-            <span className="bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent">Blog</span>
+            <span className="text-white">SkillPass</span>{" "}
+            <span className="text-purple-400">Blog</span>
           </h1>
 
-          <p className="text-xl text-gray-600 mb-10 leading-relaxed max-w-3xl mx-auto">
-            Insights, tutorials, and updates from the Authora team on Web3, crypto payments, and creator economy.
+          <p className="text-xl text-gray-400 mb-10 leading-relaxed max-w-3xl mx-auto">
+            Insights, tutorials, and updates on skills validation, reputation staking, and the future of decentralized professional credentials.
           </p>
 
           <div className="max-w-xl mx-auto">
             <div className="flex gap-2">
               <Input
                 placeholder="Search articles..."
-                className="bg-white/80 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-purple-500 focus:ring-purple-500"
               />
-              <Button className="bg-blue-600 hover:bg-blue-700 text-white px-6">Search</Button>
+              <Button className="bg-purple-600 hover:bg-purple-700 text-white px-6">Search</Button>
             </div>
           </div>
         </div>
       </section>
 
       {/* Featured Post */}
-      <section className="py-10 px-4 sm:px-6 lg:px-8">
+      <section className="py-10 px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="max-w-7xl mx-auto">
-          <Card className="bg-gradient-to-r from-blue-600 to-green-600 text-white shadow-2xl overflow-hidden">
+          <Card className="bg-gradient-to-r from-purple-600 to-pink-600 text-white border-0 overflow-hidden">
             <div className="grid lg:grid-cols-2">
               <div className="p-8 lg:p-12">
                 <Badge className="bg-white/20 text-white border-0 mb-4">Featured</Badge>
-                <h2 className="text-3xl font-bold mb-4">The Future of Web3 Onboarding: Breaking Down Barriers</h2>
-                <p className="text-blue-100 mb-6 leading-relaxed">
-                  How Authora is revolutionizing the way creators and businesses enter the decentralized economy by
-                  eliminating technical barriers and simplifying the crypto experience.
+                <h2 className="text-3xl font-bold mb-4">The Future of Professional Reputation: Skills Validation On-Chain</h2>
+                <p className="text-purple-100 mb-6 leading-relaxed">
+                  How SkillPass is revolutionizing professional credibility through decentralized skills validation, 
+                  reputation staking, and soulbound NFT credentials that can't be faked.
                 </p>
                 <div className="flex items-center space-x-4 mb-6">
                   <div className="flex items-center">
                     <Calendar className="w-4 h-4 mr-2" />
-                    <span className="text-sm">June 2, 2024</span>
+                    <span className="text-sm">December 15, 2024</span>
                   </div>
                   <div className="flex items-center">
                     <User className="w-4 h-4 mr-2" />
-                    <span className="text-sm">Java Jay Bartolome</span>
+                    <span className="text-sm">SkillPass Team</span>
                   </div>
                 </div>
-                <Button className="bg-white text-blue-600 hover:bg-blue-50">
+                <Button className="bg-white text-purple-600 hover:bg-purple-50">
                   Read Article
                   <ArrowRight className="ml-2 w-4 h-4" />
                 </Button>
               </div>
               <div className="relative h-64 lg:h-auto">
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-800 to-green-800 opacity-50"></div>
+                <div className="absolute inset-0 bg-gradient-to-br from-purple-800 to-pink-800 opacity-50"></div>
                 <img
                   src="/placeholder.svg?height=600&width=800"
-                  alt="Web3 Onboarding"
+                  alt="Skills Validation"
                   className="w-full h-full object-cover"
                 />
               </div>
@@ -78,21 +82,21 @@ export default function BlogPage() {
       </section>
 
       {/* Latest Posts */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8">
+      <section className="py-20 px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="max-w-7xl mx-auto">
           <div className="flex justify-between items-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900">Latest Articles</h2>
+            <h2 className="text-3xl font-bold text-white">Latest Articles</h2>
             <div className="flex space-x-2">
-              <Button variant="outline" className="border-gray-200 text-gray-700 hover:bg-gray-50">
+              <Button variant="outline" className="border-white/20 text-gray-300 hover:bg-white/10">
                 All
               </Button>
-              <Button variant="outline" className="border-gray-200 text-gray-700 hover:bg-gray-50">
+              <Button variant="outline" className="border-white/20 text-gray-300 hover:bg-white/10">
                 Tutorials
               </Button>
-              <Button variant="outline" className="border-gray-200 text-gray-700 hover:bg-gray-50">
+              <Button variant="outline" className="border-white/20 text-gray-300 hover:bg-white/10">
                 News
               </Button>
-              <Button variant="outline" className="border-gray-200 text-gray-700 hover:bg-gray-50">
+              <Button variant="outline" className="border-white/20 text-gray-300 hover:bg-white/10">
                 Guides
               </Button>
             </div>
@@ -101,69 +105,69 @@ export default function BlogPage() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[
               {
-                title: "How to Set Up Your First Crypto Payment Link",
+                title: "How to Build Your First Skills Profile",
                 excerpt:
-                  "A step-by-step guide to creating and sharing your first Authora payment link to start accepting crypto.",
+                  "A step-by-step guide to creating your SkillPass profile and adding verifiable skills to build professional reputation.",
                 image: "/placeholder.svg?height=400&width=600",
-                date: "May 28, 2024",
+                date: "December 10, 2024",
                 author: "Alex Chen",
                 category: "Tutorial",
-                categoryColor: "bg-blue-100 text-blue-700",
+                categoryColor: "bg-purple-500/20 text-purple-300 border-purple-500/30",
               },
               {
-                title: "Understanding Non-Custodial Wallets: Security and Control",
+                title: "Understanding Reputation Staking: Skin in the Game",
                 excerpt:
-                  "Learn why non-custodial wallets are the cornerstone of Web3 security and how Authora implements them.",
+                  "Learn how our reputation staking mechanism creates trust through economic incentives and social validation.",
                 image: "/placeholder.svg?height=400&width=600",
-                date: "May 20, 2024",
+                date: "December 5, 2024",
                 author: "Sarah Johnson",
                 category: "Guide",
-                categoryColor: "bg-green-100 text-green-700",
+                categoryColor: "bg-green-500/20 text-green-300 border-green-500/30",
               },
               {
-                title: "Authora Partners with Major Payment Processor",
+                title: "SkillPass Integrates with Major Web3 Communities",
                 excerpt:
-                  "Exciting news about our latest partnership that will expand payment options and reduce fees for users.",
+                  "Exciting partnerships with leading DAOs and Web3 communities to enable skills-based access and governance.",
                 image: "/placeholder.svg?height=400&width=600",
-                date: "May 15, 2024",
-                author: "Java Jay Bartolome",
+                date: "November 28, 2024",
+                author: "SkillPass Team",
                 category: "News",
-                categoryColor: "bg-purple-100 text-purple-700",
+                categoryColor: "bg-blue-500/20 text-blue-300 border-blue-500/30",
               },
               {
-                title: "5 Ways Creators Are Earning More with Crypto Payments",
+                title: "5 Ways Soulbound NFTs Change Professional Credentialing",
                 excerpt:
-                  "Real-world examples of how content creators are increasing their income by accepting cryptocurrency.",
+                  "Explore how non-transferable NFTs are creating a new paradigm for verified skills and professional reputation.",
                 image: "/placeholder.svg?height=400&width=600",
-                date: "May 10, 2024",
+                date: "November 20, 2024",
                 author: "Michael Torres",
                 category: "Guide",
-                categoryColor: "bg-green-100 text-green-700",
+                categoryColor: "bg-green-500/20 text-green-300 border-green-500/30",
               },
               {
-                title: "The Ultimate Guide to Crypto Tax Compliance",
+                title: "The Economics of Trust: How Endorsements Work",
                 excerpt:
-                  "Everything creators need to know about staying compliant with tax regulations when accepting crypto.",
+                  "Deep dive into our endorsement system where community members stake reputation on each other's skills.",
                 image: "/placeholder.svg?height=400&width=600",
-                date: "May 5, 2024",
+                date: "November 15, 2024",
                 author: "Emily Watson",
                 category: "Guide",
-                categoryColor: "bg-green-100 text-green-700",
+                categoryColor: "bg-green-500/20 text-green-300 border-green-500/30",
               },
               {
-                title: "New Feature: Multi-Chain Support Now Available",
+                title: "New Feature: Skills Leaderboards Now Live",
                 excerpt:
-                  "Authora now supports multiple blockchains, allowing you to accept payments across different networks.",
+                  "Discover top-ranked professionals in each skill category and see how the community validates excellence.",
                 image: "/placeholder.svg?height=400&width=600",
-                date: "April 28, 2024",
-                author: "Java Jay Bartolome",
+                date: "November 8, 2024",
+                author: "SkillPass Team",
                 category: "News",
-                categoryColor: "bg-purple-100 text-purple-700",
+                categoryColor: "bg-blue-500/20 text-blue-300 border-blue-500/30",
               },
             ].map((post, index) => (
               <Card
                 key={index}
-                className="bg-white/80 backdrop-blur-xl border-gray-100 shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:scale-105 overflow-hidden"
+                className="border border-white/10 bg-white/5 backdrop-blur-xl hover:bg-white/10 transition-all duration-500 transform hover:scale-105 overflow-hidden"
               >
                 <div className="relative h-48">
                   <img src={post.image || "/placeholder.svg"} alt={post.title} className="w-full h-full object-cover" />
@@ -172,8 +176,8 @@ export default function BlogPage() {
                   </div>
                 </div>
                 <CardContent className="p-6">
-                  <h3 className="text-xl font-bold text-gray-900 mb-3 line-clamp-2">{post.title}</h3>
-                  <p className="text-gray-600 mb-4 line-clamp-3">{post.excerpt}</p>
+                  <h3 className="text-xl font-bold text-white mb-3 line-clamp-2">{post.title}</h3>
+                  <p className="text-gray-400 mb-4 line-clamp-3">{post.excerpt}</p>
                   <div className="flex items-center justify-between text-sm text-gray-500">
                     <div className="flex items-center">
                       <Calendar className="w-4 h-4 mr-1" />
@@ -185,10 +189,10 @@ export default function BlogPage() {
                     </div>
                   </div>
                 </CardContent>
-                <CardFooter className="bg-gray-50 px-6 py-4">
+                <CardFooter className="bg-white/5 px-6 py-4 border-t border-white/10">
                   <Link
                     href="#"
-                    className="text-blue-600 hover:text-blue-700 font-medium flex items-center transition-colors"
+                    className="text-purple-400 hover:text-purple-300 font-medium flex items-center transition-colors"
                   >
                     Read More
                     <ArrowRight className="ml-2 w-4 h-4" />
@@ -196,33 +200,6 @@ export default function BlogPage() {
                 </CardFooter>
               </Card>
             ))}
-          </div>
-
-          <div className="flex justify-center mt-12">
-            <Button
-              variant="outline"
-              size="lg"
-              className="border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-blue-200"
-            >
-              Load More Articles
-            </Button>
-          </div>
-        </div>
-      </section>
-
-      {/* Newsletter */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-blue-600 to-green-600">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl font-bold text-white mb-4">Stay Updated</h2>
-          <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
-            Subscribe to our newsletter for the latest articles, tutorials, and updates on Web3 and crypto payments.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
-            <Input
-              placeholder="Enter your email"
-              className="bg-white/10 border-white/20 text-white placeholder:text-blue-200 focus:border-blue-400"
-            />
-            <Button className="bg-white text-blue-600 hover:bg-blue-50 px-8">Subscribe</Button>
           </div>
         </div>
       </section>

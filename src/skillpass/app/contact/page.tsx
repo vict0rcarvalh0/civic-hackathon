@@ -1,4 +1,4 @@
-import { Mail, Phone, MapPin, Send, Clock } from "lucide-react"
+import { Mail, Linkedin, Twitter, Send, Clock } from "lucide-react"
 import { SITE_DOMAIN } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -9,28 +9,32 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 export default function ContactPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 pt-20">
-      {/* Hero Section */}
-      <section className="pt-16 pb-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-400/20 to-green-400/20 rounded-full blur-3xl"></div>
-          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-green-400/20 to-blue-400/20 rounded-full blur-3xl"></div>
-        </div>
+    <div className="min-h-screen bg-black pt-20 relative overflow-hidden">
+      {/* Atmospheric Bubbles */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-20 left-10 w-16 h-16 bg-gradient-to-r from-purple-500/15 to-pink-500/15 rounded-full blur-xl animate-pulse"></div>
+        <div className="absolute top-40 right-20 w-24 h-24 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-full blur-2xl animate-bounce" style={{ animationDelay: '2s', animationDuration: '3s' }}></div>
+        <div className="absolute bottom-40 left-20 w-20 h-20 bg-gradient-to-r from-pink-500/12 to-blue-500/12 rounded-full blur-xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+        <div className="absolute bottom-20 right-32 w-32 h-32 bg-gradient-to-r from-purple-500/8 to-pink-500/8 rounded-full blur-3xl animate-bounce" style={{ animationDelay: '3s', animationDuration: '4s' }}></div>
+        <div className="absolute top-60 left-1/3 w-28 h-28 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-full blur-2xl animate-pulse" style={{ animationDelay: '1.5s' }}></div>
+      </div>
 
-        <div className="max-w-7xl mx-auto text-center relative">
+      {/* Hero Section */}
+      <section className="pt-16 pb-20 px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="max-w-7xl mx-auto text-center">
           <h1 className="text-5xl md:text-6xl font-bold mb-6 leading-tight">
-            <span className="text-gray-900">Get in </span>
-            <span className="bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent">Touch</span>
+            <span className="text-white">Get in </span>
+            <span className="text-purple-400">Touch</span>
           </h1>
 
-          <p className="text-xl text-gray-600 mb-10 leading-relaxed max-w-3xl mx-auto">
-            Have questions or need help? Our team is here to assist you with anything related to Authora.
+          <p className="text-xl text-gray-400 mb-10 leading-relaxed max-w-3xl mx-auto">
+            Have questions or need help? Our team is here to assist you with anything related to SkillPass.
           </p>
         </div>
       </section>
 
       {/* Contact Info Cards */}
-      <section className="py-10 px-4 sm:px-6 lg:px-8">
+      <section className="py-10 px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="max-w-7xl mx-auto">
           <div className="grid md:grid-cols-3 gap-8">
             {[
@@ -38,30 +42,30 @@ export default function ContactPage() {
                 icon: Mail,
                 title: "Email Us",
                 description: "Get in touch via email",
-                info: `support@${SITE_DOMAIN}`,
+                info: "victordecarvalho342@gmail.com",
                 action: "Send Email",
-                color: "from-blue-500 to-blue-600",
+                color: "from-purple-500 to-purple-600",
               },
               {
-                icon: Phone,
-                title: "Call Us",
-                description: "Speak with our team",
-                info: "+63 9983708168",
-                action: "Call Now",
-                color: "from-green-500 to-green-600",
+                icon: Linkedin,
+                title: "LinkedIn",
+                description: "Connect on LinkedIn",
+                info: "www.linkedin.com/in/victor-severiano-de-carvalho",
+                action: "View Profile",
+                color: "from-pink-500 to-pink-600",
               },
               {
-                icon: MapPin,
-                title: "Visit Us",
-                description: "Our headquarters",
-                info: "Quezon City, Philippines",
-                action: "Get Directions",
-                color: "from-purple-500 to-pink-500",
+                icon: Twitter,
+                title: "Follow on X",
+                description: "",
+                info: "https://x.com/vict0rcarvalh0o",
+                action: "Follow",
+                color: "from-blue-500 to-purple-500",
               },
             ].map((item, index) => (
               <Card
                 key={index}
-                className="bg-white/80 backdrop-blur-xl border-gray-100 shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:scale-105"
+                className="border border-white/10 bg-white/5 backdrop-blur-xl hover:bg-white/10 transition-all duration-500 transform hover:scale-105"
               >
                 <CardContent className="p-8 text-center">
                   <div
@@ -69,15 +73,9 @@ export default function ContactPage() {
                   >
                     <item.icon className="w-8 h-8 text-white" />
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">{item.title}</h3>
-                  <p className="text-gray-600 mb-4">{item.description}</p>
-                  <p className="text-lg font-semibold text-blue-600 mb-6">{item.info}</p>
-                  <Button
-                    variant="outline"
-                    className="border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-blue-200"
-                  >
-                    {item.action}
-                  </Button>
+                  <h3 className="text-xl font-bold text-white mb-2">{item.title}</h3>
+                  <p className="text-gray-400 mb-4">{item.description}</p>
+                  <p className="text-lg font-semibold text-purple-400 mb-6">{item.info}</p>
                 </CardContent>
               </Card>
             ))}
@@ -85,126 +83,12 @@ export default function ContactPage() {
         </div>
       </section>
 
-      {/* Contact Form */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-6xl mx-auto">
-          <Card className="bg-white/80 backdrop-blur-xl border-gray-100 shadow-2xl overflow-hidden">
-            <div className="grid lg:grid-cols-2">
-              <div className="bg-gradient-to-br from-blue-600 to-green-600 p-12 text-white">
-                <h2 className="text-3xl font-bold mb-6">Contact Information</h2>
-                <p className="text-blue-100 mb-8 leading-relaxed">
-                  Fill out the form and our team will get back to you within 24 hours. We're here to help with any
-                  questions about Authora.
-                </p>
-
-                <div className="space-y-6">
-                  <div className="flex items-start">
-                    <Mail className="w-6 h-6 mr-4 mt-1" />
-                    <div>
-                      <p className="font-medium mb-1">Email</p>
-                      <p className="text-blue-100">{`support@${SITE_DOMAIN}`}</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start">
-                    <Phone className="w-6 h-6 mr-4 mt-1" />
-                    <div>
-                      <p className="font-medium mb-1">Phone</p>
-                      <p className="text-blue-100">+63 9983708168</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start">
-                    <MapPin className="w-6 h-6 mr-4 mt-1" />
-                    <div>
-                      <p className="font-medium mb-1">Office</p>
-                      <p className="text-blue-100">Quezon City, Philippines</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start">
-                    <Clock className="w-6 h-6 mr-4 mt-1" />
-                    <div>
-                      <p className="font-medium mb-1">Hours</p>
-                      <p className="text-blue-100">Monday - Friday: 9AM - 5PM PHT</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="p-12">
-                <h2 className="text-3xl font-bold text-gray-900 mb-6">Send Us a Message</h2>
-                <form className="space-y-6">
-                  <div className="grid grid-cols-2 gap-6">
-                    <div>
-                      <Label htmlFor="name" className="text-gray-700 font-medium">
-                        Full Name
-                      </Label>
-                      <Input
-                        id="name"
-                        placeholder="John Doe"
-                        className="mt-2 bg-white/50 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="email" className="text-gray-700 font-medium">
-                        Email Address
-                      </Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        placeholder="john@example.com"
-                        className="mt-2 bg-white/50 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <Label htmlFor="subject" className="text-gray-700 font-medium">
-                      Subject
-                    </Label>
-                    <Select>
-                      <SelectTrigger className="mt-2 bg-white/50 border-gray-200 focus:border-blue-500">
-                        <SelectValue placeholder="Select a subject" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="general">General Inquiry</SelectItem>
-                        <SelectItem value="support">Technical Support</SelectItem>
-                        <SelectItem value="billing">Billing Question</SelectItem>
-                        <SelectItem value="partnership">Partnership Opportunity</SelectItem>
-                        <SelectItem value="feedback">Feedback</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div>
-                    <Label htmlFor="message" className="text-gray-700 font-medium">
-                      Message
-                    </Label>
-                    <Textarea
-                      id="message"
-                      placeholder="How can we help you?"
-                      className="mt-2 bg-white/50 border-gray-200 focus:border-blue-500 focus:ring-blue-500 min-h-[150px]"
-                    />
-                  </div>
-
-                  <Button className="bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 text-white w-full py-6 text-lg">
-                    <Send className="w-5 h-5 mr-2" />
-                    Send Message
-                  </Button>
-                </form>
-              </div>
-            </div>
-          </Card>
-        </div>
-      </section>
-
       {/* FAQ Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8">
+      <section className="py-20 px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">Frequently Asked Questions</h2>
-            <p className="text-xl text-gray-600">Quick answers to common questions</p>
+            <h2 className="text-4xl font-bold text-white mb-4">Frequently Asked Questions</h2>
+            <p className="text-xl text-gray-400">Quick answers to common questions</p>
           </div>
 
           <div className="space-y-6">
@@ -212,28 +96,28 @@ export default function ContactPage() {
               {
                 question: "How quickly will I receive a response?",
                 answer:
-                  "We typically respond to all inquiries within 24 hours during business days. For urgent technical issues, we aim to respond within 4 hours.",
+                  "We typically respond to all inquiries within 24 hours during business days. For urgent technical issues related to skills validation or staking, we aim to respond within 4 hours.",
               },
               {
                 question: "What information should I include in my message?",
                 answer:
-                  "Please include as much detail as possible about your question or issue. If it's a technical problem, include your account email and any error messages you're seeing.",
+                  "Please include as much detail as possible about your question or issue. If it's related to skills validation or endorsements, include your wallet address and any relevant transaction hashes.",
               },
               {
                 question: "Do you offer phone support?",
                 answer:
-                  "Phone support is available for Business plan customers. Starter and Professional plan users can reach us via email or our in-app chat.",
+                  "Phone support is available for verified community members and partners. All users can reach us via email or our support chat.",
               },
               {
                 question: "Can I schedule a demo or consultation?",
                 answer:
-                  "Yes! We offer personalized demos for potential customers. Use the contact form above or email us directly to schedule a time that works for you.",
+                  "Yes! We offer personalized demos for organizations interested in implementing skills-based verification. Use the contact form above or email us directly to schedule a consultation.",
               },
             ].map((faq, index) => (
-              <Card key={index} className="bg-white/80 backdrop-blur-xl border-gray-100 shadow-lg">
+              <Card key={index} className="border border-white/10 bg-white/5 backdrop-blur-xl">
                 <CardContent className="p-6">
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">{faq.question}</h3>
-                  <p className="text-gray-600">{faq.answer}</p>
+                  <h3 className="text-xl font-bold text-white mb-2">{faq.question}</h3>
+                  <p className="text-gray-400">{faq.answer}</p>
                 </CardContent>
               </Card>
             ))}

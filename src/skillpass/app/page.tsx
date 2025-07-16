@@ -1,8 +1,45 @@
+'use client'
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { useUser } from "@civic/auth-web3/react";
+import { useRouter } from "next/navigation";
 
 export default function HomePage() {
+  const { user, signIn } = useUser()
+  const router = useRouter()
+
+  const handleGetStarted = async () => {
+    if (user) {
+      router.push("/dashboard")
+    } else {
+      try {
+        await signIn()
+        router.push("/dashboard")
+      } catch (e) {
+        console.error("Login failed", e)
+      }
+    }
+  }
+
+  const handleCreateProfile = async () => {
+    if (user) {
+      router.push("/dashboard")
+    } else {
+      try {
+        await signIn()
+        router.push("/dashboard")
+      } catch (e) {
+        console.error("Login failed", e)
+      }
+    }
+  }
+
+  const handleViewLeaderboard = () => {
+    router.push("/leaderboard")
+  }
+
   return (
     <div className="min-h-screen bg-black">
       {/* Hero Section */}
@@ -64,10 +101,19 @@ export default function HomePage() {
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Button size="lg" className="px-8 py-4 text-lg animate-subtle-glow">
+            <Button 
+              size="lg" 
+              className="px-8 py-4 text-lg animate-subtle-glow"
+              onClick={handleGetStarted}
+            >
               Get Started
             </Button>
-            <Button variant="outline" size="lg" className="px-8 py-4 text-lg">
+            <Button 
+              variant="outline" 
+              size="lg" 
+              className="px-8 py-4 text-lg"
+              onClick={handleViewLeaderboard}
+            >
               View Leaderboard
             </Button>
           </div>
@@ -126,30 +172,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Stats Section */}
-      <section className="px-6 py-24 bg-muted/20">
-        <div className="max-w-4xl mx-auto">
-          <div className="grid md:grid-cols-4 gap-8 text-center">
-            <div>
-              <div className="text-3xl font-bold text-primary mb-2">1,250+</div>
-              <div className="text-muted-foreground">Skills Validated</div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold text-primary mb-2">850+</div>
-              <div className="text-muted-foreground">Active Users</div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold text-primary mb-2">95%</div>
-              <div className="text-muted-foreground">Accuracy Rate</div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold text-primary mb-2">50+</div>
-              <div className="text-muted-foreground">Skill Categories</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* CTA Section */}
       <section className="px-6 py-24">
         <div className="max-w-4xl mx-auto text-center">
@@ -159,7 +181,11 @@ export default function HomePage() {
               <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
                 Be part of the next generation of professional validation
               </p>
-              <Button size="lg" className="px-8 py-4 text-lg">
+              <Button 
+                size="lg" 
+                className="px-8 py-4 text-lg"
+                onClick={handleCreateProfile}
+              >
                 Create Your Profile
               </Button>
             </CardContent>

@@ -65,7 +65,6 @@ export default function Footer() {
                 { name: "How It Works", href: "/how-it-works" },
                 { name: "Dashboard", href: "/dashboard" },
                 { name: "Leaderboard", href: "/leaderboard" },
-                { name: "Pricing", href: "/pricing" },
               ].map((item) => (
                 <li key={item.name}>
                   <Link href={item.href} className="text-gray-400 hover:text-white transition-colors">
@@ -84,7 +83,6 @@ export default function Footer() {
                 { name: "About", href: "/about" },
                 { name: "Blog", href: "/blog" },
                 { name: "Contact", href: "/contact" },
-                { name: "Help", href: "/help" },
               ].map((item) => (
                 <li key={item.name}>
                   <Link href={item.href} className="text-gray-400 hover:text-white transition-colors">
@@ -100,8 +98,7 @@ export default function Footer() {
             <h4 className="font-semibold text-white mb-6">Support</h4>
             <ul className="space-y-3">
               {[
-                { name: "Help Center", href: "/help" },
-                { name: "Contact Us", href: "/contact" },
+                { name: "Help", href: "/help" },
                 { name: "Privacy Policy", href: "/privacy" },
                 { name: "Terms of Service", href: "/terms" },
               ].map((item) => (
