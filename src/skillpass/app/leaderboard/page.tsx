@@ -80,16 +80,16 @@ export default function LeaderboardPage() {
       case 2:
         return "bg-gradient-to-r from-orange-400 to-orange-600 text-white"
       default:
-        return "bg-gray-100 text-gray-700"
+        return "bg-gray-600 text-gray-300"
     }
   }
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 pt-20">
+      <div className="min-h-screen bg-black pt-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
           <div className="text-center">
-            <p className="text-xl text-gray-600 animate-pulse">Loading leaderboard...</p>
+            <p className="text-xl text-gray-400 animate-pulse">Loading leaderboard...</p>
           </div>
         </div>
       </div>
@@ -97,44 +97,48 @@ export default function LeaderboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 pt-20">
-      {/* Hero Section */}
-      <section className="pt-16 pb-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-400/20 to-green-400/20 rounded-full blur-3xl"></div>
-          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-green-400/20 to-blue-400/20 rounded-full blur-3xl"></div>
-        </div>
+    <div className="min-h-screen bg-black pt-20 relative overflow-hidden">
+      {/* Atmospheric Bubbles */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-40 right-20 w-20 h-20 bg-gradient-to-br from-purple-500/12 to-pink-500/12 rounded-full blur-xl animate-float" style={{ animationDelay: '0s', animationDuration: '14s' }}></div>
+        <div className="absolute top-80 left-10 w-16 h-16 bg-gradient-to-br from-blue-700/15 to-purple-600/15 rounded-full blur-lg animate-float" style={{ animationDelay: '2s', animationDuration: '16s' }}></div>
+        <div className="absolute bottom-40 right-1/3 w-24 h-24 bg-gradient-to-br from-pink-500/10 to-blue-700/10 rounded-full blur-2xl animate-float" style={{ animationDelay: '4s', animationDuration: '18s' }}></div>
+        <div className="absolute top-60 left-1/2 w-12 h-12 bg-gradient-to-br from-purple-600/18 to-pink-500/18 rounded-full blur-md animate-float" style={{ animationDelay: '1s', animationDuration: '12s' }}></div>
+        <div className="absolute bottom-20 left-1/4 w-8 h-8 bg-gradient-to-br from-blue-700/20 to-purple-500/20 rounded-full blur-sm animate-float" style={{ animationDelay: '3s', animationDuration: '11s' }}></div>
+      </div>
 
+      {/* Hero Section */}
+      <section className="pt-16 pb-12 px-4 sm:px-6 lg:px-8 relative">
         <div className="max-w-7xl mx-auto text-center relative">
-          <Badge className="mb-6 bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-200">
+          <Badge className="mb-6 bg-purple-600/20 text-purple-300 border-purple-500/30 hover:bg-purple-600/30">
             <Trophy className="w-3 h-3 mr-1" />
             Top Performers
           </Badge>
 
           <h1 className="text-5xl md:text-6xl font-bold mb-6 leading-tight">
-            <span className="bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
               SkillPass
             </span>
             <br />
-            <span className="text-gray-900">Leaderboard</span>
+            <span className="text-white">Leaderboard</span>
           </h1>
 
-          <p className="text-xl text-gray-600 mb-10 leading-relaxed max-w-3xl mx-auto">
+          <p className="text-xl text-gray-400 mb-10 leading-relaxed max-w-3xl mx-auto">
             Discover the most validated talents in our community. See who's leading in reputation and skill endorsements.
           </p>
         </div>
       </section>
 
       {/* Leaderboard Content */}
-      <section className="pb-20 px-4 sm:px-6 lg:px-8">
+      <section className="pb-20 px-4 sm:px-6 lg:px-8 relative">
         <div className="max-w-7xl mx-auto">
           <Tabs value={selectedCategory} onValueChange={setSelectedCategory} className="w-full">
-            <TabsList className="grid grid-cols-4 mb-8 bg-white/50 backdrop-blur-sm">
+            <TabsList className="bg-white/5 border border-white/10 grid grid-cols-4 mb-8">
               {categories.map((category) => (
                 <TabsTrigger
                   key={category.value}
                   value={category.value}
-                  className="data-[state=active]:bg-blue-100 data-[state=active]:text-blue-700 py-3"
+                  className="text-gray-400 data-[state=active]:bg-white/10 data-[state=active]:text-white py-3"
                 >
                   <category.icon className="w-4 h-4 mr-2" />
                   {category.label}
@@ -144,18 +148,18 @@ export default function LeaderboardPage() {
 
             <TabsContent value={selectedCategory}>
               {filteredSkills.length === 0 ? (
-                <Card className="bg-white/80 backdrop-blur-xl border-gray-100 shadow-xl">
+                <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
                   <CardContent className="p-12 text-center">
-                    <Trophy className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                    <h3 className="text-xl font-semibold text-gray-900 mb-2">No Skills Yet</h3>
-                    <p className="text-gray-600 mb-6">
+                    <Trophy className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+                    <h3 className="text-xl font-semibold text-white mb-2">No Skills Yet</h3>
+                    <p className="text-gray-400 mb-6">
                       {selectedCategory === "all" 
                         ? "Be the first to add a skill and start building your reputation!"
                         : `No skills in ${selectedCategory} category yet. Be the first to add one!`
                       }
                     </p>
                     <Button 
-                      className="bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700"
+                      className="bg-purple-600 hover:bg-purple-700 text-white"
                       onClick={() => window.location.href = "/dashboard"}
                     >
                       Add Your Skills
@@ -165,7 +169,7 @@ export default function LeaderboardPage() {
               ) : (
                 <div className="space-y-4">
                   {filteredSkills.map((skill, index) => (
-                    <Card key={skill.id} className="bg-white/80 backdrop-blur-xl border-gray-100 shadow-xl hover:shadow-2xl transition-shadow">
+                    <Card key={skill.id} className="bg-white/5 border-white/10 backdrop-blur-sm hover:bg-white/10 transition-all">
                       <CardContent className="p-6">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center space-x-4">
@@ -178,18 +182,18 @@ export default function LeaderboardPage() {
                             
                             <div className="flex-1">
                               <div className="flex items-center space-x-3 mb-2">
-                                <h3 className="text-xl font-bold text-gray-900">{skill.name}</h3>
-                                <Badge variant="outline" className="border-blue-200 text-blue-700">
+                                <h3 className="text-xl font-bold text-white">{skill.name}</h3>
+                                <Badge variant="outline" className="border-purple-500/30 text-purple-300">
                                   {skill.category}
                                 </Badge>
-                                <Badge variant="secondary">
+                                <Badge className="bg-white/10 text-gray-300">
                                   {skill.level}
                                 </Badge>
                               </div>
                               
-                              <p className="text-gray-600 mb-2">{skill.description}</p>
+                              <p className="text-gray-400 mb-2">{skill.description}</p>
                               
-                              <div className="flex items-center space-x-4 text-sm text-gray-500">
+                              <div className="flex items-center space-x-4 text-sm text-gray-400">
                                 <span>{skill.endorsements?.length || 0} endorsements</span>
                                 <span>•</span>
                                 <span>${skill.totalStaked?.toFixed(2) || "0.00"} staked</span>
@@ -198,10 +202,10 @@ export default function LeaderboardPage() {
                           </div>
                           
                           <div className="text-right">
-                            <div className="text-3xl font-bold text-gray-900 mb-1">
+                            <div className="text-3xl font-bold text-white mb-1">
                               {skill.reputationScore || 0}
                             </div>
-                            <div className="text-sm text-gray-500">reputation</div>
+                            <div className="text-sm text-gray-400">reputation</div>
                           </div>
                         </div>
                       </CardContent>

@@ -43,7 +43,11 @@ export default function AuthButton() {
 
   if (isLoading) {
     return (
-      <Button variant="outline" disabled>
+      <Button 
+        variant="outline" 
+        disabled
+        className="bg-white/5 border-white/10 text-gray-400"
+      >
         Loading…
       </Button>
     )
@@ -51,14 +55,21 @@ export default function AuthButton() {
 
   if (user) {
     return (
-      <Button onClick={handleLogout} variant="outline">
+      <Button 
+        onClick={handleLogout} 
+        variant="outline"
+        className="bg-white/5 border-white/10 text-gray-300 hover:bg-white/10 hover:text-white"
+      >
         Logout
       </Button>
     )
   }
 
   return (
-    <Button onClick={handleLogin}>
+    <Button 
+      onClick={handleLogin}
+      className="bg-purple-600 hover:bg-purple-700 text-white"
+    >
       Login with Civic
     </Button>
   )

@@ -1,241 +1,171 @@
-import { ArrowRight, Sparkles, Shield, Zap } from "lucide-react"
-import { SITE_DOMAIN } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import Link from "next/link"
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50">
+    <div className="min-h-screen bg-black">
       {/* Hero Section */}
-      <section className="pt-32 pb-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-        {/* Background Elements */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-purple-400/30 to-pink-400/30 rounded-full blur-3xl"></div>
-          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-blue-400/30 to-purple-400/30 rounded-full blur-3xl"></div>
+      <section className="relative px-6 pt-32 pb-24 overflow-hidden">
+        {/* Background Bubbles */}
+        <div className="absolute inset-0">
+          {/* Large bubbles */}
+          <div className="absolute top-10 right-10 w-60 h-60 bg-gradient-to-br from-purple-500/15 to-pink-500/15 rounded-full blur-3xl animate-float-minimal"></div>
+          <div className="absolute top-20 left-20 w-40 h-40 bg-gradient-to-br from-blue-800/20 to-purple-600/15 rounded-full blur-2xl animate-float-minimal" style={{ animationDelay: '1s' }}></div>
+          <div className="absolute top-1/2 right-1/4 w-80 h-80 bg-gradient-to-br from-pink-600/10 to-blue-800/10 rounded-full blur-3xl animate-float-minimal" style={{ animationDelay: '3s' }}></div>
+          <div className="absolute bottom-10 left-10 w-70 h-70 bg-gradient-to-br from-blue-800/15 to-purple-600/15 rounded-full blur-3xl animate-float-minimal" style={{ animationDelay: '4s' }}></div>
+          
+          {/* Medium bubbles */}
+          <div className="absolute top-1/3 left-1/3 w-50 h-50 bg-gradient-to-br from-purple-600/15 to-pink-500/10 rounded-full blur-2xl animate-float-minimal" style={{ animationDelay: '2s' }}></div>
+          <div className="absolute bottom-20 right-20 w-50 h-50 bg-gradient-to-br from-pink-500/15 to-purple-500/10 rounded-full blur-2xl animate-float-minimal" style={{ animationDelay: '5s' }}></div>
+          <div className="absolute bottom-1/3 left-1/2 w-40 h-40 bg-gradient-to-br from-pink-600/15 to-purple-600/10 rounded-full blur-2xl animate-float-minimal" style={{ animationDelay: '7s' }}></div>
+          <div className="absolute top-1/4 right-1/2 w-45 h-45 bg-gradient-to-br from-blue-700/18 to-pink-500/12 rounded-full blur-2xl animate-float-minimal" style={{ animationDelay: '8s' }}></div>
+          
+          {/* Small bubbles */}
+          <div className="absolute top-1/4 right-1/3 w-30 h-30 bg-gradient-to-br from-purple-500/20 to-blue-800/15 rounded-full blur-xl animate-float-minimal" style={{ animationDelay: '6s' }}></div>
+          <div className="absolute top-16 left-1/2 w-25 h-25 bg-gradient-to-br from-pink-500/18 to-purple-600/12 rounded-full blur-xl animate-float-minimal" style={{ animationDelay: '9s' }}></div>
+          <div className="absolute bottom-16 right-1/3 w-35 h-35 bg-gradient-to-br from-blue-800/16 to-pink-600/14 rounded-full blur-xl animate-float-minimal" style={{ animationDelay: '10s' }}></div>
+          <div className="absolute top-3/4 left-1/4 w-28 h-28 bg-gradient-to-br from-purple-600/17 to-blue-700/13 rounded-full blur-xl animate-float-minimal" style={{ animationDelay: '11s' }}></div>
+          
+          {/* Extra small scattered bubbles */}
+          <div className="absolute top-24 right-1/4 w-20 h-20 bg-gradient-to-br from-pink-600/16 to-purple-500/12 rounded-full blur-lg animate-float-minimal" style={{ animationDelay: '12s' }}></div>
+          <div className="absolute bottom-24 left-1/3 w-22 h-22 bg-gradient-to-br from-blue-700/15 to-pink-500/11 rounded-full blur-lg animate-float-minimal" style={{ animationDelay: '13s' }}></div>
+          <div className="absolute top-1/3 right-16 w-18 h-18 bg-gradient-to-br from-purple-500/19 to-blue-800/14 rounded-full blur-lg animate-float-minimal" style={{ animationDelay: '14s' }}></div>
+          <div className="absolute bottom-1/4 right-1/4 w-26 h-26 bg-gradient-to-br from-pink-500/17 to-purple-600/13 rounded-full blur-lg animate-float-minimal" style={{ animationDelay: '15s' }}></div>
+          <div className="absolute top-2/3 left-16 w-24 h-24 bg-gradient-to-br from-blue-800/18 to-pink-600/12 rounded-full blur-lg animate-float-minimal" style={{ animationDelay: '16s' }}></div>
+          
+          {/* Micro bubbles for richness */}
+          <div className="absolute top-12 left-1/4 w-15 h-15 bg-gradient-to-br from-purple-600/22 to-pink-500/14 rounded-full blur-md animate-float-minimal" style={{ animationDelay: '17s' }}></div>
+          <div className="absolute bottom-12 right-1/2 w-16 h-16 bg-gradient-to-br from-blue-700/20 to-purple-600/15 rounded-full blur-md animate-float-minimal" style={{ animationDelay: '18s' }}></div>
+          <div className="absolute top-1/2 left-12 w-14 h-14 bg-gradient-to-br from-pink-600/21 to-blue-800/16 rounded-full blur-md animate-float-minimal" style={{ animationDelay: '19s' }}></div>
+          <div className="absolute bottom-1/3 right-12 w-17 h-17 bg-gradient-to-br from-purple-500/18 to-pink-600/13 rounded-full blur-md animate-float-minimal" style={{ animationDelay: '20s' }}></div>
+          <div className="absolute top-1/6 right-2/3 w-19 h-19 bg-gradient-to-br from-blue-800/17 to-purple-500/14 rounded-full blur-md animate-float-minimal" style={{ animationDelay: '21s' }}></div>
+          <div className="absolute bottom-1/6 left-2/3 w-21 h-21 bg-gradient-to-br from-pink-500/19 to-blue-700/15 rounded-full blur-md animate-float-minimal" style={{ animationDelay: '22s' }}></div>
+          
+          {/* Additional corner and edge bubbles */}
+          <div className="absolute top-8 right-8 w-32 h-32 bg-gradient-to-br from-purple-600/14 to-pink-500/10 rounded-full blur-2xl animate-float-minimal" style={{ animationDelay: '23s' }}></div>
+          <div className="absolute bottom-8 left-8 w-38 h-38 bg-gradient-to-br from-blue-800/16 to-purple-600/12 rounded-full blur-2xl animate-float-minimal" style={{ animationDelay: '24s' }}></div>
+          <div className="absolute top-32 right-32 w-42 h-42 bg-gradient-to-br from-pink-600/13 to-blue-700/11 rounded-full blur-2xl animate-float-minimal" style={{ animationDelay: '25s' }}></div>
+          <div className="absolute bottom-32 left-32 w-36 h-36 bg-gradient-to-br from-purple-500/15 to-pink-600/12 rounded-full blur-2xl animate-float-minimal" style={{ animationDelay: '26s' }}></div>
         </div>
 
-        <div className="max-w-7xl mx-auto relative">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="text-center lg:text-left">
-              <Badge className="mb-6 bg-white/20 backdrop-blur-sm text-purple-700 border-white/30 hover:bg-white/30 shadow-lg">
-                <Sparkles className="w-3 h-3 mr-1" />
-                LinkedIn with Skin in the Game
-              </Badge>
-
-                        <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
-            <span className="bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 bg-clip-text text-transparent">
-              Skills Passport.
-            </span>
-            <br />
-            <span className="text-gray-900">Reputation Staking.</span>
-            <br />
-            <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              Verified Talents.
-            </span>
+        <div className="max-w-6xl mx-auto text-center relative z-10">
+          <Badge variant="secondary" className="mb-6 px-4 py-2 text-sm font-medium">
+            Reputation-Based Skills Validation
+          </Badge>
+          
+          <h1 className="text-5xl md:text-7xl font-bold mb-8 tracking-tight">
+            Your Professional
+            <span className="block text-gradient">Skills Passport</span>
           </h1>
-
-          <p className="text-xl text-gray-600 mb-10 leading-relaxed max-w-2xl">
-            Build your Web3 reputation with skill endorsements backed by crypto stakes. Get validated by your peers with skin in the game.
+          
+          <p className="text-xl md:text-2xl text-muted-foreground mb-12 max-w-3xl mx-auto leading-relaxed">
+            Build, validate, and showcase your skills through community endorsements backed by reputation staking.
           </p>
-
-              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                <Button
-                  size="lg"
-                  className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 text-lg px-8 py-4"
-                >
-                  Start Your Journey
-                  <ArrowRight className="ml-2 w-5 h-5" />
-                </Button>
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="bg-white/20 backdrop-blur-sm border-white/30 text-gray-700 hover:bg-white/30 shadow-lg text-lg px-8 py-4"
-                >
-                  Watch Demo
-                </Button>
-              </div>
-            </div>
-
-            {/* Hero Illustration */}
-            <div className="relative">
-              <div className="relative z-10">
-                <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-500 transform hover:scale-105">
-                  <CardContent className="p-8">
-                    <div className="space-y-6">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-3">
-                          <div className="w-10 h-10 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center">
-                            <Shield className="w-5 h-5 text-white" />
-                          </div>
-                          <div>
-                            <p className="font-semibold text-gray-900">Civic Verified</p>
-                            <p className="text-sm text-gray-600">Identity Confirmed</p>
-                          </div>
-                        </div>
-                        <Badge className="bg-green-100 text-green-700 border-green-200">Active</Badge>
-                      </div>
-
-                      <div className="bg-gradient-to-r from-purple-100 to-pink-100 rounded-xl p-4">
-                        <p className="text-sm text-gray-600 mb-2">Wallet Balance</p>
-                        <p className="text-2xl font-bold text-gray-900">$2,847.50</p>
-                        <p className="text-sm text-green-600">+12.5% this month</p>
-                      </div>
-
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between p-3 bg-white/50 rounded-lg">
-                          <span className="text-sm text-gray-600">Payment Link</span>
-                          <span className="text-sm font-medium text-purple-600">{`${SITE_DOMAIN}/@you`}</span>
-                        </div>
-                        <div className="flex items-center justify-between p-3 bg-white/50 rounded-lg">
-                          <span className="text-sm text-gray-600">Recent Payment</span>
-                          <span className="text-sm font-medium text-green-600">+$125 USDC</span>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Floating Elements */}
-              <div className="absolute -top-4 -right-4 w-20 h-20 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full opacity-20 animate-pulse"></div>
-              <div className="absolute -bottom-4 -left-4 w-16 h-16 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full opacity-20 animate-pulse delay-1000"></div>
-            </div>
+          
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            <Button size="lg" className="px-8 py-4 text-lg animate-subtle-glow">
+              Get Started
+            </Button>
+            <Button variant="outline" size="lg" className="px-8 py-4 text-lg">
+              View Leaderboard
+            </Button>
           </div>
         </div>
       </section>
 
-      {/* Quick Features */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid md:grid-cols-3 gap-8">
-            {[
-              {
-                icon: Shield,
-                title: "Skill Validation",
-                description: "Add your skills and get them endorsed by community members",
-                gradient: "from-blue-500 to-purple-600",
-              },
-              {
-                icon: Zap,
-                title: "Reputation Staking",
-                description: "Others stake crypto to validate your skills with skin in the game",
-                gradient: "from-purple-500 to-pink-600",
-              },
-              {
-                icon: ArrowRight,
-                title: "Public Profiles",
-                description: "Showcase your validated skills and reputation score",
-                gradient: "from-pink-500 to-red-600",
-              },
-            ].map((feature, index) => (
-              <Card
-                key={index}
-                className="bg-white/10 backdrop-blur-xl border-white/20 shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:scale-105 group"
-              >
-                <CardContent className="p-8 text-center">
-                  <div
-                    className={`w-16 h-16 bg-gradient-to-br ${feature.gradient} rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg group-hover:shadow-xl transition-shadow`}
-                  >
-                    <feature.icon className="w-8 h-8 text-white" />
-                  </div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-3">{feature.title}</h3>
-                  <p className="text-gray-600">{feature.description}</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Partners */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
+      {/* Features Grid */}
+      <section className="px-6 py-24">
+        <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">Powered By Visionaries</h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Built in partnership with industry leaders who share our vision of accessible Web3
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              How SkillPass Works
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              A decentralized approach to professional validation
             </p>
           </div>
 
-          <div className="grid lg:grid-cols-2 gap-8">
-            {/* Hacktivators */}
-            <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-500 transform hover:scale-105">
+          <div className="grid md:grid-cols-3 gap-8">
+            <Card className="glass-strong">
               <CardContent className="p-8">
-                <div className="flex items-center mb-6">
-                  <img src="/partners/hacktivators-logo.svg" alt="Hacktivators" className="h-12 w-auto mr-4" />
-                  <div>
-                    <h3 className="text-2xl font-bold text-gray-900">Hacktivators</h3>
-                    <p className="text-purple-600 font-medium">CODE. CREATE. CONQUER.</p>
-                  </div>
+                <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-6">
+                  <span className="text-primary font-bold">1</span>
                 </div>
-                <p className="text-gray-600 leading-relaxed mb-4">
-                  A rebellion of multidisciplinary professionals, engineers, coders, builders, and dreamers.
-                  Hacktivators brings together the brightest minds who see beyond the limitations of today's technology.
-                </p>
-                <p className="text-gray-600 leading-relaxed">
-                  We don't adapt to the system — we rewrite it. As creators of the future and architects of rebellion,
-                  we stand as the vanguard of technological revolution.
+                <h3 className="text-xl font-semibold mb-4">Build Your Profile</h3>
+                <p className="text-muted-foreground">
+                  Create a comprehensive skills profile showcasing your expertise and professional journey.
                 </p>
               </CardContent>
             </Card>
 
-            {/* Civic */}
-            <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-500 transform hover:scale-105">
+            <Card className="glass-strong">
               <CardContent className="p-8">
-                <div className="flex items-center mb-6">
-                  <img src="/partners/civic-logo.svg" alt="Civic" className="h-12 w-auto mr-4 filter brightness-0" />
-                  <div>
-                    <h3 className="text-2xl font-bold text-gray-900">Civic</h3>
-                    <p className="text-purple-600 font-medium">Decentralized Identity Leaders</p>
-                  </div>
+                <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-6">
+                  <span className="text-primary font-bold">2</span>
                 </div>
-                <p className="text-gray-600 leading-relaxed mb-4">
-                  Working toward a world where identity is defined not only by documents, but also personality — where
-                  unique expression contributes to the security of digital identity that you own and control.
-                </p>
-                <p className="text-gray-600 leading-relaxed">
-                  Identity is a fundamental human right and should be universally accessible. As leaders in
-                  decentralized identity since 2015, we're building this future with confidence.
+                <h3 className="text-xl font-semibold mb-4">Get Endorsed</h3>
+                <p className="text-muted-foreground">
+                  Receive endorsements from peers who stake their reputation to validate your skills.
                 </p>
               </CardContent>
             </Card>
+
+            <Card className="glass-strong">
+              <CardContent className="p-8">
+                <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-6">
+                  <span className="text-primary font-bold">3</span>
+                </div>
+                <h3 className="text-xl font-semibold mb-4">Earn Reputation</h3>
+                <p className="text-muted-foreground">
+                  Build your reputation score through quality endorsements and community validation.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* Stats Section */}
+      <section className="px-6 py-24 bg-muted/20">
+        <div className="max-w-4xl mx-auto">
+          <div className="grid md:grid-cols-4 gap-8 text-center">
+            <div>
+              <div className="text-3xl font-bold text-primary mb-2">1,250+</div>
+              <div className="text-muted-foreground">Skills Validated</div>
+            </div>
+            <div>
+              <div className="text-3xl font-bold text-primary mb-2">850+</div>
+              <div className="text-muted-foreground">Active Users</div>
+            </div>
+            <div>
+              <div className="text-3xl font-bold text-primary mb-2">95%</div>
+              <div className="text-muted-foreground">Accuracy Rate</div>
+            </div>
+            <div>
+              <div className="text-3xl font-bold text-primary mb-2">50+</div>
+              <div className="text-muted-foreground">Skill Categories</div>
+            </div>
           </div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8">
+      <section className="px-6 py-24">
         <div className="max-w-4xl mx-auto text-center">
-          <Card className="bg-gradient-to-r from-purple-600/10 to-pink-600/10 backdrop-blur-xl border-white/20 shadow-2xl">
+          <Card className="glass-strong">
             <CardContent className="p-12">
-              <h2 className="text-4xl font-bold text-gray-900 mb-6">Ready to Enter Web3?</h2>
-              <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-                Join thousands of creators already earning crypto with Authora. No technical knowledge required.
+              <h2 className="text-4xl font-bold mb-6">Join the Future</h2>
+              <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+                Be part of the next generation of professional validation
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button
-                  size="lg"
-                  className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
-                >
-                  Get Started Now
-                  <ArrowRight className="ml-2 w-5 h-5" />
-                </Button>
-                <Link href="/how-it-works">
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    className="bg-white/20 backdrop-blur-sm border-white/30 text-gray-700 hover:bg-white/30 shadow-lg"
-                  >
-                    Learn How It Works
-                  </Button>
-                </Link>
-              </div>
+              <Button size="lg" className="px-8 py-4 text-lg">
+                Create Your Profile
+              </Button>
             </CardContent>
           </Card>
         </div>
       </section>
     </div>
-  )
+  );
 }

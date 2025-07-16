@@ -118,7 +118,7 @@ export default function ChainSelector() {
         <Button
           variant="ghost"
           size="sm"
-          className="flex items-center space-x-1"
+          className="flex items-center space-x-1 text-gray-300 hover:text-white hover:bg-white/5"
         >
           <img
             src={current.logo}
@@ -129,13 +129,13 @@ export default function ChainSelector() {
           <ChevronDown className="w-4 h-4 ml-1" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
+      <DropdownMenuContent align="end" className="bg-black/90 border-white/10 backdrop-blur-xl">
         {CHAINS.map((c) => (
           <DropdownMenuItem
             key={String(c.id)}
             onSelect={() => handleSelect(c)}
             disabled={switching || c.id === current.id}
-            className="cursor-pointer data-[disabled]:opacity-50 flex items-center"
+            className="cursor-pointer data-[disabled]:opacity-50 flex items-center text-gray-300 hover:text-white hover:bg-white/5 focus:bg-white/5 focus:text-white"
           >
             <img
               src={c.logo}

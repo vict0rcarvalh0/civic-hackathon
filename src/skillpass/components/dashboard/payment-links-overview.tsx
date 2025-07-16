@@ -31,36 +31,36 @@ export default function SkillsOverview({ compact = false }: SkillsOverviewProps)
   const totalEndorsements = skills.reduce((s, skill) => s + (skill.endorsements?.length || 0), 0)
 
   return (
-    <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-xl">
+    <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-gray-900">
-          <Trophy className="w-5 h-5 text-purple-600" />
+        <CardTitle className="flex items-center gap-2 text-white">
+          <Trophy className="w-5 h-5 text-purple-400" />
           Skills & Reputation
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex justify-between text-sm">
-          <span>Total Skills</span>
-          <span className="font-medium">{skills.length}</span>
+          <span className="text-gray-400">Total Skills</span>
+          <span className="font-medium text-white">{skills.length}</span>
         </div>
         <div className="flex justify-between text-sm">
-          <span>Reputation Score</span>
-          <span className="font-medium">
+          <span className="text-gray-400">Reputation Score</span>
+          <span className="font-medium text-white">
             {totalReputation > 0 ? totalReputation.toLocaleString() : "—"}
           </span>
         </div>
         <div className="flex justify-between text-sm">
-          <span>Total Endorsements</span>
-          <span className="font-medium">{totalEndorsements}</span>
+          <span className="text-gray-400">Total Endorsements</span>
+          <span className="font-medium text-white">{totalEndorsements}</span>
         </div>
 
         {!compact &&
           skills.slice(0, 3).map((skill) => (
-            <div key={skill.id} className="flex justify-between text-xs text-gray-600">
+            <div key={skill.id} className="flex justify-between text-xs text-gray-400">
               <span className="truncate">{skill.name}</span>
               <div className="flex items-center space-x-1">
-                <Star className="w-3 h-3 text-yellow-500" />
-                <span>{skill.reputationScore || 0}</span>
+                <Star className="w-3 h-3 text-purple-400" />
+                <span className="text-white">{skill.reputationScore || 0}</span>
               </div>
             </div>
           ))}

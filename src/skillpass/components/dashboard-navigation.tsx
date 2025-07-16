@@ -81,29 +81,29 @@ export default function DashboardNavigation() {
   const getNotificationIcon = (type: string) => {
     switch (type) {
       case "payment":
-        return <DollarSign className="w-4 h-4 text-green-600" />
+        return <DollarSign className="w-4 h-4 text-green-400" />
       default:
-        return <Bell className="w-4 h-4 text-gray-600" />
+        return <Bell className="w-4 h-4 text-gray-400" />
     }
   }
 
   /* ---------- UI ---------- */
   return (
-    <nav className="fixed top-0 left-0 right-0 z-40 bg-white/90 backdrop-blur-xl border-b border-gray-100 shadow-sm">
+    <nav className="fixed top-0 left-0 right-0 z-40 bg-black/80 backdrop-blur-xl border-b border-white/5">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2 group">
-            <div className="w-8 h-8 bg-gradient-to-br from-purple-600 to-pink-500 rounded-lg flex items-center justify-center shadow-lg group-hover:shadow-purple-500/30 transition-all duration-300">
+            <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center group-hover:bg-purple-500 transition-colors">
               <Sparkles className="w-4 h-4 text-white" />
             </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-              Authora
+            <span className="text-xl font-bold text-white">
+              SkillPass
             </span>
             {user && (
               <Badge
                 variant="outline"
-                className="text-xs bg-purple-50 text-purple-700 border-purple-200"
+                className="text-xs bg-purple-600/20 text-purple-300 border-purple-500/30"
               >
                 Dashboard
               </Badge>
@@ -115,21 +115,21 @@ export default function DashboardNavigation() {
             <div className="hidden md:flex items-center space-x-6">
               <Link
                 href="/dashboard"
-                className="flex items-center space-x-2 text-gray-700 hover:text-purple-600 transition-colors font-medium"
+                className="flex items-center space-x-2 text-gray-300 hover:text-white transition-colors font-medium"
               >
                 <Home className="w-4 h-4" />
                 <span>Overview</span>
               </Link>
               <Link
                 href="/dashboard/wallet"
-                className="flex items-center space-x-2 text-gray-700 hover:text-purple-600 transition-colors font-medium"
+                className="flex items-center space-x-2 text-gray-300 hover:text-white transition-colors font-medium"
               >
                 <Wallet className="w-4 h-4" />
                 <span>Wallet</span>
               </Link>
               <Link
                 href="/leaderboard"
-                className="flex items-center space-x-2 text-gray-700 hover:text-purple-600 transition-colors font-medium"
+                className="flex items-center space-x-2 text-gray-300 hover:text-white transition-colors font-medium"
               >
                 <BarChart3 className="w-4 h-4" />
                 <span>Leaderboard</span>
@@ -148,49 +148,52 @@ export default function DashboardNavigation() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="relative text-gray-700 hover:text-purple-600"
+                      className="relative text-gray-300 hover:text-white hover:bg-white/5"
                     >
                       <Bell className="w-5 h-5" />
                       {unreadCount > 0 && (
-                        <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center">
-                          <span className="text-xs text-white font-bold">
-                            {unreadCount}
-                          </span>
-                        </span>
+                        <Badge className="absolute -top-1 -right-1 w-5 h-5 p-0 bg-red-500 text-white text-xs flex items-center justify-center">
+                          {unreadCount}
+                        </Badge>
                       )}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-80 p-0" align="end">
-                    <div className="p-4 border-b border-gray-200 flex items-center justify-between">
-                      <h3 className="font-semibold">Notifications</h3>
-                      <Badge variant="secondary" className="text-xs">
-                        {unreadCount} new
-                      </Badge>
-                    </div>
-                    <div className="max-h-96 overflow-y-auto">
-                      {notifications.map((n) => (
-                        <div
-                          key={n.id}
-                          className={`p-4 border-b border-gray-100 hover:bg-gray-50 cursor-pointer ${
-                            !n.read ? "bg-blue-50" : ""
-                          }`}
-                          onClick={() => markAsRead(n.id)}
-                        >
-                          <div className="flex items-start gap-3">
-                            {getNotificationIcon(n.type)}
-                            <div className="flex-1">
-                              <p className="font-medium text-sm">{n.title}</p>
-                              <p className="text-sm text-gray-600">
-                                {n.message}
-                              </p>
-                              <p className="text-xs text-gray-500 flex items-center gap-1 mt-2">
-                                <Clock className="w-3 h-3" />
-                                {n.time}
-                              </p>
+                  <PopoverContent className="w-80 bg-black/90 border-white/10 backdrop-blur-xl" align="end">
+                    <div className="space-y-4">
+                      <h4 className="font-semibold text-white">Notifications</h4>
+                      {notifications.length === 0 ? (
+                        <p className="text-sm text-gray-400">No notifications yet.</p>
+                      ) : (
+                        <div className="space-y-2 max-h-64 overflow-y-auto">
+                          {notifications.slice(0, 5).map((notif) => (
+                            <div
+                              key={notif.id}
+                              className={`p-3 rounded-lg border cursor-pointer hover:bg-white/5 transition-colors ${
+                                notif.read
+                                  ? "bg-white/[0.02] border-white/5"
+                                  : "bg-purple-600/10 border-purple-500/20"
+                              }`}
+                              onClick={() => markAsRead(notif.id)}
+                            >
+                              <div className="flex items-start space-x-3">
+                                {getNotificationIcon(notif.type)}
+                                <div className="flex-1 min-w-0">
+                                  <h5 className="text-sm font-medium text-white truncate">
+                                    {notif.title}
+                                  </h5>
+                                  <p className="text-xs text-gray-400 mt-1">
+                                    {notif.message}
+                                  </p>
+                                  <div className="flex items-center mt-2 text-xs text-gray-500">
+                                    <Clock className="w-3 h-3 mr-1" />
+                                    {notif.time}
+                                  </div>
+                                </div>
+                              </div>
                             </div>
-                          </div>
+                          ))}
                         </div>
-                      ))}
+                      )}
                     </div>
                   </PopoverContent>
                 </Popover>
@@ -198,48 +201,37 @@ export default function DashboardNavigation() {
                 {/* User Menu */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      className="flex items-center space-x-2 text-gray-700 hover:text-purple-600"
-                    >
+                    <Button variant="ghost" className="flex items-center space-x-2 text-gray-300 hover:text-white hover:bg-white/5">
                       <Avatar className="w-8 h-8">
-                        <AvatarFallback className="bg-gradient-to-br from-purple-500 to-pink-500 text-white font-bold">
-                          {user.name?.charAt(0)?.toUpperCase() ||
-                            user.email?.charAt(0)?.toUpperCase() ||
-                            "?"}
+                        <AvatarFallback className="bg-purple-600 text-white">
+                          {user.name?.[0]?.toUpperCase() || user.email?.[0]?.toUpperCase() || "U"}
                         </AvatarFallback>
                       </Avatar>
-                      <div className="text-left">
-                        <p className="text-sm font-medium">
-                          {user.name || user.email}
-                        </p>
-                        <div className="flex items-center">
-                          <Shield className="w-3 h-3 text-green-500 mr-1" />
-                          <span className="text-xs text-green-600">
-                            Verified
-                          </span>
-                        </div>
-                      </div>
                       <ChevronDown className="w-4 h-4" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56">
-                    <DropdownMenuLabel>
-                      <div className="flex flex-col space-y-1">
-                        <p className="text-sm font-medium">{user.email}</p>
-                      </div>
+                  <DropdownMenuContent align="end" className="w-56 bg-black/90 border-white/10 backdrop-blur-xl">
+                    <DropdownMenuLabel className="text-white">
+                      {user.name || user.email}
                     </DropdownMenuLabel>
-                    <DropdownMenuSeparator />
+                    <DropdownMenuSeparator className="bg-white/10" />
                     <DropdownMenuItem asChild>
-                      <Link
-                        href="/dashboard/settings"
-                        className="flex items-center w-full"
-                      >
+                      <Link href="/dashboard/settings" className="text-gray-300 hover:text-white focus:text-white">
                         <Settings className="w-4 h-4 mr-2" />
                         Settings
                       </Link>
                     </DropdownMenuItem>
-                    <DropdownMenuItem onSelect={() => signOut()}>
+                    <DropdownMenuItem asChild>
+                      <Link href="/dashboard/security" className="text-gray-300 hover:text-white focus:text-white">
+                        <Shield className="w-4 h-4 mr-2" />
+                        Security
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator className="bg-white/10" />
+                    <DropdownMenuItem
+                      onSelect={signOut}
+                      className="text-red-400 hover:text-red-300 focus:text-red-300 hover:bg-red-500/10 focus:bg-red-500/10"
+                    >
                       <LogOut className="w-4 h-4 mr-2" />
                       Sign Out
                     </DropdownMenuItem>
@@ -257,45 +249,43 @@ export default function DashboardNavigation() {
               variant="ghost"
               size="sm"
               onClick={() => setIsOpen(!isOpen)}
-              className="text-gray-700"
+              className="text-gray-300 hover:text-white hover:bg-white/5"
             >
-              {isOpen ? (
-                <X className="w-5 h-5" />
-              ) : (
-                <Menu className="w-5 h-5" />
-              )}
+              {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </Button>
           </div>
         </div>
 
         {/* Mobile Navigation */}
         {isOpen && user && (
-          <div className="md:hidden absolute top-16 left-0 right-0 bg-white/95 backdrop-blur-xl border-b border-gray-100 shadow-xl">
+          <div className="md:hidden absolute top-16 left-0 right-0 bg-black/90 backdrop-blur-xl border-b border-white/5">
             <div className="px-4 py-6 space-y-4">
               <Link
                 href="/dashboard"
-                className="flex items-center space-x-3 text-gray-700 hover:text-purple-600 font-medium"
+                className="flex items-center space-x-2 text-gray-300 hover:text-white transition-colors font-medium"
               >
-                <Home className="w-5 h-5" />
+                <Home className="w-4 h-4" />
                 <span>Overview</span>
               </Link>
               <Link
                 href="/dashboard/wallet"
-                className="flex items-center space-x-3 text-gray-700 hover:text-purple-600 font-medium"
+                className="flex items-center space-x-2 text-gray-300 hover:text-white transition-colors font-medium"
               >
-                <Wallet className="w-5 h-5" />
+                <Wallet className="w-4 h-4" />
                 <span>Wallet</span>
               </Link>
               <Link
                 href="/leaderboard"
-                className="flex items-center space-x-3 text-gray-700 hover:text-purple-600 font-medium"
+                className="flex items-center space-x-2 text-gray-300 hover:text-white transition-colors font-medium"
               >
-                <BarChart3 className="w-5 h-5" />
+                <BarChart3 className="w-4 h-4" />
                 <span>Leaderboard</span>
               </Link>
-              <div className="pt-4 flex items-center space-x-4">
-                <ChainSelector />
-                <AuthButton />
+              <div className="pt-4 border-t border-white/10">
+                <div className="flex items-center space-x-4">
+                  <ChainSelector />
+                  {!user && <AuthButton />}
+                </div>
               </div>
             </div>
           </div>

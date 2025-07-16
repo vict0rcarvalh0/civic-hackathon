@@ -61,8 +61,8 @@ export default function DashboardPage() {
 
   if (isLoading || !user) {
     return (
-      <div className="pt-20 pb-8 min-h-screen flex items-center justify-center">
-        <p className="text-xl text-gray-600">Loading…</p>
+      <div className="pt-20 pb-8 min-h-screen bg-black flex items-center justify-center">
+        <p className="text-xl text-gray-400 animate-pulse">Loading…</p>
       </div>
     )
   }
@@ -73,18 +73,35 @@ export default function DashboardPage() {
       : "—"
 
   return (
-    <div className="pt-20 pb-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="pt-20 pb-8 min-h-screen bg-black relative overflow-hidden">
+      {/* Atmospheric Bubbles */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {/* Large bubbles */}
+        <div className="absolute top-20 left-10 w-20 h-20 bg-gradient-to-br from-pink-500/15 to-purple-600/15 rounded-full blur-xl animate-float" style={{ animationDelay: '0s', animationDuration: '12s' }}></div>
+        <div className="absolute top-40 right-20 w-16 h-16 bg-gradient-to-br from-purple-500/12 to-blue-700/12 rounded-full blur-lg animate-float" style={{ animationDelay: '2s', animationDuration: '15s' }}></div>
+        <div className="absolute top-80 left-1/3 w-24 h-24 bg-gradient-to-br from-blue-700/10 to-pink-500/10 rounded-full blur-2xl animate-float" style={{ animationDelay: '4s', animationDuration: '18s' }}></div>
+        
+        {/* Medium bubbles */}
+        <div className="absolute top-60 right-1/4 w-12 h-12 bg-gradient-to-br from-pink-600/18 to-purple-500/18 rounded-full blur-md animate-float" style={{ animationDelay: '1s', animationDuration: '14s' }}></div>
+        <div className="absolute bottom-40 left-20 w-14 h-14 bg-gradient-to-br from-purple-600/16 to-blue-800/16 rounded-full blur-lg animate-float" style={{ animationDelay: '3s', animationDuration: '16s' }}></div>
+        
+        {/* Small scattered bubbles */}
+        <div className="absolute top-32 left-2/3 w-8 h-8 bg-gradient-to-br from-blue-700/20 to-purple-500/20 rounded-full blur-sm animate-float" style={{ animationDelay: '5s', animationDuration: '11s' }}></div>
+        <div className="absolute bottom-60 right-10 w-10 h-10 bg-gradient-to-br from-pink-500/14 to-blue-700/14 rounded-full blur-md animate-float" style={{ animationDelay: '6s', animationDuration: '13s' }}></div>
+        <div className="absolute top-96 left-1/4 w-6 h-6 bg-gradient-to-br from-purple-600/22 to-pink-500/22 rounded-full blur-sm animate-float" style={{ animationDelay: '7s', animationDuration: '10s' }}></div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-4xl font-bold text-gray-900">SkillPass Dashboard</h1>
-            <p className="text-gray-600">
+            <h1 className="text-4xl font-bold text-white">SkillPass Dashboard</h1>
+            <p className="text-gray-400">
               Welcome back, {user.name || user.email}! Build your reputation with validated skills.
             </p>
           </div>
           <Button
             variant="outline"
-            className="border-gray-200 text-gray-700 hover:bg-gray-50"
+            className="bg-white/5 border-white/10 text-gray-300 hover:bg-white/10 hover:text-white"
             onClick={() => window.location.reload()}
           >
             <RefreshCw className="w-4 h-4 mr-2" />
@@ -93,10 +110,25 @@ export default function DashboardPage() {
         </div>
 
         <Tabs defaultValue="overview">
-          <TabsList className="grid grid-cols-3 bg-white/50 backdrop-blur-sm mb-8">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="skills">My Skills</TabsTrigger>
-            <TabsTrigger value="wallet">Wallet</TabsTrigger>
+          <TabsList className="bg-white/5 border border-white/10 grid grid-cols-3 mb-8">
+            <TabsTrigger 
+              value="overview" 
+              className="text-gray-400 data-[state=active]:text-white data-[state=active]:bg-white/10"
+            >
+              Overview
+            </TabsTrigger>
+            <TabsTrigger 
+              value="skills" 
+              className="text-gray-400 data-[state=active]:text-white data-[state=active]:bg-white/10"
+            >
+              My Skills
+            </TabsTrigger>
+            <TabsTrigger 
+              value="wallet" 
+              className="text-gray-400 data-[state=active]:text-white data-[state=active]:bg-white/10"
+            >
+              Wallet
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview">
@@ -106,37 +138,35 @@ export default function DashboardPage() {
                   title: "Reputation Score",
                   value: totalReputationScore.toString(),
                   icon: BarChart3,
-                  gradient: "from-purple-500 to-pink-500",
+                  color: "purple",
                 },
                 {
                   title: "Total Endorsements",
                   value: totalEndorsements.toString(),
                   icon: LinkIcon,
-                  gradient: "from-blue-500 to-cyan-500",
+                  color: "pink",
                 },
                 {
                   title: "Skills Added",
                   value: skills.length.toString(),
                   icon: WalletIcon,
-                  gradient: "from-green-500 to-teal-500",
+                  color: "blue",
                 },
               ].map((stat) => (
                 <Card
                   key={stat.title}
-                  className="bg-white/10 backdrop-blur-xl border-white/20 shadow-xl"
+                  className="bg-white/5 border-white/10 backdrop-blur-sm hover:bg-white/10 transition-all"
                 >
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between mb-4">
-                      <div
-                        className={`w-12 h-12 bg-gradient-to-br ${stat.gradient} rounded-xl flex items-center justify-center`}
-                      >
+                      <div className={`w-12 h-12 bg-${stat.color}-600 rounded-xl flex items-center justify-center`}>
                         <stat.icon className="w-6 h-6 text-white" />
                       </div>
                     </div>
-                    <h3 className="text-2xl font-bold text-gray-900 mb-1">
+                    <h3 className="text-2xl font-bold text-white mb-1">
                       {stat.value}
                     </h3>
-                    <p className="text-gray-600 text-sm">{stat.title}</p>
+                    <p className="text-gray-400 text-sm">{stat.title}</p>
                   </CardContent>
                 </Card>
               ))}
@@ -151,9 +181,9 @@ export default function DashboardPage() {
           <TabsContent value="skills">
             <div className="space-y-6">
               <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-bold text-gray-900">My Skills</h2>
+                <h2 className="text-2xl font-bold text-white">My Skills</h2>
                 <Button 
-                  className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                  className="bg-purple-600 hover:bg-purple-700 text-white"
                   onClick={() => {
                     // TODO: Add skill modal
                     alert("Add skill functionality coming soon!")
@@ -164,11 +194,11 @@ export default function DashboardPage() {
               </div>
               
               {skills.length === 0 ? (
-                <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-xl">
+                <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
                   <CardContent className="p-8 text-center">
-                    <p className="text-gray-600 mb-4">You haven't added any skills yet.</p>
+                    <p className="text-gray-400 mb-4">You haven't added any skills yet.</p>
                     <Button 
-                      className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                      className="bg-purple-600 hover:bg-purple-700 text-white"
                       onClick={() => {
                         // TODO: Add skill modal
                         alert("Add skill functionality coming soon!")
@@ -181,25 +211,28 @@ export default function DashboardPage() {
               ) : (
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {skills.map((skill) => (
-                    <Card key={skill.id} className="bg-white/10 backdrop-blur-xl border-white/20 shadow-xl">
+                    <Card 
+                      key={skill.id} 
+                      className="bg-white/5 border-white/10 backdrop-blur-sm hover:bg-white/10 transition-all"
+                    >
                       <CardContent className="p-6">
                         <div className="flex items-start justify-between mb-4">
                           <div>
-                            <h3 className="font-semibold text-gray-900">{skill.name}</h3>
-                            <p className="text-sm text-gray-600">{skill.category}</p>
+                            <h3 className="font-semibold text-white">{skill.name}</h3>
+                            <p className="text-sm text-gray-400">{skill.category}</p>
                           </div>
-                          <span className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">
+                          <span className="px-2 py-1 text-xs bg-purple-600/20 text-purple-300 rounded-full">
                             {skill.level}
                           </span>
                         </div>
                         
-                        <p className="text-sm text-gray-700 mb-4">{skill.description}</p>
+                        <p className="text-sm text-gray-400 mb-4">{skill.description}</p>
                         
                         <div className="flex items-center justify-between text-sm">
-                          <span className="text-gray-600">
+                          <span className="text-gray-400">
                             {skill.endorsements?.length || 0} endorsements
                           </span>
-                          <span className="font-medium text-gray-900">
+                          <span className="font-medium text-purple-300">
                             {skill.reputationScore || 0} pts
                           </span>
                         </div>
