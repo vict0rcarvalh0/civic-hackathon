@@ -232,27 +232,6 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
-      {/* CTA Section */}
-      <section className="px-6 py-24">
-        <div className="max-w-4xl mx-auto text-center">
-          <Card className="glass-strong">
-            <CardContent className="p-12">
-              <h2 className="text-4xl font-bold mb-6">Join the Future</h2>
-              <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-                Be part of the next generation of professional validation
-              </p>
-              <Button 
-                size="lg" 
-                className="px-8 py-4 text-lg"
-                onClick={handleCreateProfile}
-              >
-                Create Your Profile
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-      </section>
     </div>
   );
 }
