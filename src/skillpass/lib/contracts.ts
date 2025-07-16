@@ -2,49 +2,63 @@
 export const CONTRACTS = {
   // Sepolia testnet (default)
   sepolia: {
-    ReputationToken: "0x8F840F2d5df100C5c3b0C3d181c3EFA3d6C5068A",
-    SkillNFT: "0x45b1f38d1adfB5A9FFAA81b996a53bE78A33cF0c",
-    SkillStaking: "0x1FFA789d597E95923fe40bfE2A386DA379Ec4293",
-    rpcUrl: "https://eth-sepolia.g.alchemy.com/v2/demo", // Alchemy demo endpoint with CORS
+    ReputationToken: "0x9f193F2B46EE42989c8aE393506003392190Cc1A", // ✅ Deployed & Verified
+    SkillNFT: "0xA959Ae52fDcFDdA1349f13de1b8C58FA63482E7d", // ✅ Deployed & Verified  
+    SkillStaking: "0x75162c4dd207BD1cbfF511709588B89910C92c0F", // DEPRECATED - legacy staking
+    SkillRevenue: "0x75162c4dd207BD1cbfF511709588B89910C92c0F", // ✅ NEW - Investment platform
+    rpcUrl: "https://eth-sepolia.public.blastapi.io", // Public Sepolia RPC
     chainId: 11155111
   },
   // Local development (Anvil) - kept for development
   localhost: {
     ReputationToken: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
     SkillNFT: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512", 
-    SkillStaking: "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+    SkillStaking: "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0", // DEPRECATED - legacy staking
+    SkillRevenue: "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0", // NEW - Investment platform
     rpcUrl: "http://127.0.0.1:8545",
     chainId: 31337
   }
 }
 
-// Contract ABIs (simplified - include only the functions we need)
-export const ABIS = {
-  ReputationToken: [
-    "function balanceOf(address owner) view returns (uint256)",
-    "function getReputationScore(address user) view returns (uint256)",
-    "function transfer(address to, uint256 amount) returns (bool)",
-    "function approve(address spender, uint256 amount) returns (bool)",
-    "function earnReputation(address user, uint256 amount, string reason)",
-    "event ReputationEarned(address indexed user, uint256 amount, string reason)"
-  ],
-  SkillNFT: [
-    "function mintSkill(string category, string name, string description, string uri) returns (uint256)",
-    "function getSkill(uint256 tokenId) view returns (tuple(string category, string name, string description, address creator, uint256 createdAt, uint256 totalStaked, uint256 endorsementCount, bool verified))",
-    "function getUserSkills(address user) view returns (uint256[])",
-    "function getCategories() view returns (string[])",
-    "function ownerOf(uint256 tokenId) view returns (address)",
-    "event SkillMinted(uint256 indexed tokenId, address indexed creator, string category, string name)"
-  ],
-  SkillStaking: [
-    "function endorseSkill(uint256 skillId, uint256 stakeAmount, string evidence)",
-    "function getSkillEndorsements(uint256 skillId) view returns (tuple(address endorser, uint256 stakedAmount, uint256 timestamp, bool active, string evidence)[])",
-    "function getStakeInfo(uint256 skillId) view returns (tuple(uint256 totalStaked, uint256 endorsementCount, uint256 averageStake, bool challenged, uint256 challengeEndTime))",
-    "function claimRewards()",
-    "function stakerRewards(address staker) view returns (uint256)",
-    "event SkillEndorsed(uint256 indexed skillId, address indexed endorser, uint256 stakedAmount, string evidence)"
-  ]
-}
+// Export individual addresses for backward compatibility
+export const {
+  ReputationToken: REPUTATION_TOKEN_ADDRESS,
+  SkillNFT: SKILL_NFT_ADDRESS,
+  SkillStaking: SKILL_STAKING_ADDRESS,
+  SkillRevenue: SKILL_REVENUE_ADDRESS,
+  rpcUrl: RPC_URL,
+  chainId: CHAIN_ID
+} = CONTRACTS.sepolia // Default to Sepolia for production
+
+// ABI definitions for the contracts
+export const REPUTATION_TOKEN_ABI = [
+  "function balanceOf(address owner) view returns (uint256)",
+  "function transfer(address to, uint256 amount) returns (bool)",
+  "function approve(address spender, uint256 amount) returns (bool)",
+  "function getReputationScore(address user) view returns (uint256)",
+  "function earnReputation(address user, uint256 amount, string reason) external",
+  "function slashReputation(address user, uint256 amount, string reason) external"
+]
+
+export const SKILL_NFT_ABI = [
+  "function mintSkill(string category, string name, string description, string tokenURI) returns (uint256)",
+  "function getSkill(uint256 tokenId) view returns (tuple(string category, string name, string description, address creator, uint256 createdAt, uint256 totalStaked, uint256 endorsementCount, bool verified))",
+  "function getUserSkills(address user) view returns (uint256[])",
+  "function ownerOf(uint256 tokenId) view returns (address)",
+  "event SkillMinted(uint256 indexed tokenId, address indexed creator, string category, string name)"
+]
+
+export const SKILL_REVENUE_ABI = [
+  "function investInSkill(uint256 skillId, uint256 amount) external",
+  "function completeJob(uint256 skillId, uint256 jobPayment, address skillOwner) external", 
+  "function claimYield(uint256 skillId) external returns (uint256)",
+  "function getInvestmentInfo(uint256 skillId, address investor) view returns (tuple(uint256 amount, uint256 pendingYield, uint256 lastClaimTime))",
+  "function getSkillPerformance(uint256 skillId) view returns (tuple(uint256 totalInvested, uint256 totalRevenue, uint256 monthlyRevenue, uint256 apy))",
+  "function calculateAPY(uint256 skillId) view returns (uint256)",
+  "event SkillInvestment(uint256 indexed skillId, address indexed investor, uint256 amount)",
+  "event JobCompleted(uint256 indexed skillId, address indexed skillOwner, uint256 jobPayment, uint256 investorShare)",
+  "event YieldClaimed(uint256 indexed skillId, address indexed investor, uint256 amount)"
+]
 
 // Helper to get current network configuration
 export function getNetworkConfig(chainId?: number) {

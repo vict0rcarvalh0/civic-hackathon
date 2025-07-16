@@ -1,5 +1,5 @@
 import { ethers } from "ethers"
-import { CONTRACTS, ABIS, getNetworkConfig } from "./contracts"
+import { CONTRACTS, REPUTATION_TOKEN_ABI, SKILL_NFT_ABI, SKILL_REVENUE_ABI, getNetworkConfig } from "./contracts"
 
 // Global declarations for MetaMask
 declare global {
@@ -395,7 +395,7 @@ export class SkillPassContracts {
     
     const contract = new ethers.Contract(
       this.networkConfig.ReputationToken,
-      ABIS.ReputationToken,
+      REPUTATION_TOKEN_ABI,
       provider
     )
     
@@ -417,7 +417,7 @@ export class SkillPassContracts {
     
     const contract = new ethers.Contract(
       this.networkConfig.SkillNFT,
-      ABIS.SkillNFT,
+      SKILL_NFT_ABI,
       provider
     )
     
@@ -425,9 +425,9 @@ export class SkillPassContracts {
     return contract
   }
   
-  async getSkillStaking() {
-    console.log("🔍 getSkillStaking: Getting contract instance...")
-    console.log("🔍 getSkillStaking: Contract address:", this.networkConfig.SkillStaking)
+  async getSkillRevenue() {
+    console.log("🔍 getSkillRevenue: Getting contract instance...")
+    console.log("🔍 getSkillRevenue: Contract address:", this.networkConfig.SkillRevenue)
     
     // Use provider for read-only operations, no signer needed
     if (!provider) {
@@ -438,12 +438,12 @@ export class SkillPassContracts {
     }
     
     const contract = new ethers.Contract(
-      this.networkConfig.SkillStaking,
-      ABIS.SkillStaking,
+      this.networkConfig.SkillRevenue,
+      SKILL_REVENUE_ABI,
       provider
     )
     
-    console.log("✅ getSkillStaking: Contract instance created")
+    console.log("✅ getSkillRevenue: Contract instance created")
     return contract
   }
   
@@ -468,7 +468,7 @@ export class SkillPassContracts {
       console.log("🔄 getUserReputation: Creating contract directly...")
       const reputationToken = new ethers.Contract(
         this.networkConfig.ReputationToken,
-        ABIS.ReputationToken,
+        REPUTATION_TOKEN_ABI,
         provider
       )
       console.log("✅ getUserReputation: Got reputation token contract")
@@ -621,45 +621,51 @@ export class SkillPassContracts {
     }
   }
   
-  async endorseSkill(skillId: string, stakeAmount: string, evidence: string) {
-    console.log("🔍 endorseSkill: Starting endorsement process...")
-    console.log("🔍 endorseSkill: Parameters:", { skillId, stakeAmount, evidence })
+  async investInSkill(skillId: string, investmentAmount: string) {
+    console.log("🔍 investInSkill: Starting investment process...")
+    console.log("🔍 investInSkill: Parameters:", { skillId, investmentAmount })
     
     try {
-      const skillStaking = await this.getSkillStakingWithSigner()
-      console.log("✅ endorseSkill: Got SkillStaking contract with signer")
+      const skillRevenue = await this.getSkillRevenueWithSigner()
+      console.log("✅ investInSkill: Got SkillRevenue contract with signer")
       
       const reputationToken = await this.getReputationTokenWithSigner()
-      console.log("✅ endorseSkill: Got ReputationToken contract with signer")
+      console.log("✅ investInSkill: Got ReputationToken contract with signer")
       
-      // Approve stake amount first
-      const stakeAmountWei = ethers.parseEther(stakeAmount)
-      console.log("🔍 endorseSkill: Stake amount in wei:", stakeAmountWei.toString())
+      // Approve investment amount first
+      const investmentAmountWei = ethers.parseEther(investmentAmount)
+      console.log("🔍 investInSkill: Investment amount in wei:", investmentAmountWei.toString())
       
-      console.log("🔍 endorseSkill: Approving tokens...")
-      const approveTx = await reputationToken.approve(this.networkConfig.SkillStaking, stakeAmountWei)
-      console.log("✅ endorseSkill: Approval transaction sent:", approveTx.hash)
+      console.log("🔍 investInSkill: Approving tokens...")
+      const approveTx = await reputationToken.approve(this.networkConfig.SkillRevenue, investmentAmountWei)
+      console.log("✅ investInSkill: Approval transaction sent:", approveTx.hash)
       
-      console.log("🔍 endorseSkill: Waiting for approval confirmation...")
+      console.log("🔍 investInSkill: Waiting for approval confirmation...")
       await approveTx.wait()
-      console.log("✅ endorseSkill: Approval confirmed")
+      console.log("✅ investInSkill: Approval confirmed")
       
-      // Endorse the skill
-      console.log("🔍 endorseSkill: Calling contract.endorseSkill()...")
-      const tx = await skillStaking.endorseSkill(skillId, stakeAmountWei, evidence)
-      console.log("✅ endorseSkill: Endorsement transaction sent:", tx.hash)
+      // Invest in the skill
+      console.log("🔍 investInSkill: Calling contract.investInSkill()...")
+      const tx = await skillRevenue.investInSkill(skillId, investmentAmountWei)
+      console.log("✅ investInSkill: Investment transaction sent:", tx.hash)
       
-      console.log("🔍 endorseSkill: Waiting for endorsement confirmation...")
+      console.log("🔍 investInSkill: Waiting for investment confirmation...")
       const receipt = await tx.wait()
-      console.log("✅ endorseSkill: Endorsement confirmed:", receipt)
+      console.log("✅ investInSkill: Investment confirmed:", receipt)
       
       return receipt
     } catch (error: any) {
-      console.error("❌ endorseSkill: Error during endorsement:", error)
-      console.error("❌ endorseSkill: Error message:", error.message)
-      console.error("❌ endorseSkill: Error stack:", error.stack)
+      console.error("❌ investInSkill: Error during investment:", error)
+      console.error("❌ investInSkill: Error message:", error.message)
+      console.error("❌ investInSkill: Error stack:", error.stack)
       throw error
     }
+  }
+  
+  // Keep old endorseSkill method for backward compatibility
+  async endorseSkill(skillId: string, stakeAmount: string, evidence: string) {
+    console.log("⚠️ endorseSkill: DEPRECATED - Use investInSkill instead")
+    return this.investInSkill(skillId, stakeAmount)
   }
   
   // Helper methods for write operations that need signers
@@ -668,7 +674,7 @@ export class SkillPassContracts {
     const signer = await getSigner()
     const contract = new ethers.Contract(
       this.networkConfig.ReputationToken,
-      ABIS.ReputationToken,
+      REPUTATION_TOKEN_ABI,
       signer
     )
     return contract
@@ -679,7 +685,18 @@ export class SkillPassContracts {
     const signer = await getSigner()
     const contract = new ethers.Contract(
       this.networkConfig.SkillNFT,
-      ABIS.SkillNFT,
+      SKILL_NFT_ABI,
+      signer
+    )
+    return contract
+  }
+  
+  async getSkillRevenueWithSigner() {
+    console.log("🔍 getSkillRevenueWithSigner: Getting contract with signer...")
+    const signer = await getSigner()
+    const contract = new ethers.Contract(
+      this.networkConfig.SkillRevenue,
+      SKILL_REVENUE_ABI,
       signer
     )
     return contract
@@ -687,10 +704,11 @@ export class SkillPassContracts {
   
   async getSkillStakingWithSigner() {
     console.log("🔍 getSkillStakingWithSigner: Getting contract with signer...")
+    console.log("⚠️ DEPRECATED: Use getSkillRevenueWithSigner instead")
     const signer = await getSigner()
     const contract = new ethers.Contract(
       this.networkConfig.SkillStaking,
-      ABIS.SkillStaking,
+      SKILL_REVENUE_ABI, // Use SkillRevenue ABI since it's the same contract
       signer
     )
     return contract
