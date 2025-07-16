@@ -24,7 +24,10 @@ import {
   ThumbsUp,
   Loader2,
   CheckCircle,
-  AlertCircle
+  AlertCircle,
+  Clock,
+  BarChart3,
+  Coins
 } from "lucide-react";
 import SkillDetailDialog from "@/components/ui/skill-detail-dialog";
 
@@ -34,6 +37,7 @@ interface SkillForEndorsement {
   name: string;
   category: string;
   description: string;
+  tokenId: string;
   userName: string;
   userReputation: number;
   endorsementCount: number;
@@ -102,7 +106,7 @@ export default function InvestPage() {
             await fetchReputationData(address);
           }
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error("Error checking wallet:", error);
       }
     };
@@ -217,7 +221,17 @@ export default function InvestPage() {
     }
 
     if (!user) {
-      toast.error("Please log in with Civic to invest in skills");
+      toast.error("Please log in with Civic to make investments");
+      return;
+    }
+
+    if (!walletConnected || !walletAddress) {
+      toast.error("Please connect your MetaMask wallet to make investments");
+      return;
+    }
+
+    if (!selectedSkill) {
+      toast.error("Please select a skill to invest in");
       return;
     }
 
@@ -234,34 +248,61 @@ export default function InvestPage() {
 
     setIsEndorsing(true);
 
+    let loadingToast: any;
+
     try {
       const expectedYield = calculateExpectedYield(amount, selectedSkill);
       
-      toast.loading(`Investing ${amount} REPR tokens...`);
+      loadingToast = toast.loading(`Investing ${amount} REPR tokens...`);
 
-      // TODO: Call new SkillRevenue contract instead of old endorsement
-      // This would call skillRevenue.investInSkill(skillId, amount)
+      // Step 1: Call SkillRevenue contract for blockchain investment
+      const { skillPassContracts } = await import('@/lib/web3');
+      
+      // Invest in skill on blockchain (handles approval and wei conversion internally)
+      console.log('🔍 Investing in skill on blockchain...');
+      const receipt = await skillPassContracts.investInSkill(
+        selectedSkill.tokenId, // tokenId as string 
+        amount.toString() // investment amount as string (e.g., "100")
+      );
+
+      console.log('Blockchain investment successful:', receipt.hash);
+      
+      // Step 2: Save investment to database with transaction details
+      const requestData = {
+        skillId: endorsementForm.skillId,
+        investmentAmount: amount,
+        expectedMonthlyYield: expectedYield,
+        investorWallet: walletAddress,
+        transactionHash: receipt.hash,
+        blockNumber: receipt.blockNumber ? Number(receipt.blockNumber) : null
+      };
+      
+      console.log('🔍 Sending investment data to API:', requestData);
       
       const response = await fetch('/api/investments/create', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          skillId: endorsementForm.skillId,
-          investmentAmount: amount,
-          expectedMonthlyYield: expectedYield,
-          investorWallet: user.wallet?.address || user.id,
-          transactionHash: null,
-          blockNumber: null
-        }),
+        body: JSON.stringify(requestData),
       });
+
+      // Dismiss loading toast
+      toast.dismiss(loadingToast);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('API Error:', response.status, errorText);
+        console.error('Request data that failed:', requestData);
+        toast.error(`Investment failed: ${response.status} error`);
+        return;
+      }
 
       const result = await response.json();
 
       if (result.success) {
         toast.success("Investment successful!", {
-          description: `Invested ${amount} REPR tokens. Expected yield: $${expectedYield}/month`,
+          description: `Invested ${amount} REPR tokens. Expected yield: $${expectedYield}/month. Tx: ${receipt.hash.slice(0, 10)}...`,
           duration: 10000,
         });
         
@@ -273,11 +314,26 @@ export default function InvestPage() {
         // Refresh skills data
         await loadSkillsForEndorsement();
       } else {
+        console.error('Investment failed:', result);
         toast.error(result.error || "Failed to submit investment");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error submitting investment:', error);
-      toast.error("Failed to submit investment. Please try again.");
+      
+      // Dismiss loading toast on error
+      if (loadingToast) {
+        toast.dismiss(loadingToast);
+      }
+      
+      if (error.message?.includes("MetaMask is not installed")) {
+        toast.error("Please install MetaMask extension");
+      } else if (error.message?.includes("User rejected")) {
+        toast.error("Transaction cancelled by user");
+      } else if (error.message?.includes("insufficient funds")) {
+        toast.error("Insufficient REPR tokens for investment");
+      } else {
+        toast.error("Failed to submit investment. Please try again.");
+      }
     } finally {
       setIsEndorsing(false);
     }
@@ -756,20 +812,25 @@ export default function InvestPage() {
                     placeholder="Minimum 50 REPR tokens"
                   />
                   <div className="mt-2 space-y-1">
-                    <p className="text-xs text-blue-400">
-                      💰 Expected monthly yield: ${endorsementForm.stakedAmount && selectedSkill ? calculateExpectedYield(parseFloat(endorsementForm.stakedAmount) || 0, selectedSkill) : '0'}
+                    <p className="text-xs text-blue-400 flex items-center gap-1">
+                      <Coins className="w-3 h-3" />
+                      Expected monthly yield: ${endorsementForm.stakedAmount && selectedSkill ? calculateExpectedYield(parseFloat(endorsementForm.stakedAmount) || 0, selectedSkill) : '0'}
                     </p>
-                    <p className="text-xs text-green-400">
-                      📈 Projected APY: {selectedSkill ? calculateRealAPY(selectedSkill) : '0'}%
+                    <p className="text-xs text-green-400 flex items-center gap-1">
+                      <TrendingUp className="w-3 h-3" />
+                      Projected APY: {selectedSkill ? calculateRealAPY(selectedSkill) : '0'}%
                     </p>
-                    <p className="text-xs text-gray-400">
-                      ⏰ Yield paid monthly from skill owner's job revenue
+                    <p className="text-xs text-gray-400 flex items-center gap-1">
+                      <Clock className="w-3 h-3" />
+                      Yield paid monthly from skill owner's job revenue
                     </p>
                   </div>
                 </div>
 
                 <div className="p-3 bg-gradient-to-r from-green-500/10 to-blue-500/10 rounded-lg border border-green-500/20">
-                  <h4 className="text-sm font-semibold text-white mb-2">📊 Investment Breakdown</h4>
+                  <h4 className="text-sm font-semibold text-white mb-2 flex items-center gap-1">
+                    Investment Breakdown
+                  </h4>
                   <div className="space-y-1 text-xs">
                     <div className="flex justify-between">
                       <span className="text-gray-400">Revenue source:</span>

@@ -16,6 +16,7 @@ export async function GET(request: NextRequest) {
         skillName: skills.name,
         skillCategory: skills.category,
         skillDescription: skills.description,
+        skillTokenId: skills.tokenId,
         skillEndorsementCount: skills.endorsementCount,
         skillTotalStaked: skills.totalStaked,
         skillVerified: skills.verified,
@@ -28,7 +29,7 @@ export async function GET(request: NextRequest) {
         userAvatar: userProfiles.avatar
       })
       .from(skills)
-      .innerJoin(userProfiles, eq(skills.userId, userProfiles.id))
+      .innerJoin(userProfiles, eq(skills.userId, userProfiles.walletAddress))
 
     // Apply filters if provided
     if (category) {
@@ -50,6 +51,7 @@ export async function GET(request: NextRequest) {
       name: skill.skillName,
       category: skill.skillCategory,
       description: skill.skillDescription,
+      tokenId: skill.skillTokenId,
       userName: skill.userName || 'Anonymous User',
       userReputation: Number(skill.userReputation) || 0,
       endorsementCount: skill.skillEndorsementCount || 0,

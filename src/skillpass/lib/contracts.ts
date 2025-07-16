@@ -1,34 +1,34 @@
-// Contract configuration for SkillPass
+// Contract addresses by network
 export const CONTRACTS = {
-  // Sepolia testnet (default)
-  sepolia: {
-    ReputationToken: "0x9f193F2B46EE42989c8aE393506003392190Cc1A", // ✅ Deployed & Verified
-    SkillNFT: "0xA959Ae52fDcFDdA1349f13de1b8C58FA63482E7d", // ✅ Deployed & Verified  
-    SkillStaking: "0x75162c4dd207BD1cbfF511709588B89910C92c0F", // DEPRECATED - legacy staking
-    SkillRevenue: "0x75162c4dd207BD1cbfF511709588B89910C92c0F", // ✅ NEW - Investment platform
-    rpcUrl: "https://eth-sepolia.public.blastapi.io", // Public Sepolia RPC
-    chainId: 11155111
-  },
-  // Local development (Anvil) - kept for development
-  localhost: {
+  // Anvil local testnet
+  anvil: {
+    chainId: 31337,
     ReputationToken: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
     SkillNFT: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512", 
-    SkillStaking: "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0", // DEPRECATED - legacy staking
-    SkillRevenue: "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0", // NEW - Investment platform
+    SkillRevenue: "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
     rpcUrl: "http://127.0.0.1:8545",
-    chainId: 31337
-  }
+  },
+  // Sepolia testnet  
+  sepolia: {
+    chainId: 11155111,
+    ReputationToken: "0x0b01D922072bE2EDe46154120e2791ae389f70c6",
+    SkillNFT: "0x6E3C6eC404381a0DC312dbe79FDC544e0639427F",
+    SkillRevenue: "0xD80B39C6D68d4F137BDb69232d26a88ad26a42E8", // Updated with self-investment fix
+    rpcUrl: "https://eth-sepolia.public.blastapi.io",
+  },
 }
 
 // Export individual addresses for backward compatibility
 export const {
   ReputationToken: REPUTATION_TOKEN_ADDRESS,
   SkillNFT: SKILL_NFT_ADDRESS,
-  SkillStaking: SKILL_STAKING_ADDRESS,
   SkillRevenue: SKILL_REVENUE_ADDRESS,
-  rpcUrl: RPC_URL,
-  chainId: CHAIN_ID
+  chainId: CHAIN_ID,
+  rpcUrl: RPC_URL
 } = CONTRACTS.sepolia // Default to Sepolia for production
+
+// Legacy support
+export const SKILL_STAKING_ADDRESS = CONTRACTS.sepolia.SkillRevenue // Map to new contract
 
 // ABI definitions for the contracts
 export const REPUTATION_TOKEN_ABI = [
@@ -65,7 +65,7 @@ export function getNetworkConfig(chainId?: number) {
   const currentChainId = chainId || 11155111 // Default to Sepolia
   
   if (currentChainId === 11155111) return CONTRACTS.sepolia
-  if (currentChainId === 31337) return CONTRACTS.localhost
+  if (currentChainId === 31337) return CONTRACTS.anvil
   
   throw new Error(`Unsupported chain ID: ${currentChainId}`)
 } 

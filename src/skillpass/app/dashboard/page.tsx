@@ -286,9 +286,9 @@ export default function DashboardPage() {
 
     setIsAddingSkill(true);
 
-    try {
-      toast.loading("Creating skill and minting NFT...");
+    const loadingToast = toast.loading("Creating skill and minting NFT...");
 
+    try {
       const networkConfig = getNetworkConfig();
 
       // First, mint the NFT on blockchain using MetaMask
@@ -339,6 +339,9 @@ export default function DashboardPage() {
 
       const result = await response.json();
 
+      // Dismiss loading toast
+      toast.dismiss(loadingToast);
+
       if (result.success) {
         // Show success toast with transaction link
         toast.success("Skill created and NFT minted successfully!", {
@@ -362,6 +365,9 @@ export default function DashboardPage() {
       }
     } catch (error: any) {
       console.error('Error adding skill:', error);
+      
+      // Dismiss loading toast on error
+      toast.dismiss(loadingToast);
       
       if (error.message?.includes("MetaMask is not installed")) {
         toast.error("Please install MetaMask extension");
