@@ -7,7 +7,6 @@ const connectionString = process.env.DATABASE_URL!
 
 // Skip transform DEV
 const client = postgres(connectionString, { prepare: false })
-export const db = drizzle(client)
 
 // Skills table
 export const skills = pgTable('skills', {
@@ -143,6 +142,41 @@ export const ipfsUploads = pgTable('ipfs_uploads', {
   createdAt: timestamp('created_at').defaultNow(),
 })
 
+// Investments table (NEW - for real investment platform)
+export const investments = pgTable('investments', {
+  id: text('id').primaryKey(),
+  skillId: text('skill_id').references(() => skills.id).notNull(),
+  investorId: text('investor_id').notNull(),
+  investorWallet: text('investor_wallet').notNull(),
+  
+  // Investment details
+  investmentAmount: decimal('investment_amount', { precision: 18, scale: 2 }).notNull(),
+  expectedMonthlyYield: decimal('expected_monthly_yield', { precision: 18, scale: 2 }),
+  currentAPY: decimal('current_apy', { precision: 5, scale: 2 }),
+  
+  // Earnings tracking
+  totalYieldEarned: decimal('total_yield_earned', { precision: 18, scale: 2 }).default('0'),
+  totalYieldClaimed: decimal('total_yield_claimed', { precision: 18, scale: 2 }).default('0'),
+  pendingYield: decimal('pending_yield', { precision: 18, scale: 2 }).default('0'),
+  lastYieldClaim: timestamp('last_yield_claim'),
+  
+  // Investment metrics
+  jobsCompleted: integer('jobs_completed').default(0),
+  monthlyJobRevenue: decimal('monthly_job_revenue', { precision: 18, scale: 2 }).default('0'),
+  riskScore: integer('risk_score').default(50), // 0-100 scale
+  
+  // Blockchain data
+  transactionHash: text('transaction_hash'),
+  blockNumber: integer('block_number'),
+  
+  // Status
+  status: text('status').default('active'), // active, paused, withdrawn
+  investmentDate: timestamp('investment_date').defaultNow(),
+  
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+})
+
 export type Skill = typeof skills.$inferSelect
 export type NewSkill = typeof skills.$inferInsert
 export type Endorsement = typeof endorsements.$inferSelect
@@ -151,3 +185,17 @@ export type UserProfile = typeof userProfiles.$inferSelect
 export type NewUserProfile = typeof userProfiles.$inferInsert
 export type Challenge = typeof challenges.$inferSelect
 export type NewChallenge = typeof challenges.$inferInsert
+export type Investment = typeof investments.$inferSelect
+export type NewInvestment = typeof investments.$inferInsert
+
+// Database instance with all tables
+export const db = drizzle(client, { 
+  schema: { 
+    skills, 
+    endorsements, 
+    userProfiles, 
+    challenges, 
+    blockchainEvents,
+    investments
+  } 
+})

@@ -46,18 +46,20 @@ interface Skill {
   status?: string;
 }
 
-interface RecentEndorsement {
+interface RecentInvestment {
   skill: string;
-  endorser: string;
-  reputation: number;
+  investor: string;
+  amount: number;
+  expectedYield: number;
+  apy: number;
   timestamp: string;
-  evidence?: string;
+  status: string;
 }
 
 interface DashboardData {
   stats: DashboardStats;
   skills: Skill[];
-  recentEndorsements: RecentEndorsement[];
+  recentInvestments: RecentInvestment[];
 }
 
 interface NewSkill {
@@ -72,7 +74,7 @@ export default function DashboardPage() {
   const [data, setData] = useState<DashboardData>({
     stats: { totalSkills: 0, endorsements: 0, reputation: 0, rank: 0 },
     skills: [],
-    recentEndorsements: []
+    recentInvestments: []
   });
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -754,10 +756,10 @@ export default function DashboardPage() {
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-gray-400">Total Skills</p>
-                    <p className="text-2xl font-bold text-white">{data.stats.totalSkills}</p>
+                    <p className="text-sm text-gray-400">Total Investments</p>
+                    <p className="text-2xl font-bold text-white">{data.stats.endorsements}</p>
                   </div>
-                  <Award className="w-8 h-8 text-purple-400" />
+                  <DollarSign className="w-8 h-8 text-purple-400" />
                 </div>
               </CardContent>
             </Card>
@@ -766,10 +768,10 @@ export default function DashboardPage() {
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-gray-400">Endorsements</p>
-                    <p className="text-2xl font-bold text-white">{data.stats.endorsements}</p>
+                    <p className="text-sm text-gray-400">Investment Value</p>
+                    <p className="text-2xl font-bold text-white">${data.stats.reputation.toLocaleString()}</p>
                   </div>
-                  <ThumbsUp className="w-8 h-8 text-purple-400" />
+                  <TrendingUp className="w-8 h-8 text-purple-400" />
                 </div>
               </CardContent>
             </Card>
@@ -848,16 +850,6 @@ export default function DashboardPage() {
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            className="text-purple-400 hover:text-purple-300"
-                            onClick={() => openEndorseDialog(skill)}
-                            disabled={!walletConnected}
-                          >
-                            <Heart className="w-4 h-4 mr-1" />
-                            Endorse
-                          </Button>
                           <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white">
                             <Eye className="w-4 h-4" />
                           </Button>
@@ -873,30 +865,31 @@ export default function DashboardPage() {
             <div>
               <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
                 <CardHeader>
-                  <CardTitle className="text-white">Recent Endorsements</CardTitle>
+                  <CardTitle className="text-white">Recent Investments</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {data.recentEndorsements.length === 0 ? (
+                  {data.recentInvestments.length === 0 ? (
                     <div className="text-center py-8">
                       <Users className="w-12 h-12 text-gray-600 mx-auto mb-3" />
-                      <p className="text-gray-400 text-sm">No endorsements yet</p>
+                      <p className="text-gray-400 text-sm">No investments yet</p>
                     </div>
                   ) : (
-                    data.recentEndorsements.map((endorsement, index) => (
+                    data.recentInvestments.map((investment, index) => (
                       <div key={index} className="p-4 border border-white/10 rounded-lg">
                         <div className="flex items-start justify-between mb-2">
                           <div>
-                            <p className="font-medium text-sm text-white">{endorsement.skill}</p>
-                            <p className="text-xs text-gray-400">by {endorsement.endorser}</p>
+                            <p className="font-medium text-sm text-white">{investment.skill}</p>
+                            <p className="text-xs text-gray-400">by {investment.investor}</p>
                           </div>
                           <Badge variant="outline" className="text-xs border-purple-500/30 text-purple-300">
-                            {endorsement.reputation}★
+                            ${investment.amount.toFixed(2)}
                           </Badge>
                         </div>
-                        {endorsement.evidence && (
-                          <p className="text-xs text-gray-400 mb-2 italic">"{endorsement.evidence}"</p>
-                        )}
-                        <p className="text-xs text-gray-500">{endorsement.timestamp}</p>
+                        <div className="flex items-center gap-2 text-sm text-gray-400">
+                          <span>Expected Yield: {investment.expectedYield}%</span>
+                          <span>APY: {investment.apy}%</span>
+                        </div>
+                        <p className="text-xs text-gray-500">{investment.timestamp}</p>
                       </div>
                     ))
                   )}
@@ -907,12 +900,12 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Endorsement Dialog */}
+      {/* Investment Dialog */}
       <Dialog open={isEndorseDialogOpen} onOpenChange={setIsEndorseDialogOpen}>
         <DialogContent className="bg-black border-white/10">
           <DialogHeader>
             <DialogTitle className="text-white">
-              Endorse Skill: {selectedSkill?.name}
+              Invest in Skill: {selectedSkill?.name}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
@@ -920,31 +913,31 @@ export default function DashboardPage() {
               <div className="p-3 bg-white/5 rounded-lg border border-white/10">
                 <h4 className="text-white font-medium">{selectedSkill.name}</h4>
                 <p className="text-gray-400 text-sm">{selectedSkill.category}</p>
-                <p className="text-gray-500 text-xs mt-1">Current endorsements: {selectedSkill.endorsements}</p>
+                <p className="text-gray-500 text-xs mt-1">Current investments: {selectedSkill.endorsements}</p>
               </div>
             )}
             <div>
-              <Label htmlFor="stakeAmount" className="text-white">Stake Amount (REPR tokens)</Label>
+              <Label htmlFor="stakeAmount" className="text-white">Investment Amount (REPR tokens)</Label>
               <Input
                 id="stakeAmount"
                 type="number"
                 step="0.1"
-                min="0.1"
+                min="50"
                 value={endorsementData.stakeAmount}
                 onChange={(e) => setEndorsementData({ ...endorsementData, stakeAmount: e.target.value })}
                 className="bg-white/5 border-white/10 text-white placeholder:text-gray-400"
-                placeholder="e.g., 10"
+                placeholder="e.g., 100"
               />
-              <p className="text-xs text-gray-500 mt-1">Minimum stake: 0.1 REPR</p>
+              <p className="text-xs text-gray-500 mt-1">Minimum investment: 50 REPR</p>
             </div>
             <div>
-              <Label htmlFor="evidence" className="text-white">Evidence</Label>
+              <Label htmlFor="evidence" className="text-white">Investment Reason</Label>
               <Textarea
                 id="evidence"
                 value={endorsementData.evidence}
                 onChange={(e) => setEndorsementData({ ...endorsementData, evidence: e.target.value })}
                 className="bg-white/5 border-white/10 text-white placeholder:text-gray-400"
-                placeholder="Why are you endorsing this skill? Provide evidence or reasoning..."
+                placeholder="Why are you investing in this skill? What do you expect from this investment..."
                 rows={3}
               />
             </div>
@@ -964,12 +957,12 @@ export default function DashboardPage() {
                 {isEndorsing ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Endorsing...
+                    Investing...
                   </>
                 ) : (
                   <>
                     <DollarSign className="w-4 h-4 mr-2" />
-                    Stake & Endorse
+                    Invest & Earn Yield
                   </>
                 )}
               </Button>

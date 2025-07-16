@@ -652,14 +652,8 @@ export default function InvestPage() {
                     <div className="mb-4 p-3 bg-gradient-to-r from-purple-500/10 to-blue-500/10 rounded-lg border border-purple-500/20">
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-sm text-gray-300">Current APY</span>
-                        <span className="text-lg font-bold text-green-400">
+                        <span className="text-lg font-bold text-white-400">
                           {calculateRealAPY(skill)}%
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm text-gray-300">Monthly Revenue</span>
-                        <span className="text-sm text-blue-400">
-                          ${calculateMonthlyRevenue(skill)}
                         </span>
                       </div>
                       <div className="text-xs text-gray-400 space-y-1">
@@ -671,7 +665,7 @@ export default function InvestPage() {
                         <div className="flex items-center gap-2">
                           <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
                           <span className="text-xs text-green-400 font-medium">
-                            ✅ Real yield from skill owner earnings
+                            Real yield from skill owner earnings
                           </span>
                         </div>
                         <div className="mt-1">

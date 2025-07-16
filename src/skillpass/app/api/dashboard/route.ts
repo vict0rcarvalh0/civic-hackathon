@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { db, skills, userProfiles, endorsements } from '@/lib/db'
+import { db, skills, userProfiles, endorsements, investments } from '@/lib/db'
 import { desc, eq, sql } from 'drizzle-orm'
 
 export async function GET(request: NextRequest) {
@@ -16,27 +16,36 @@ export async function GET(request: NextRequest) {
         .from(skills)
       const totalSkills = totalSkillsResult[0]?.count || 0
 
-      // Get total endorsements count
-      const totalEndorsementsResult = await db
+      // Get total investments count (new metric)
+      const totalInvestmentsResult = await db
         .select({ count: sql<number>`count(*)` })
-        .from(endorsements)
-      const totalEndorsements = totalEndorsementsResult[0]?.count || 0
+        .from(investments)
+      const totalInvestments = totalInvestmentsResult[0]?.count || 0
 
-      // Calculate average reputation from all users
-      const avgReputationResult = await db
+      // Calculate total investment value
+      const totalInvestmentValueResult = await db
         .select({ 
-          avgRep: sql<number>`COALESCE(AVG(CAST(reputation_score AS NUMERIC)), 0)` 
+          totalValue: sql<number>`COALESCE(SUM(CAST(investment_amount AS NUMERIC)), 0)` 
         })
-        .from(userProfiles)
-      const avgReputation = Number((avgReputationResult[0]?.avgRep || 0) / 100) // Convert to 0-10 scale
+        .from(investments)
+      const totalInvestmentValue = Number(totalInvestmentValueResult[0]?.totalValue || 0)
 
-      // Calculate a demo rank based on average
-      const demoRank = Math.max(1, Math.floor(totalSkills / 2))
+      // Calculate average APY from investments
+      const avgAPYResult = await db
+        .select({ 
+          avgAPY: sql<number>`COALESCE(AVG(CAST(current_apy AS NUMERIC)), 0)` 
+        })
+        .from(investments)
+        .where(eq(investments.status, 'active'))
+      const avgAPY = Number((avgAPYResult[0]?.avgAPY || 0))
+
+      // Calculate a demo rank based on investment activity
+      const demoRank = Math.max(1, Math.floor(totalInvestments / 5))
 
       const calculatedStats = {
         totalSkills: Number(totalSkills),
-        endorsements: Number(totalEndorsements),
-        reputation: Number(avgReputation.toFixed(1)),
+        endorsements: Number(totalInvestments), // Show investments as "endorsements" for compatibility
+        reputation: Number((totalInvestmentValue / 100).toFixed(1)), // Show investment value as reputation
         rank: demoRank
       }
       
@@ -55,21 +64,22 @@ export async function GET(request: NextRequest) {
         .orderBy(desc(skills.verified), desc(skills.endorsementCount))
         .limit(8)
 
-      // Get recent endorsements
-      const recentEndorsements = await db
+      // Get recent investments (not endorsements)
+      const recentInvestments = await db
         .select({
-          id: endorsements.id,
+          id: investments.id,
           skillName: skills.name,
-          endorserName: userProfiles.displayName,
-          endorserReputation: userProfiles.reputationScore,
-          createdAt: endorsements.createdAt,
-          evidence: endorsements.evidence
+          investorWallet: investments.investorWallet,
+          investmentAmount: investments.investmentAmount,
+          expectedYield: investments.expectedMonthlyYield,
+          currentAPY: investments.currentAPY,
+          investmentDate: investments.investmentDate,
+          status: investments.status
         })
-        .from(endorsements)
-        .innerJoin(skills, eq(endorsements.skillId, skills.id))
-        .innerJoin(userProfiles, eq(endorsements.endorserId, userProfiles.id))
-        .orderBy(desc(endorsements.createdAt))
-        .limit(3)
+        .from(investments)
+        .innerJoin(skills, eq(investments.skillId, skills.id))
+        .orderBy(desc(investments.investmentDate))
+        .limit(5)
 
       return NextResponse.json({
         success: true,
@@ -83,12 +93,14 @@ export async function GET(request: NextRequest) {
           verified: skill.verified,
           status: skill.status
         })),
-        recentEndorsements: recentEndorsements.map(endorsement => ({
-          skill: endorsement.skillName,
-          endorser: endorsement.endorserName || 'Anonymous',
-          reputation: Number(endorsement.endorserReputation) / 1000,
-          timestamp: getTimeAgo(endorsement.createdAt),
-          evidence: endorsement.evidence || undefined
+        recentInvestments: recentInvestments.map(investment => ({
+          skill: investment.skillName,
+          investor: `${investment.investorWallet.slice(0, 6)}...${investment.investorWallet.slice(-4)}`,
+          amount: parseFloat(investment.investmentAmount),
+          expectedYield: parseFloat(investment.expectedYield || '0'),
+          apy: parseFloat(investment.currentAPY || '0'),
+          timestamp: getTimeAgo(investment.investmentDate),
+          status: investment.status
         }))
       })
     }
@@ -125,28 +137,29 @@ export async function GET(request: NextRequest) {
       .where(eq(skills.userId, userId))
       .orderBy(desc(skills.verified), desc(skills.endorsementCount))
 
-    // Get recent endorsements for user's skills
-    const userEndorsements = await db
+    // Get recent investments in user's skills
+    const userSkillInvestments = await db
       .select({
-        id: endorsements.id,
+        id: investments.id,
         skillName: skills.name,
-        endorserName: userProfiles.displayName,
-        endorserReputation: userProfiles.reputationScore,
-        createdAt: endorsements.createdAt,
-        evidence: endorsements.evidence
+        investorWallet: investments.investorWallet,
+        investmentAmount: investments.investmentAmount,
+        expectedYield: investments.expectedMonthlyYield,
+        currentAPY: investments.currentAPY,
+        investmentDate: investments.investmentDate,
+        status: investments.status
       })
-      .from(endorsements)
-      .innerJoin(skills, eq(endorsements.skillId, skills.id))
-      .innerJoin(userProfiles, eq(endorsements.endorserId, userProfiles.id))
+      .from(investments)
+      .innerJoin(skills, eq(investments.skillId, skills.id))
       .where(eq(skills.userId, userId))
-      .orderBy(desc(endorsements.createdAt))
+      .orderBy(desc(investments.investmentDate))
       .limit(5)
 
     return NextResponse.json({
       success: true,
       stats: {
         totalSkills: user.totalSkills,
-        endorsements: user.totalEndorsements,
+        endorsements: user.totalEndorsements, // This will include investments
         reputation: Number(user.reputationScore) / 1000,
         rank: await getUserRank(user.reputationScore || '0')
       },
@@ -159,12 +172,14 @@ export async function GET(request: NextRequest) {
         verified: skill.verified,
         status: skill.status
       })),
-      recentEndorsements: userEndorsements.map(endorsement => ({
-        skill: endorsement.skillName,
-        endorser: endorsement.endorserName || 'Anonymous',
-        reputation: Number(endorsement.endorserReputation || '0') / 1000,
-        timestamp: getTimeAgo(endorsement.createdAt),
-        evidence: endorsement.evidence || undefined
+      recentInvestments: userSkillInvestments.map(investment => ({
+        skill: investment.skillName,
+        investor: `${investment.investorWallet.slice(0, 6)}...${investment.investorWallet.slice(-4)}`,
+        amount: parseFloat(investment.investmentAmount),
+        expectedYield: parseFloat(investment.expectedYield || '0'),
+        apy: parseFloat(investment.currentAPY || '0'),
+        timestamp: getTimeAgo(investment.investmentDate),
+        status: investment.status
       }))
     })
 
@@ -177,31 +192,33 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// Helper function to calculate user rank
-async function getUserRank(userReputation: string): Promise<number> {
-  try {
-    const higherRankedUsers = await db
-      .select({ count: sql<number>`count(*)` })
-      .from(userProfiles)
-      .where(sql`${userProfiles.reputationScore} > ${userReputation}`)
-    
-    return (higherRankedUsers[0]?.count || 0) + 1
-  } catch {
-    return 1
-  }
+// Helper functions
+async function getUserRank(reputationScore: string): Promise<number> {
+  const score = Number(reputationScore)
+  const betterUsers = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(userProfiles)
+    .where(sql`CAST(reputation_score AS NUMERIC) > ${score}`)
+  
+  return (betterUsers[0]?.count || 0) + 1
 }
 
-// Helper function to format timestamps
 function getTimeAgo(date: Date | null): string {
   if (!date) return 'Unknown'
   
   const now = new Date()
   const diffMs = now.getTime() - date.getTime()
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
   const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
-  const diffDays = Math.floor(diffHours / 24)
-  
-  if (diffHours < 1) return 'Just now'
-  if (diffHours < 24) return `${diffHours} hours ago`
-  if (diffDays === 1) return '1 day ago'
-  return `${diffDays} days ago`
+  const diffMinutes = Math.floor(diffMs / (1000 * 60))
+
+  if (diffDays > 0) {
+    return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`
+  } else if (diffHours > 0) {
+    return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`
+  } else if (diffMinutes > 0) {
+    return `${diffMinutes} minute${diffMinutes > 1 ? 's' : ''} ago`
+  } else {
+    return 'Just now'
+  }
 } 

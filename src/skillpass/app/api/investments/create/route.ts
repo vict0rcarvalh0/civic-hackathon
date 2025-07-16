@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { db, skills, userProfiles } from '@/lib/db'
+import { db, skills, userProfiles, investments } from '@/lib/db'
 import { nanoid } from 'nanoid'
 import { eq, sql } from 'drizzle-orm'
 
@@ -64,26 +64,36 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Calculate investment metrics
+    const projectedAPY = calculateAPY(skill[0], amount)
+    const monthlyYieldEstimate = (amount * (projectedAPY / 100)) / 12
+
     // Create the investment record
     const newInvestment = {
       id: nanoid(),
       skillId: skillId,
-      investorId: investorWallet, // Use wallet address as ID
+      investorId: investorWallet,
       investorWallet: investorWallet,
       investmentAmount: amount.toString(),
-      expectedMonthlyYield: expectedMonthlyYield || '0',
+      expectedMonthlyYield: (expectedMonthlyYield || monthlyYieldEstimate).toString(),
+      currentAPY: projectedAPY.toString(),
+      totalYieldEarned: '0',
+      totalYieldClaimed: '0',
+      pendingYield: '0',
+      lastYieldClaim: null,
+      jobsCompleted: 0,
+      monthlyJobRevenue: '0',
+      riskScore: calculateRiskScore(skill[0]),
       transactionHash: transactionHash || null,
       blockNumber: blockNumber || null,
       status: 'active',
       investmentDate: new Date(),
-      lastYieldClaim: new Date(),
-      totalYieldClaimed: '0',
       createdAt: new Date(),
       updatedAt: new Date()
     }
 
-    // TODO: Insert investment into investments table (needs DB migration)
-    // await db.insert(investments).values(newInvestment)
+    // Insert investment into database
+    await db.insert(investments).values(newInvestment)
 
     // Update skill with new investment data
     await db
@@ -136,10 +146,6 @@ export async function POST(request: NextRequest) {
       console.error('Error updating investor profile:', profileError)
     }
 
-    // Calculate investment metrics
-    const projectedAPY = calculateAPY(skill[0], amount)
-    const monthlyYieldEstimate = (amount * (projectedAPY / 100)) / 12
-
     return NextResponse.json({
       success: true,
       investment: newInvestment,
@@ -147,15 +153,15 @@ export async function POST(request: NextRequest) {
         investmentAmount: amount,
         projectedAPY: projectedAPY,
         monthlyYieldEstimate: monthlyYieldEstimate.toFixed(2),
-        expectedMonthlyYield: expectedMonthlyYield
+        expectedMonthlyYield: expectedMonthlyYield || monthlyYieldEstimate.toFixed(2)
       },
-      message: `Successfully invested ${amount} REPR tokens! Expected monthly yield: $${expectedMonthlyYield}`
+      message: `Successfully invested ${amount} REPR tokens! Expected monthly yield: $${(expectedMonthlyYield || monthlyYieldEstimate).toFixed(2)}`
     })
 
   } catch (error) {
-    console.error('Error creating investment:', error)
+    console.error('Investment creation error:', error)
     return NextResponse.json(
-      { success: false, error: 'Internal server error' },
+      { success: false, error: 'Failed to create investment' },
       { status: 500 }
     )
   }
@@ -165,10 +171,44 @@ export async function POST(request: NextRequest) {
  * Calculate projected APY based on skill metrics
  */
 function calculateAPY(skill: any, investmentAmount: number): number {
-  const baseAPY = 12 // Base 12% APY
-  const endorsementBonus = Math.min((skill.endorsementCount || 0) * 2, 20) // Up to 20% bonus
-  const stakeBonus = (skill.totalStaked || 0) > 1000 ? 8 : 4 // Higher stakes = better performance
-  const verificationBonus = skill.verified ? 5 : 0 // Verified skills get bonus
+  // Base APY calculation (15-45% range)
+  let baseAPY = 15
   
-  return baseAPY + endorsementBonus + stakeBonus + verificationBonus
+  // Boost based on endorsements/investments
+  const endorsementBoost = Math.min(15, (skill.endorsementCount || 0) * 2)
+  baseAPY += endorsementBoost
+  
+  // Boost for verified skills
+  if (skill.verified) {
+    baseAPY += 10
+  }
+  
+  // Boost based on total staked (higher staked = higher confidence)
+  const totalStaked = parseFloat(skill.totalStaked || '0')
+  if (totalStaked > 1000) baseAPY += 5
+  if (totalStaked > 5000) baseAPY += 5
+  
+  return Math.min(45, baseAPY) // Cap at 45%
+}
+
+/**
+ * Calculate risk score (0-100, lower is safer)
+ */
+function calculateRiskScore(skill: any): number {
+  let riskScore = 50 // Start at medium risk
+  
+  // Lower risk for verified skills
+  if (skill.verified) riskScore -= 20
+  
+  // Lower risk for established skills (more endorsements)
+  const endorsements = skill.endorsementCount || 0
+  if (endorsements > 5) riskScore -= 10
+  if (endorsements > 15) riskScore -= 10
+  
+  // Lower risk for higher total investment
+  const totalStaked = parseFloat(skill.totalStaked || '0')
+  if (totalStaked > 2000) riskScore -= 10
+  if (totalStaked > 10000) riskScore -= 10
+  
+  return Math.max(10, Math.min(90, riskScore)) // Keep between 10-90
 } 
