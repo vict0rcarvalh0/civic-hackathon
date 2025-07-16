@@ -87,9 +87,9 @@ export default function WalletActions({
   }
 
   return (
-    <Card className="bg-white/10 backdrop-blur-xl border-white/20 shadow-2xl">
+    <Card className="border border-white/10 bg-white/5 backdrop-blur-xl">
       <CardHeader>
-        <CardTitle className="text-xl text-gray-900">Wallet Actions</CardTitle>
+        <CardTitle className="text-xl text-white">Wallet Actions</CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
         {/* Receive */}
@@ -100,19 +100,22 @@ export default function WalletActions({
               Receive Crypto
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-md">
+          <DialogContent className="sm:max-w-md bg-black/95 border-white/20 backdrop-blur-xl">
             <DialogHeader>
-              <DialogTitle>Your Deposit QR</DialogTitle>
+              <DialogTitle className="text-white">Your Deposit QR</DialogTitle>
             </DialogHeader>
             <div className="flex flex-col items-center space-y-4">
               {walletAddress ? (
                 <>
-                  <QRCodeSVG value={walletAddress} size={200} />
-                  <p className="font-mono break-all text-sm">{walletAddress}</p>
+                  <div className="p-4 bg-white rounded-xl">
+                    <QRCodeSVG value={walletAddress} size={200} />
+                  </div>
+                  <p className="font-mono break-all text-sm text-gray-300">{walletAddress}</p>
                   <CopyButton
                     value={walletAddress}
                     size="sm"
                     variant="outline"
+                    className="bg-white/5 border-white/10 text-gray-300 hover:bg-white/10"
                     suffix="Address"
                   >
                     <Copy className="w-4 h-4 mr-2" />
@@ -120,7 +123,7 @@ export default function WalletActions({
                   </CopyButton>
                 </>
               ) : (
-                <p className="text-sm text-gray-600">Wallet address unavailable</p>
+                <p className="text-sm text-gray-400">Wallet address unavailable</p>
               )}
             </div>
             <DialogFooter />
@@ -130,45 +133,47 @@ export default function WalletActions({
         {/* Send */}
         <Dialog open={showSend} onOpenChange={setShowSend}>
           <DialogTrigger asChild>
-            <Button variant="outline" className="w-full bg-white/20 border-white/30 text-gray-700 hover:bg-white/30">
+            <Button variant="outline" className="w-full bg-white/5 border-white/10 text-gray-300 hover:bg-white/10 hover:text-white">
               <ArrowUpRight className="w-4 h-4 mr-2" />
               Send Crypto
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-sm">
+          <DialogContent className="sm:max-w-sm bg-black/95 border-white/20 backdrop-blur-xl">
             <DialogHeader>
-              <DialogTitle>Send Crypto</DialogTitle>
+              <DialogTitle className="text-white">Send Crypto</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
               <div>
-                <Label htmlFor="send-address">Recipient Address</Label>
+                <Label htmlFor="send-address" className="text-gray-300">Recipient Address</Label>
                 <Input
                   id="send-address"
                   value={sendAddress}
                   onChange={(e) => setSendAddress(e.target.value)}
                   placeholder="0x..."
+                  className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-purple-500"
                 />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <Label htmlFor="send-amount">Amount</Label>
+                  <Label htmlFor="send-amount" className="text-gray-300">Amount</Label>
                   <Input
                     id="send-amount"
                     value={sendAmount}
                     onChange={(e) => setSendAmount(e.target.value)}
                     placeholder="0.00"
+                    className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus:border-purple-500"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="send-token">Token</Label>
+                  <Label htmlFor="send-token" className="text-gray-300">Token</Label>
                   <Select value={sendToken} onValueChange={setSendToken}>
-                    <SelectTrigger id="send-token">
+                    <SelectTrigger id="send-token" className="bg-white/5 border-white/10 text-white focus:border-purple-500">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="USDC">USDC</SelectItem>
-                      <SelectItem value="ETH">ETH</SelectItem>
-                      <SelectItem value="SOL">SOL</SelectItem>
+                    <SelectContent className="bg-black/95 border-white/20 backdrop-blur-xl">
+                      <SelectItem value="USDC" className="text-white hover:bg-white/10 focus:bg-white/10">USDC</SelectItem>
+                      <SelectItem value="ETH" className="text-white hover:bg-white/10 focus:bg-white/10">ETH</SelectItem>
+                      <SelectItem value="SOL" className="text-white hover:bg-white/10 focus:bg-white/10">SOL</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -184,7 +189,7 @@ export default function WalletActions({
                 variant="outline"
                 size="sm"
                 onClick={handleImportQr}
-                className="w-full"
+                className="w-full bg-white/5 border-white/10 text-gray-300 hover:bg-white/10"
               >
                 <QrCode className="w-4 h-4 mr-2" />
                 Import QR
@@ -200,6 +205,7 @@ export default function WalletActions({
                   })
                   setShowSend(false)
                 }}
+                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
               >
                 Send
               </Button>
@@ -210,7 +216,7 @@ export default function WalletActions({
         {/* Buy */}
         <Button
           variant="outline"
-          className="w-full bg-white/20 border-white/30 text-gray-700 hover:bg-white/30"
+          className="w-full bg-white/5 border-white/10 text-gray-300 hover:bg-white/10 hover:text-white"
           onClick={() => window.open("https://www.okx.com/buy-crypto", "_blank")}
         >
           <CreditCard className="w-4 h-4 mr-2" />
@@ -220,7 +226,7 @@ export default function WalletActions({
         {/* Export */}
         <Button
           variant="outline"
-          className="w-full bg-white/20 border-white/30 text-gray-700 hover:bg-white/30"
+          className="w-full bg-white/5 border-white/10 text-gray-300 hover:bg-white/10 hover:text-white"
           onClick={handleExport}
         >
           <Download className="w-4 h-4 mr-2" />
