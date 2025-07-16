@@ -128,6 +128,13 @@ export default function DashboardNavigation() {
                 <span>Wallet</span>
               </Link>
               <Link
+                href="/dashboard/invest"
+                className="flex items-center space-x-2 text-gray-300 hover:text-white transition-colors font-medium"
+              >
+                <DollarSign className="w-4 h-4" />
+                <span>Invest</span>
+              </Link>
+              <Link
                 href="/leaderboard"
                 className="flex items-center space-x-2 text-gray-300 hover:text-white transition-colors font-medium"
               >
