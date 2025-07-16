@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { toast } from "sonner";
 import { useUser } from "@civic/auth-web3/react";
 import { getNetworkConfig } from "@/lib/contracts";
+import { isWalletConnected, getConnectedAddress } from "@/lib/web3";
 import { 
   Star, 
   TrendingUp, 
@@ -21,7 +22,10 @@ import {
   Eye,
   ThumbsUp,
   Loader2,
-  Wallet
+  Wallet,
+  AlertCircle,
+  Heart,
+  DollarSign
 } from "lucide-react";
 
 // Types
@@ -73,12 +77,53 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isAddingSkill, setIsAddingSkill] = useState(false);
+  const [walletConnected, setWalletConnected] = useState(false);
+  const [walletAddress, setWalletAddress] = useState<string | null>(null);
+  const [isEndorseDialogOpen, setIsEndorseDialogOpen] = useState(false);
+  const [selectedSkill, setSelectedSkill] = useState<Skill | null>(null);
+  const [isEndorsing, setIsEndorsing] = useState(false);
+  const [endorsementData, setEndorsementData] = useState({
+    stakeAmount: "",
+    evidence: ""
+  });
   const [newSkill, setNewSkill] = useState<NewSkill>({
     name: "",
     category: "",
     description: "",
     evidence: ""
   });
+
+  // Check MetaMask connection status
+  useEffect(() => {
+    const checkWalletConnection = async () => {
+      try {
+        const connected = await isWalletConnected();
+        setWalletConnected(connected);
+        
+        if (connected) {
+          const address = await getConnectedAddress();
+          setWalletAddress(address);
+        }
+      } catch (error) {
+        console.error("Error checking wallet connection:", error);
+      }
+    };
+
+    checkWalletConnection();
+
+    // Listen for account changes
+    if (typeof window !== "undefined" && window.ethereum) {
+      const handleAccountsChanged = (accounts: string[]) => {
+        setWalletConnected(accounts.length > 0);
+        setWalletAddress(accounts.length > 0 ? accounts[0] : null);
+      };
+
+      window.ethereum.on('accountsChanged', handleAccountsChanged);
+      return () => {
+        window.ethereum.removeListener('accountsChanged', handleAccountsChanged);
+      };
+    }
+  }, []);
 
   useEffect(() => {
     if (user) {
@@ -105,6 +150,41 @@ export default function DashboardPage() {
     }
   };
 
+  const connectMetaMask = async () => {
+    try {
+      if (typeof window === "undefined" || !window.ethereum) {
+        toast.error("MetaMask is not installed. Please install MetaMask extension.");
+        return;
+      }
+
+      const loadingToast = toast.loading("Connecting to MetaMask...");
+      
+      // Use the working bypass connection method
+      const { connectWallet } = await import('@/lib/web3');
+      const address = await connectWallet();
+      
+      setWalletConnected(true);
+      setWalletAddress(address);
+      
+      toast.dismiss(loadingToast);
+      toast.success("MetaMask connected successfully!");
+    } catch (error: any) {
+      console.error('Error connecting MetaMask:', error);
+      
+      toast.dismiss(); // Dismiss loading toast
+      
+      if (error.message?.includes("rejected") || error.code === 4001) {
+        toast.error("Connection cancelled by user");
+      } else if (error.code === -32002) {
+        toast.error("MetaMask connection request already pending. Please check MetaMask.");
+      } else if (error.message?.includes("not installed")) {
+        toast.error("MetaMask is not installed. Please install MetaMask extension.");
+      } else {
+        toast.error(`Failed to connect MetaMask: ${error.message}`);
+      }
+    }
+  };
+
   const handleAddSkill = async () => {
     if (!newSkill.name || !newSkill.category || !newSkill.description) {
       toast.error("Please fill in all required fields");
@@ -116,40 +196,72 @@ export default function DashboardPage() {
       return;
     }
 
+    if (!walletConnected) {
+      toast.error("Please connect your MetaMask wallet to mint NFTs");
+      return;
+    }
+
     setIsAddingSkill(true);
 
     try {
       toast.loading("Creating skill and minting NFT...");
 
       const networkConfig = getNetworkConfig();
+
+      // First, mint the NFT on blockchain using MetaMask
+      const { skillPassContracts } = await import('@/lib/web3');
+
+      // Create metadata
+      const metadata = {
+        name: newSkill.name,
+        description: newSkill.description,
+        category: newSkill.category,
+        image: "https://skillpass.app/placeholder-skill.png"
+      }
+      const metadataUri = `data:application/json,${encodeURIComponent(JSON.stringify(metadata))}`
+
+      const receipt = await skillPassContracts.mintSkill(
+        newSkill.category, 
+        newSkill.name, 
+        newSkill.description, 
+        metadataUri
+      );
+
+      // Extract token ID from transaction logs
+      let tokenId = null
+      if (receipt.logs && receipt.logs.length > 0) {
+        const mintEvent = receipt.logs.find((log: any) => log.topics && log.topics.length > 0)
+        if (mintEvent && mintEvent.topics && mintEvent.topics.length >= 2) {
+          tokenId = parseInt(mintEvent.topics[1], 16).toString()
+        }
+      }
+
+      // Now send to API with blockchain transaction details
+      const payload = {
+        ...newSkill,
+        walletAddress: walletAddress,
+        tokenId: tokenId,
+        transactionHash: receipt.hash,
+        blockNumber: receipt.blockNumber,
+        contractAddress: networkConfig.SkillNFT
+      }
       
       const response = await fetch('/api/skills', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          ...newSkill,
-          walletAddress: user.wallet?.address || user.id,
-          tokenId: null,
-          transactionHash: null,
-          blockNumber: null,
-          contractAddress: networkConfig.SkillNFT
-        }),
+        body: JSON.stringify(payload),
       });
 
       const result = await response.json();
 
       if (result.success) {
-        // Show success toast with transaction link if available
-        if (result.transactionHash) {
-          toast.success("Skill created successfully!", {
-            description: `NFT minted! View on Sepolia: https://sepolia.etherscan.io/tx/${result.transactionHash}`,
-            duration: 10000,
-          });
-        } else {
-          toast.success("Skill created successfully!");
-        }
+        // Show success toast with transaction link
+        toast.success("Skill created and NFT minted successfully!", {
+          description: `NFT minted! Token ID: ${tokenId}. Transaction: ${receipt.hash}`,
+          duration: 10000,
+        });
         
         // Reset form and close dialog
         setNewSkill({ name: "", category: "", description: "", evidence: "" });
@@ -158,14 +270,125 @@ export default function DashboardPage() {
         // Refresh dashboard data
         await loadDashboardData();
       } else {
-        toast.error(result.error || "Failed to create skill");
+        toast.error(result.error || "Failed to save skill to database");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error adding skill:', error);
-      toast.error("Failed to create skill. Please try again.");
+      
+      if (error.message?.includes("MetaMask is not installed")) {
+        toast.error("Please install MetaMask extension");
+      } else if (error.message?.includes("User rejected")) {
+        toast.error("Transaction cancelled by user");
+      } else {
+        toast.error("Failed to create skill. Please try again.");
+      }
     } finally {
       setIsAddingSkill(false);
     }
+  };
+
+  const handleEndorseSkill = async () => {
+    if (!endorsementData.stakeAmount || !endorsementData.evidence) {
+      toast.error("Please fill in stake amount and evidence");
+      return;
+    }
+
+    if (!user) {
+      toast.error("Please log in with Civic to endorse skills");
+      return;
+    }
+
+    if (!walletConnected) {
+      toast.error("Please connect your MetaMask wallet to sign transactions");
+      return;
+    }
+
+    if (!selectedSkill) {
+      toast.error("No skill selected for endorsement");
+      return;
+    }
+
+    const stakeAmount = parseFloat(endorsementData.stakeAmount);
+    if (isNaN(stakeAmount) || stakeAmount <= 0) {
+      toast.error("Please enter a valid stake amount");
+      return;
+    }
+
+    setIsEndorsing(true);
+
+    try {
+      const loadingToast = toast.loading("Endorsing skill and staking reputation...");
+
+      // Import skillPassContracts for transaction signing
+      const { skillPassContracts } = await import('@/lib/web3');
+
+      // Sign endorsement transaction with MetaMask
+      const receipt = await skillPassContracts.endorseSkill(
+        selectedSkill.id,
+        endorsementData.stakeAmount,
+        endorsementData.evidence
+      );
+
+      // Send endorsement data to API
+      const payload = {
+        skillId: selectedSkill.id,
+        stakeAmount: endorsementData.stakeAmount,
+        evidence: endorsementData.evidence,
+        endorserAddress: walletAddress,
+        transactionHash: receipt.hash,
+        blockNumber: receipt.blockNumber
+      };
+
+      const response = await fetch('/api/endorsements', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const result = await response.json();
+
+      toast.dismiss(loadingToast);
+
+      if (result.success) {
+        toast.success("Skill endorsed successfully!", {
+          description: `Staked ${endorsementData.stakeAmount} REPR tokens. Transaction: ${receipt.hash}`,
+          duration: 10000,
+        });
+        
+        // Reset form and close dialog
+        setEndorsementData({ stakeAmount: "", evidence: "" });
+        setSelectedSkill(null);
+        setIsEndorseDialogOpen(false);
+        
+        // Refresh dashboard data
+        await loadDashboardData();
+      } else {
+        toast.error(result.error || "Failed to save endorsement to database");
+      }
+    } catch (error: any) {
+      console.error('Error endorsing skill:', error);
+      
+      toast.dismiss();
+      
+      if (error.message?.includes("User rejected")) {
+        toast.error("Transaction cancelled by user");
+      } else if (error.message?.includes("insufficient funds")) {
+        toast.error("Insufficient REPR tokens for staking");
+      } else if (error.message?.includes("allowance")) {
+        toast.error("Token approval failed. Please try again.");
+      } else {
+        toast.error(`Failed to endorse skill: ${error.message}`);
+      }
+    } finally {
+      setIsEndorsing(false);
+    }
+  };
+
+  const openEndorseDialog = (skill: Skill) => {
+    setSelectedSkill(skill);
+    setIsEndorseDialogOpen(true);
   };
 
   // Show loading if checking authentication
@@ -224,7 +447,10 @@ export default function DashboardPage() {
             
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
-                <Button className="mt-4 md:mt-0 bg-purple-600 hover:bg-purple-700 text-white">
+                <Button 
+                  disabled={!walletConnected || isAddingSkill}
+                  className="mt-4 md:mt-0 bg-purple-600 hover:bg-purple-700 text-white disabled:opacity-50"
+                >
                   <Plus className="w-4 h-4 mr-2" />
                   Add New Skill
                 </Button>
@@ -284,8 +510,8 @@ export default function DashboardPage() {
                   </div>
                   <Button 
                     onClick={handleAddSkill} 
-                    disabled={isAddingSkill}
-                    className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+                    disabled={isAddingSkill || !walletConnected}
+                    className="w-full bg-purple-600 hover:bg-purple-700 text-white disabled:opacity-50"
                   >
                     {isAddingSkill ? (
                       <>
@@ -300,6 +526,52 @@ export default function DashboardPage() {
               </DialogContent>
             </Dialog>
           </div>
+
+          {/* MetaMask Wallet Status */}
+          {!walletConnected ? (
+            <Card className="bg-yellow-600/10 border-yellow-500/30 backdrop-blur-sm">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <AlertCircle className="w-5 h-5 text-yellow-400" />
+                    <div>
+                      <p className="text-yellow-300 font-medium">MetaMask Required</p>
+                      <p className="text-yellow-200/80 text-sm">
+                        Connect your MetaMask wallet to mint skills and sign transactions
+                      </p>
+                    </div>
+                  </div>
+                  <Button
+                    onClick={connectMetaMask}
+                    variant="outline"
+                    size="sm"
+                    className="bg-yellow-600/20 border-yellow-500/50 text-yellow-300 hover:bg-yellow-600/30"
+                  >
+                    Connect MetaMask
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ) : (
+            <Card className="bg-green-600/10 border-green-500/30 backdrop-blur-sm">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <Wallet className="w-5 h-5 text-green-400" />
+                    <div>
+                      <p className="text-green-300 font-medium">MetaMask Connected</p>
+                      <p className="text-green-200/80 text-sm font-mono">
+                        {walletAddress}
+                      </p>
+                    </div>
+                  </div>
+                  <Badge className="bg-green-600/20 text-green-300 border-green-500/30">
+                    Connected
+                  </Badge>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Stats Overview */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -369,7 +641,8 @@ export default function DashboardPage() {
                       </p>
                       <Button 
                         onClick={() => setIsDialogOpen(true)}
-                        className="bg-purple-600 hover:bg-purple-700 text-white"
+                        disabled={!walletConnected}
+                        className="bg-purple-600 hover:bg-purple-700 text-white disabled:opacity-50"
                       >
                         <Plus className="w-4 h-4 mr-2" />
                         Add Your First Skill
@@ -400,6 +673,16 @@ export default function DashboardPage() {
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="text-purple-400 hover:text-purple-300"
+                            onClick={() => openEndorseDialog(skill)}
+                            disabled={!walletConnected}
+                          >
+                            <Heart className="w-4 h-4 mr-1" />
+                            Endorse
+                          </Button>
                           <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white">
                             <Eye className="w-4 h-4" />
                           </Button>
@@ -448,6 +731,77 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
+
+      {/* Endorsement Dialog */}
+      <Dialog open={isEndorseDialogOpen} onOpenChange={setIsEndorseDialogOpen}>
+        <DialogContent className="bg-black border-white/10">
+          <DialogHeader>
+            <DialogTitle className="text-white">
+              Endorse Skill: {selectedSkill?.name}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            {selectedSkill && (
+              <div className="p-3 bg-white/5 rounded-lg border border-white/10">
+                <h4 className="text-white font-medium">{selectedSkill.name}</h4>
+                <p className="text-gray-400 text-sm">{selectedSkill.category}</p>
+                <p className="text-gray-500 text-xs mt-1">Current endorsements: {selectedSkill.endorsements}</p>
+              </div>
+            )}
+            <div>
+              <Label htmlFor="stakeAmount" className="text-white">Stake Amount (REPR tokens)</Label>
+              <Input
+                id="stakeAmount"
+                type="number"
+                step="0.1"
+                min="0.1"
+                value={endorsementData.stakeAmount}
+                onChange={(e) => setEndorsementData({ ...endorsementData, stakeAmount: e.target.value })}
+                className="bg-white/5 border-white/10 text-white placeholder:text-gray-400"
+                placeholder="e.g., 10"
+              />
+              <p className="text-xs text-gray-500 mt-1">Minimum stake: 0.1 REPR</p>
+            </div>
+            <div>
+              <Label htmlFor="evidence" className="text-white">Evidence</Label>
+              <Textarea
+                id="evidence"
+                value={endorsementData.evidence}
+                onChange={(e) => setEndorsementData({ ...endorsementData, evidence: e.target.value })}
+                className="bg-white/5 border-white/10 text-white placeholder:text-gray-400"
+                placeholder="Why are you endorsing this skill? Provide evidence or reasoning..."
+                rows={3}
+              />
+            </div>
+            <div className="flex gap-2">
+              <Button 
+                onClick={() => setIsEndorseDialogOpen(false)}
+                variant="outline"
+                className="flex-1 border-white/10 text-white hover:bg-white/5"
+              >
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleEndorseSkill} 
+                disabled={isEndorsing || !walletConnected || !endorsementData.stakeAmount || !endorsementData.evidence}
+                className="flex-1 bg-purple-600 hover:bg-purple-700 text-white disabled:opacity-50"
+              >
+                {isEndorsing ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Endorsing...
+                  </>
+                ) : (
+                  <>
+                    <DollarSign className="w-4 h-4 mr-2" />
+                    Stake & Endorse
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
