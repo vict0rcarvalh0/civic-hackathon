@@ -9,7 +9,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
+import { useUser } from "@civic/auth-web3/react";
+import { getNetworkConfig } from "@/lib/contracts";
 import { 
   Star, 
   TrendingUp, 
@@ -18,7 +20,8 @@ import {
   Plus,
   Eye,
   ThumbsUp,
-  Loader2
+  Loader2,
+  Wallet
 } from "lucide-react";
 
 // Types
@@ -53,125 +56,146 @@ interface DashboardData {
   recentEndorsements: RecentEndorsement[];
 }
 
+interface NewSkill {
+  name: string;
+  category: string;
+  description: string;
+  evidence: string;
+}
+
 export default function DashboardPage() {
-  const [data, setData] = useState<DashboardData | null>(null);
+  const { user, isLoading } = useUser();
+  const [data, setData] = useState<DashboardData>({
+    stats: { totalSkills: 0, endorsements: 0, reputation: 0, rank: 0 },
+    skills: [],
+    recentEndorsements: []
+  });
   const [loading, setLoading] = useState(true);
-  const [isAddingSkill, setIsAddingSkill] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  
-  // Form state for adding new skill
-  const [newSkill, setNewSkill] = useState({
+  const [isAddingSkill, setIsAddingSkill] = useState(false);
+  const [newSkill, setNewSkill] = useState<NewSkill>({
     name: "",
     category: "",
     description: "",
     evidence: ""
   });
 
-  // Fetch dashboard data
   useEffect(() => {
-    async function fetchDashboardData() {
-      try {
-        const response = await fetch('/api/dashboard');
-        const result = await response.json();
-        
-        if (result.success) {
-          setData(result);
-        } else {
-          toast({
-            title: "Error",
-            description: "Failed to load dashboard data",
-            variant: "destructive",
-          });
-        }
-      } catch (error) {
-        console.error('Error fetching dashboard data:', error);
-        toast({
-          title: "Error",
-          description: "Failed to connect to server",
-          variant: "destructive",
-        });
-      } finally {
-        setLoading(false);
-      }
+    if (user) {
+      loadDashboardData();
     }
+  }, [user]);
 
-    fetchDashboardData();
-  }, []);
+  const loadDashboardData = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/dashboard');
+      const result = await response.json();
+      
+      if (result.success) {
+        setData(result);
+      } else {
+        toast.error("Failed to load dashboard data");
+      }
+    } catch (error) {
+      console.error('Error loading dashboard:', error);
+      toast.error("Failed to connect to server");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleAddSkill = async () => {
     if (!newSkill.name || !newSkill.category || !newSkill.description) {
-      toast({
-        title: "Error",
-        description: "Please fill in all required fields",
-        variant: "destructive",
-      });
+      toast.error("Please fill in all required fields");
+      return;
+    }
+
+    if (!user) {
+      toast.error("Please log in with Civic to create skills");
       return;
     }
 
     setIsAddingSkill(true);
 
     try {
+      toast.loading("Creating skill and minting NFT...");
+
+      const networkConfig = getNetworkConfig();
+      
       const response = await fetch('/api/skills', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(newSkill),
+        body: JSON.stringify({
+          ...newSkill,
+          walletAddress: user.wallet?.address || user.id,
+          tokenId: null,
+          transactionHash: null,
+          blockNumber: null,
+          contractAddress: networkConfig.SkillNFT
+        }),
       });
 
       const result = await response.json();
 
       if (result.success) {
-        toast({
-          title: "Success!",
-          description: "Skill added successfully",
-        });
+        // Show success toast with transaction link if available
+        if (result.transactionHash) {
+          toast.success("Skill created successfully!", {
+            description: `NFT minted! View on Sepolia: https://sepolia.etherscan.io/tx/${result.transactionHash}`,
+            duration: 10000,
+          });
+        } else {
+          toast.success("Skill created successfully!");
+        }
         
         // Reset form and close dialog
         setNewSkill({ name: "", category: "", description: "", evidence: "" });
         setIsDialogOpen(false);
         
         // Refresh dashboard data
-        const dashResponse = await fetch('/api/dashboard');
-        const dashResult = await dashResponse.json();
-        if (dashResult.success) {
-          setData(dashResult);
-        }
+        await loadDashboardData();
       } else {
-        toast({
-          title: "Error",
-          description: result.error || "Failed to add skill",
-          variant: "destructive",
-        });
+        toast.error(result.error || "Failed to create skill");
       }
     } catch (error) {
       console.error('Error adding skill:', error);
-      toast({
-        title: "Error",
-        description: "Failed to add skill",
-        variant: "destructive",
-      });
+      toast.error("Failed to create skill. Please try again.");
     } finally {
       setIsAddingSkill(false);
     }
   };
 
-  if (loading) {
+  // Show loading if checking authentication
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-black relative overflow-hidden flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="w-8 h-8 animate-spin text-purple-400 mx-auto mb-4" />
-          <p className="text-white text-lg">Loading dashboard...</p>
+          <p className="text-white text-lg">Loading...</p>
         </div>
       </div>
     );
   }
 
-  if (!data) {
+  // Show login required if not authenticated
+  if (!user) {
     return (
       <div className="min-h-screen bg-black relative overflow-hidden flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-red-400 text-lg">Failed to load dashboard data</p>
+        <div className="text-center max-w-md mx-auto p-8">
+          <Wallet className="w-16 h-16 text-purple-400 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-white mb-4">Authentication Required</h2>
+          <p className="text-gray-400 mb-6">
+            Please log in with Civic to access your dashboard and manage your skills.
+          </p>
+          <Button 
+            onClick={() => window.location.href = '/'}
+            className="bg-purple-600 hover:bg-purple-700 text-white"
+          >
+            Go to Login
+          </Button>
         </div>
       </div>
     );

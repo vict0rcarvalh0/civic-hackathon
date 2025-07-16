@@ -9,7 +9,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
+import { useUser } from "@civic/auth-web3/react";
 import { 
   Wallet, 
   Search, 
@@ -47,62 +48,133 @@ interface EndorsementForm {
   evidence: string;
 }
 
-export default function WalletPage() {
+export default function InvestPage() {
+  const { user, isLoading } = useUser();
   const [skills, setSkills] = useState<SkillForEndorsement[]>([]);
   const [filteredSkills, setFilteredSkills] = useState<SkillForEndorsement[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isEndorsing, setIsEndorsing] = useState(false);
-  const [selectedSkill, setSelectedSkill] = useState<SkillForEndorsement | null>(null);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  
-  // Filter and search state
   const [searchTerm, setSearchTerm] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState("all");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [sortBy, setSortBy] = useState("endorsements");
-  
-  // Endorsement form state
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [sortBy, setSortBy] = useState("newest");
+
+  // Endorsement modal state
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedSkill, setSelectedSkill] = useState<SkillForEndorsement | null>(null);
   const [endorsementForm, setEndorsementForm] = useState<EndorsementForm>({
     skillId: "",
     stakedAmount: "",
     evidence: ""
   });
+  const [isEndorsing, setIsEndorsing] = useState(false);
 
-  // Fetch skills available for endorsement
   useEffect(() => {
-    async function fetchSkills() {
-      try {
-        setLoading(true);
-        const response = await fetch('/api/skills/endorsable');
-        const result = await response.json();
-        
-        if (result.success) {
-          setSkills(result.skills);
-          setFilteredSkills(result.skills);
-        } else {
-          toast({
-            title: "Error",
-            description: "Failed to load skills",
-            variant: "destructive",
-          });
-        }
-      } catch (error) {
-        console.error('Error fetching skills:', error);
-        toast({
-          title: "Error",
-          description: "Failed to connect to server",
-          variant: "destructive",
-        });
-      } finally {
-        setLoading(false);
+    if (user) {
+      loadSkillsForEndorsement();
+    }
+  }, [user]);
+
+  useEffect(() => {
+    filterAndSortSkills();
+  }, [skills, searchTerm, selectedCategory, sortBy]);
+
+  const loadSkillsForEndorsement = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/skills/endorsable');
+      const result = await response.json();
+      
+      if (result.success) {
+        setSkills(result.skills);
+      } else {
+        toast.error("Failed to load skills");
       }
+    } catch (error) {
+      console.error('Error fetching skills:', error);
+      toast.error("Failed to load skills");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEndorseClick = (skill: SkillForEndorsement) => {
+    setSelectedSkill(skill);
+    setEndorsementForm({
+      skillId: skill.id,
+      stakedAmount: "",
+      evidence: ""
+    });
+    setIsDialogOpen(true);
+  };
+
+  const handleSubmitEndorsement = async () => {
+    if (!endorsementForm.stakedAmount || !selectedSkill) {
+      toast.error("Please enter a stake amount");
+      return;
     }
 
-    fetchSkills();
-  }, []);
+    if (!user) {
+      toast.error("Please log in with Civic to endorse skills");
+      return;
+    }
 
-  // Filter and search logic
-  useEffect(() => {
+    const amount = parseFloat(endorsementForm.stakedAmount);
+    if (isNaN(amount) || amount <= 0) {
+      toast.error("Please enter a valid stake amount");
+      return;
+    }
+
+    setIsEndorsing(true);
+
+    try {
+      toast.loading("Staking tokens and submitting endorsement...");
+
+      const response = await fetch('/api/endorsements', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          skillId: endorsementForm.skillId,
+          stakedAmount: amount,
+          evidence: endorsementForm.evidence,
+          endorserWallet: user.wallet?.address || user.id,
+          transactionHash: null,
+          blockNumber: null
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        // Show success toast with transaction link if available
+        if (result.transactionHash) {
+          toast.success("Endorsement submitted successfully!", {
+            description: `Tokens staked! View on Sepolia: https://sepolia.etherscan.io/tx/${result.transactionHash}`,
+            duration: 10000,
+          });
+        } else {
+          toast.success("Endorsement submitted successfully!");
+        }
+        
+        // Reset form and close dialog
+        setEndorsementForm({ skillId: "", stakedAmount: "", evidence: "" });
+        setIsDialogOpen(false);
+        setSelectedSkill(null);
+        
+        // Refresh skills data
+        await loadSkillsForEndorsement();
+      } else {
+        toast.error(result.error || "Failed to submit endorsement");
+      }
+    } catch (error) {
+      console.error('Error submitting endorsement:', error);
+      toast.error("Failed to submit endorsement. Please try again.");
+    } finally {
+      setIsEndorsing(false);
+    }
+  };
+
+  const filterAndSortSkills = () => {
     let filtered = skills;
 
     // Search filter
@@ -116,17 +188,8 @@ export default function WalletPage() {
     }
 
     // Category filter
-    if (categoryFilter !== "all") {
-      filtered = filtered.filter(skill => skill.category === categoryFilter);
-    }
-
-    // Status filter
-    if (statusFilter !== "all") {
-      if (statusFilter === "verified") {
-        filtered = filtered.filter(skill => skill.verified);
-      } else if (statusFilter === "pending") {
-        filtered = filtered.filter(skill => !skill.verified);
-      }
+    if (selectedCategory !== "all") {
+      filtered = filtered.filter(skill => skill.category === selectedCategory);
     }
 
     // Sort
@@ -146,95 +209,45 @@ export default function WalletPage() {
     });
 
     setFilteredSkills(filtered);
-  }, [skills, searchTerm, categoryFilter, statusFilter, sortBy]);
-
-  const handleEndorseClick = (skill: SkillForEndorsement) => {
-    setSelectedSkill(skill);
-    setEndorsementForm({
-      skillId: skill.id,
-      stakedAmount: "",
-      evidence: ""
-    });
-    setIsDialogOpen(true);
-  };
-
-  const handleSubmitEndorsement = async () => {
-    if (!endorsementForm.stakedAmount || !selectedSkill) {
-      toast({
-        title: "Error",
-        description: "Please enter a stake amount",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const amount = parseFloat(endorsementForm.stakedAmount);
-    if (isNaN(amount) || amount <= 0) {
-      toast({
-        title: "Error",
-        description: "Please enter a valid stake amount",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsEndorsing(true);
-
-    try {
-      const response = await fetch('/api/endorsements', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          skillId: endorsementForm.skillId,
-          stakedAmount: amount,
-          evidence: endorsementForm.evidence
-        }),
-      });
-
-      const result = await response.json();
-
-      if (result.success) {
-        toast({
-          title: "Success!",
-          description: "Endorsement submitted successfully",
-        });
-        
-        // Reset form and close dialog
-        setEndorsementForm({ skillId: "", stakedAmount: "", evidence: "" });
-        setIsDialogOpen(false);
-        setSelectedSkill(null);
-        
-        // Refresh skills data
-        const refreshResponse = await fetch('/api/skills/endorsable');
-        const refreshResult = await refreshResponse.json();
-        if (refreshResult.success) {
-          setSkills(refreshResult.skills);
-        }
-      } else {
-        toast({
-          title: "Error",
-          description: result.error || "Failed to submit endorsement",
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      console.error('Error submitting endorsement:', error);
-      toast({
-        title: "Error",
-        description: "Failed to submit endorsement",
-        variant: "destructive",
-      });
-    } finally {
-      setIsEndorsing(false);
-    }
   };
 
   const getUniqueCategories = () => {
     const categories = [...new Set(skills.map(skill => skill.category))];
     return categories.sort();
   };
+
+  // Show loading if checking authentication
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-black relative overflow-hidden flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin text-purple-400 mx-auto mb-4" />
+          <p className="text-white text-lg">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show login required if not authenticated
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-black relative overflow-hidden flex items-center justify-center">
+        <div className="text-center max-w-md mx-auto p-8">
+          <Wallet className="w-16 h-16 text-purple-400 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-white mb-4">Authentication Required</h2>
+          <p className="text-gray-400 mb-6">
+            Please log in with Civic to access skill investment features and endorse skills.
+          </p>
+          <Button 
+            onClick={() => window.location.href = '/'}
+            className="bg-purple-600 hover:bg-purple-700 text-white"
+          >
+            Go to Login
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
@@ -279,6 +292,33 @@ export default function WalletPage() {
             </p>
           </div>
 
+          {/* User Stats */}
+          <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-4">
+                  <div className="w-12 h-12 bg-purple-600 rounded-full flex items-center justify-center">
+                    <Wallet className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-white">Civic Wallet</h3>
+                    <p className="text-gray-400 font-mono">{user.wallet?.address || "Connected via Civic"}</p>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-6">
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-purple-400">{user.wallet?.balance || "0"}</p>
+                    <p className="text-sm text-gray-400">REPR Tokens</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-blue-400">{user.reputation || "0"}</p>
+                    <p className="text-sm text-gray-400">Reputation Score</p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Filters and Search */}
           <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
             <CardContent className="p-6">
@@ -300,7 +340,7 @@ export default function WalletPage() {
                 {/* Category Filter */}
                 <div>
                   <Label className="text-white mb-2 block">Category</Label>
-                  <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                  <Select value={selectedCategory} onValueChange={setSelectedCategory}>
                     <SelectTrigger className="bg-white/5 border-white/10 text-white">
                       <SelectValue />
                     </SelectTrigger>
@@ -316,7 +356,7 @@ export default function WalletPage() {
                 {/* Status Filter */}
                 <div>
                   <Label className="text-white mb-2 block">Status</Label>
-                  <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <Select value={selectedCategory} onValueChange={setSelectedCategory}>
                     <SelectTrigger className="bg-white/5 border-white/10 text-white">
                       <SelectValue />
                     </SelectTrigger>
@@ -354,7 +394,7 @@ export default function WalletPage() {
                 <Wallet className="w-16 h-16 text-gray-600 mx-auto mb-4" />
                 <h3 className="text-xl font-semibold text-white mb-2">No Skills Found</h3>
                 <p className="text-gray-400">
-                  {searchTerm || categoryFilter !== "all" || statusFilter !== "all"
+                  {searchTerm || selectedCategory !== "all"
                     ? "Try adjusting your filters to see more results."
                     : "No skills available for endorsement at the moment."}
                 </p>

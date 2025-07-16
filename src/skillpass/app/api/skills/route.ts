@@ -6,7 +6,7 @@ import { eq, and, desc } from 'drizzle-orm'
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { name, category, description, evidence } = body
+    const { name, category, description, evidence, walletAddress, tokenId, transactionHash, blockNumber, contractAddress } = body
 
     // Validate required fields
     if (!name || !category || !description) {
@@ -16,30 +16,44 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // For now, we'll use a demo user since we don't have auth yet
-    // In a real app, you'd get this from the session/auth token
-    const demoUserId = 'demo-user-' + Date.now()
-    const demoWalletAddress = '0x' + Math.random().toString(16).substr(2, 40)
+    // For blockchain integration, we expect these fields from the frontend
+    const userId = walletAddress || 'demo-user-' + Date.now()
+    const userWallet = walletAddress || '0x' + Math.random().toString(16).substr(2, 40)
+
+    // Create metadata URI
+    const metadata = {
+      name,
+      description,
+      category,
+      image: "https://skillpass.app/placeholder-skill.png",
+      attributes: [
+        { trait_type: "Category", value: category },
+        { trait_type: "Verified", value: false },
+        { trait_type: "Created", value: new Date().toISOString() }
+      ]
+    }
+    
+    const metadataUri = `data:application/json,${encodeURIComponent(JSON.stringify(metadata))}`
 
     // Create the skill
     const newSkill = {
       id: nanoid(),
-      userId: demoUserId,
-      walletAddress: demoWalletAddress,
+      userId: userId,
+      walletAddress: userWallet,
       category,
       name,
       description,
       evidence: evidence ? { portfolio: [evidence] } : null,
-      tokenId: null, // Will be set when minted on blockchain
-      contractAddress: null,
-      blockNumber: null,
-      transactionHash: null,
+      tokenId: tokenId?.toString() || null, // From blockchain mint
+      contractAddress: contractAddress || null, // SkillNFT contract address
+      blockNumber: blockNumber || null,
+      transactionHash: transactionHash || null,
       ipfsHash: null,
-      metadataUri: null,
+      metadataUri: metadataUri,
       totalStaked: '0',
       endorsementCount: 0,
       verified: false,
-      status: 'pending',
+      status: tokenId ? 'active' : 'pending', // Active if minted on blockchain
       createdAt: new Date(),
       updatedAt: new Date()
     }
@@ -49,45 +63,51 @@ export async function POST(request: NextRequest) {
 
     // Create or update user profile if it doesn't exist
     try {
-      await db.insert(userProfiles).values({
-        id: demoUserId,
-        walletAddress: demoWalletAddress,
-        displayName: 'Demo User',
-        bio: 'Demo user for testing skills functionality',
-        avatar: null,
-        website: null,
-        twitter: null,
-        linkedin: null,
-        reputationScore: '1000',
-        totalSkills: 1,
-        totalEndorsements: 0,
-        verifiedSkills: 0,
-        lastActive: new Date(),
-        joinedAt: new Date(),
-        createdAt: new Date(),
-        updatedAt: new Date()
-      })
-    } catch (error) {
-      // User might already exist, that's fine
-      console.log('User might already exist, continuing...')
+      const existingProfile = await db.select().from(userProfiles).where(eq(userProfiles.walletAddress, userWallet)).limit(1)
+      
+      if (existingProfile.length === 0) {
+        await db.insert(userProfiles).values({
+          id: nanoid(),
+          walletAddress: userWallet,
+          displayName: `User ${userWallet.slice(-6)}`,
+          bio: '',
+          avatar: null,
+          website: null,
+          twitter: null,
+          linkedin: null,
+          reputationScore: '0',
+          totalSkills: 1,
+          totalEndorsements: 0,
+          verifiedSkills: 0,
+          lastActive: new Date(),
+          joinedAt: new Date(),
+          createdAt: new Date(),
+          updatedAt: new Date()
+        })
+      } else {
+        // Update skills count
+        await db.update(userProfiles)
+          .set({ 
+            totalSkills: (existingProfile[0].totalSkills || 0) + 1,
+            updatedAt: new Date()
+          })
+          .where(eq(userProfiles.walletAddress, userWallet))
+      }
+    } catch (profileError) {
+      console.error('Error updating user profile:', profileError)
+      // Don't fail the skill creation if profile update fails
     }
 
     return NextResponse.json({
       success: true,
-      skill: {
-        id: newSkill.id,
-        name: newSkill.name,
-        category: newSkill.category,
-        description: newSkill.description,
-        status: newSkill.status
-      },
-      message: 'Skill added successfully!'
+      skill: newSkill,
+      message: 'Skill created successfully'
     })
 
   } catch (error) {
     console.error('Error creating skill:', error)
     return NextResponse.json(
-      { success: false, error: 'Failed to create skill. Please try again.' },
+      { success: false, error: 'Internal server error' },
       { status: 500 }
     )
   }

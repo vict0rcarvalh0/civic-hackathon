@@ -1,17 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db, endorsements, skills, userProfiles } from '@/lib/db'
 import { nanoid } from 'nanoid'
-import { eq, sql } from 'drizzle-orm'
+import { eq, sql, and } from 'drizzle-orm'
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { skillId, stakedAmount, evidence } = body
+    const { skillId, stakedAmount, evidence, endorserWallet, transactionHash, blockNumber } = body
 
     // Validate required fields
-    if (!skillId || !stakedAmount) {
+    if (!skillId || !stakedAmount || !endorserWallet) {
       return NextResponse.json(
-        { success: false, error: 'Skill ID and staked amount are required' },
+        { success: false, error: 'Skill ID, staked amount, and endorser wallet are required' },
         { status: 400 }
       )
     }
@@ -39,21 +39,16 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // For now, create a demo endorser since we don't have auth yet
-    // In a real app, you'd get this from the session/auth token
-    const demoEndorserId = 'endorser-' + Date.now()
-    const demoEndorserWallet = '0x' + Math.random().toString(16).substr(2, 40)
-
     // Create the endorsement
     const newEndorsement = {
       id: nanoid(),
       skillId: skillId,
-      endorserId: demoEndorserId,
-      endorserWallet: demoEndorserWallet,
+      endorserId: endorserWallet, // Use wallet address as ID for blockchain integration
+      endorserWallet: endorserWallet,
       stakedAmount: amount.toString(),
       evidence: evidence || null,
-      transactionHash: null, // Will be set when blockchain transaction is made
-      blockNumber: null,
+      transactionHash: transactionHash || null, // From blockchain transaction
+      blockNumber: blockNumber || null,
       active: true,
       challenged: false,
       resolved: false,
@@ -74,46 +69,59 @@ export async function POST(request: NextRequest) {
       })
       .where(eq(skills.id, skillId))
 
-    // Create or update endorser profile if it doesn't exist
+    // Update or create endorser profile
     try {
-      await db.insert(userProfiles).values({
-        id: demoEndorserId,
-        walletAddress: demoEndorserWallet,
-        displayName: 'Demo Endorser',
-        bio: 'Demo endorser for testing endorsement functionality',
-        avatar: null,
-        website: null,
-        twitter: null,
-        linkedin: null,
-        reputationScore: '850',
-        totalSkills: 0,
-        totalEndorsements: 1,
-        verifiedSkills: 0,
-        lastActive: new Date(),
-        joinedAt: new Date(),
-        createdAt: new Date(),
-        updatedAt: new Date()
-      })
-    } catch (error) {
-      // User might already exist, that's fine
-      console.log('Endorser profile might already exist, continuing...')
+      const existingProfile = await db
+        .select()
+        .from(userProfiles)
+        .where(eq(userProfiles.walletAddress, endorserWallet))
+        .limit(1)
+      
+      if (existingProfile.length === 0) {
+        await db.insert(userProfiles).values({
+          id: nanoid(),
+          walletAddress: endorserWallet,
+          displayName: `User ${endorserWallet.slice(-6)}`,
+          bio: '',
+          avatar: null,
+          website: null,
+          twitter: null,
+          linkedin: null,
+          reputationScore: '0',
+          totalSkills: 0,
+          totalEndorsements: 1,
+          verifiedSkills: 0,
+          lastActive: new Date(),
+          joinedAt: new Date(),
+          createdAt: new Date(),
+          updatedAt: new Date()
+        })
+      } else {
+        // Update endorsement count
+        await db
+          .update(userProfiles)
+          .set({
+            totalEndorsements: (existingProfile[0].totalEndorsements || 0) + 1,
+            lastActive: new Date(),
+            updatedAt: new Date()
+          })
+          .where(eq(userProfiles.walletAddress, endorserWallet))
+      }
+    } catch (profileError) {
+      console.error('Error updating endorser profile:', profileError)
+      // Don't fail the endorsement if profile update fails
     }
 
     return NextResponse.json({
       success: true,
-      endorsement: {
-        id: newEndorsement.id,
-        skillId: newEndorsement.skillId,
-        stakedAmount: newEndorsement.stakedAmount,
-        evidence: newEndorsement.evidence
-      },
-      message: 'Endorsement submitted successfully!'
+      endorsement: newEndorsement,
+      message: 'Endorsement created successfully'
     })
 
   } catch (error) {
     console.error('Error creating endorsement:', error)
     return NextResponse.json(
-      { success: false, error: 'Failed to create endorsement. Please try again.' },
+      { success: false, error: 'Internal server error' },
       { status: 500 }
     )
   }
