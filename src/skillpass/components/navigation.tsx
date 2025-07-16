@@ -51,6 +51,12 @@ export default function Navigation() {
               >
                 Dashboard
               </Link>
+              <Link
+                href="/demo"
+                className="text-gray-300 hover:text-white transition-colors font-medium"
+              >
+                Web3 Demo
+              </Link>
               <ChainSelector />
               <AuthButton />
             </div>
