@@ -13,6 +13,8 @@
     "db:seed": "npx tsx lib/seed.ts",
     "db:setup": "npx tsx scripts/setup-db.ts",
     "db:reset": "drizzle-kit drop && npm run db:setup",
+    "db:test": "npx tsx lib/test-db.ts",
+    "db:init": "./scripts/init-database.sh",
     "docker:up": "docker-compose up -d",
     "docker:down": "docker-compose down",
     "docker:logs": "docker-compose logs -f postgres"
@@ -60,6 +62,7 @@
     "clsx": "^2.1.1",
     "cmdk": "1.0.4",
     "date-fns": "4.1.0",
+    "dotenv": "^17.2.0",
     "drizzle-kit": "^0.31.4",
     "drizzle-orm": "^0.44.3",
     "embla-carousel-react": "8.5.1",

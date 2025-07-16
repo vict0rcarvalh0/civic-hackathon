@@ -16,6 +16,7 @@ interface LeaderboardSkill {
   avgRating: number;
   growth: string;
   verified: boolean;
+  status?: string;
 }
 
 interface LeaderboardUser {
@@ -173,9 +174,13 @@ export default function LeaderboardPage() {
                                 <Badge variant="outline" className="border-purple-500/30 text-purple-300">
                                   {skill.category}
                                 </Badge>
-                                {skill.verified && (
+                                {skill.verified ? (
                                   <Badge className="bg-green-600/20 text-green-300 border-green-500/30">
                                     Verified
+                                  </Badge>
+                                ) : (
+                                  <Badge className="bg-yellow-600/20 text-yellow-300 border-yellow-500/30">
+                                    Pending
                                   </Badge>
                                 )}
                               </div>

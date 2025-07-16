@@ -8,12 +8,36 @@ export async function GET(request: NextRequest) {
     const userId = searchParams.get('userId')
     
     if (!userId) {
-      // Return demo user data if no userId provided
-      const demoStats = {
-        totalSkills: 12,
-        endorsements: 47,
-        reputation: 8.4,
-        rank: 23
+      // Calculate real stats from database instead of using demo data
+      
+      // Get all skills count
+      const totalSkillsResult = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(skills)
+      const totalSkills = totalSkillsResult[0]?.count || 0
+
+      // Get total endorsements count
+      const totalEndorsementsResult = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(endorsements)
+      const totalEndorsements = totalEndorsementsResult[0]?.count || 0
+
+      // Calculate average reputation from all users
+      const avgReputationResult = await db
+        .select({ 
+          avgRep: sql<number>`COALESCE(AVG(CAST(reputation_score AS NUMERIC)), 0)` 
+        })
+        .from(userProfiles)
+      const avgReputation = Number((avgReputationResult[0]?.avgRep || 0) / 100) // Convert to 0-10 scale
+
+      // Calculate a demo rank based on average
+      const demoRank = Math.max(1, Math.floor(totalSkills / 2))
+
+      const calculatedStats = {
+        totalSkills: Number(totalSkills),
+        endorsements: Number(totalEndorsements),
+        reputation: Number(avgReputation.toFixed(1)),
+        rank: demoRank
       }
       
       // Get some sample skills from database
@@ -24,12 +48,12 @@ export async function GET(request: NextRequest) {
           category: skills.category,
           description: skills.description,
           endorsementCount: skills.endorsementCount,
-          verified: skills.verified
+          verified: skills.verified,
+          status: skills.status
         })
         .from(skills)
-        .where(eq(skills.verified, true))
-        .orderBy(desc(skills.endorsementCount))
-        .limit(4)
+        .orderBy(desc(skills.verified), desc(skills.endorsementCount))
+        .limit(8)
 
       // Get recent endorsements
       const recentEndorsements = await db
@@ -49,14 +73,15 @@ export async function GET(request: NextRequest) {
 
       return NextResponse.json({
         success: true,
-        stats: demoStats,
+        stats: calculatedStats,
         skills: sampleSkills.map(skill => ({
           id: skill.id,
           name: skill.name,
           category: skill.category,
           level: (skill.endorsementCount ?? 0) > 10 ? 'Expert' : (skill.endorsementCount ?? 0) > 5 ? 'Advanced' : 'Intermediate',
           endorsements: skill.endorsementCount ?? 0,
-          verified: skill.verified
+          verified: skill.verified,
+          status: skill.status
         })),
         recentEndorsements: recentEndorsements.map(endorsement => ({
           skill: endorsement.skillName,
@@ -93,11 +118,12 @@ export async function GET(request: NextRequest) {
         description: skills.description,
         endorsementCount: skills.endorsementCount,
         verified: skills.verified,
+        status: skills.status,
         totalStaked: skills.totalStaked
       })
       .from(skills)
       .where(eq(skills.userId, userId))
-      .orderBy(desc(skills.endorsementCount))
+      .orderBy(desc(skills.verified), desc(skills.endorsementCount))
 
     // Get recent endorsements for user's skills
     const userEndorsements = await db
@@ -130,7 +156,8 @@ export async function GET(request: NextRequest) {
         category: skill.category,
         level: (skill.endorsementCount ?? 0) > 10 ? 'Expert' : (skill.endorsementCount ?? 0) > 5 ? 'Advanced' : 'Intermediate',
         endorsements: skill.endorsementCount ?? 0,
-        verified: skill.verified
+        verified: skill.verified,
+        status: skill.status
       })),
       recentEndorsements: userEndorsements.map(endorsement => ({
         skill: endorsement.skillName,

@@ -19,6 +19,7 @@ export async function GET(request: NextRequest) {
           endorsementCount: skills.endorsementCount,
           totalStaked: skills.totalStaked,
           verified: skills.verified,
+          status: skills.status,
           // Calculate average rating (simplified - using endorsement count as proxy)
           avgRating: sql<number>`CASE 
             WHEN ${skills.endorsementCount} = 0 THEN 0 
@@ -28,8 +29,7 @@ export async function GET(request: NextRequest) {
           growth: sql<string>`CONCAT('+', (${skills.endorsementCount} + 5)::text, '%')`
         })
         .from(skills)
-        .where(eq(skills.verified, true))
-        .orderBy(desc(skills.endorsementCount), desc(skills.totalStaked))
+        .orderBy(desc(skills.verified), desc(skills.endorsementCount), desc(skills.totalStaked))
         .limit(limit)
 
       return NextResponse.json({
@@ -41,7 +41,8 @@ export async function GET(request: NextRequest) {
           endorsements: skill.endorsementCount,
           avgRating: Number(skill.avgRating?.toFixed(1)) || 8.0,
           growth: skill.growth,
-          verified: skill.verified
+          verified: skill.verified,
+          status: skill.status
         }))
       })
     } 

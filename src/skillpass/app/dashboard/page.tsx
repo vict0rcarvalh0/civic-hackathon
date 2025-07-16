@@ -36,6 +36,7 @@ interface Skill {
   level: string;
   endorsements: number;
   verified: boolean;
+  status?: string;
 }
 
 interface RecentEndorsement {
@@ -359,9 +360,13 @@ export default function DashboardPage() {
                             <Badge variant="secondary" className="bg-purple-600/20 text-purple-300 border-purple-500/30">
                               {skill.category}
                             </Badge>
-                            {skill.verified && (
+                            {skill.verified ? (
                               <Badge className="bg-green-600/20 text-green-300 border-green-500/30">
                                 Verified
+                              </Badge>
+                            ) : (
+                              <Badge className="bg-yellow-600/20 text-yellow-300 border-yellow-500/30">
+                                Pending
                               </Badge>
                             )}
                           </div>
