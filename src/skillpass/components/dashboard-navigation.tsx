@@ -38,7 +38,7 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import Link from "next/link"
 import ChainSelector from "./chain-selector"
-import AuthButton from "./AuthButton"
+import AuthButton from "./auth-button"
 import { useUser } from "@civic/auth-web3/react"
 
 export default function DashboardNavigation() {

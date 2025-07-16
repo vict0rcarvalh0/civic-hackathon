@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Menu, X, Briefcase } from "lucide-react"
 import Link from "next/link"
-import AuthButton from "./AuthButton"
+import AuthButton from "./auth-button"
 import ChainSelector from "./chain-selector"
 
 export default function Navigation() {

@@ -58,7 +58,7 @@ export async function copyText(value: string): Promise<boolean> {
 }
 
 /* ---------- Chain persistence ---------- */
-export const SELECTED_CHAIN_KEY = "authora.selectedChain"
+export const SELECTED_CHAIN_KEY = "skillpass.selectedChain"
 
 export function saveSelectedChain(id: string | null) {
   try {

@@ -45,7 +45,7 @@ const CHAINS: readonly (EvmChain | SolanaChain)[] = [
 function broadcastChain(val: string) {
   try {
     window.dispatchEvent(
-      new CustomEvent("authora.chainChanged", { detail: val }),
+      new CustomEvent("skillpass.chainChanged", { detail: val }),
     )
   } catch {}
 }
