@@ -1,3 +1,5 @@
+<img src="assets/mockup.png">
+
 # SkillPass - Decentralized Skills Validation & Investment Platform
 
 SkillPass is a blockchain-based platform for validating professional skills through community endorsements backed by reputation staking. Users can showcase their expertise through soulbound NFT credentials while peers stake their reputation to validate skills and **earn real yield from skill owner job revenue**.
