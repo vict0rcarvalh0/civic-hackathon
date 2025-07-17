@@ -46,32 +46,35 @@ Credential and endorsement system with third-party reputation staking **plus rea
 - MetaMask: Users need MetaMask for blockchain interactions
 - Sepolia Network: App automatically prompts network switching
 
-### 1. Environment Setup
-
-Create a `.env` file in the project root:
+### 1. Clone the repository:
+```bash
+git clone https://github.com/vict0rcarvalh0/civic-hackathon.git
+cd src/skillpass
+```
+### 2. Install dependencies:
+This project has some peer dependency conflicts. Use the --force flag to resolve them.
 
 ```bash
-# Database
-DATABASE_URL="postgresql://skillpass_user:skillpass_password@localhost:5432/skillpass_db"
-
-# Civic Auth
-CIVIC_CLIENT_ID="your_civic_client_id"
-
-# Deployed Smart Contracts (Sepolia Testnet)
-NEXT_PUBLIC_REPUTATION_TOKEN_ADDRESS="0x0b01D922072bE2EDe46154120e2791ae389f70c6"
-NEXT_PUBLIC_SKILL_NFT_ADDRESS="0x6E3C6eC404381a0DC312dbe79FDC544e0639427F"
-NEXT_PUBLIC_SKILL_REVENUE_ADDRESS="0xD80B39C6D68d4F137BDb69232d26a88ad26a42E8"
-
-# Next.js
-NEXTAUTH_SECRET="your_nextauth_secret"
-NEXTAUTH_URL="http://localhost:3000"
+npm install --legacy-peer-deps
 ```
 
-### 2. Database Setup
+### 3. Set up environment variables:
+The application requires several environment variables to run correctly.
+
+- Copy the example environment file:
+```bash
+    cp .env.example .env
+```
+
+- Get a Civic Client ID: You need to register your application with Civic to get a Client ID. You can sign up at auth.civic.com.
+
+- Open the .env file and replace YOUR_CIVIC_CLIENT_ID_HERE with your actual Civic Client ID. 
+
+### 4. Database Setup
 
 Start PostgreSQL with Docker:
 ```bash
-npm run docker:up
+sudo docker-compose up -d
 ```
 
 Set up database schema and seed data:
@@ -85,7 +88,7 @@ This will:
 - Create database tables
 - Seed with sample users, skills, and endorsements
 
-### 3. Start Development Server
+### 5. Start Development Server
 
 ```bash
 npm run dev
