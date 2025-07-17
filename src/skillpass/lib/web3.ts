@@ -47,7 +47,7 @@ export async function checkWalletConflicts() {
   return wallets
 }
 
-// Main connection method - bypasses MetaMask extension selector
+// Main connection method
 export async function connectWallet(): Promise<string> {
   console.log("🔍 connectWallet: Starting MetaMask connection...")
   
@@ -252,7 +252,7 @@ export async function switchToCorrectNetwork() {
         params: [{ chainId: chainIdHex }],
       })
       
-      console.log("✅ Network switched successfully")
+      console.log("Network switched successfully")
       return true
     } catch (switchError: any) {
       // If network doesn't exist, add it
@@ -281,17 +281,17 @@ export async function switchToCorrectNetwork() {
       }
     }
   } catch (error: any) {
-    console.error("❌ Failed to switch network:", error)
+    console.error("Failed to switch network:", error)
     throw error
   }
 }
 
 // Check if MetaMask is already connected without prompting user
 export async function isWalletConnected(): Promise<boolean> {
-  console.log("🔍 isWalletConnected: Checking connection status...")
+  console.log("isWalletConnected: Checking connection status...")
   
   if (typeof window === "undefined" || !window.ethereum) {
-    console.log("❌ MetaMask not available")
+    console.log("MetaMask not available")
     return false
   }
 
@@ -305,20 +305,20 @@ export async function isWalletConnected(): Promise<boolean> {
     }
     
     const connected = !!metaMaskProvider.selectedAddress
-    console.log("✅ Wallet connected:", connected, "address:", metaMaskProvider.selectedAddress)
+    console.log("Wallet connected:", connected, "address:", metaMaskProvider.selectedAddress)
     return connected
   } catch (error) {
-    console.error("❌ Error checking wallet connection:", error)
+    console.error("Error checking wallet connection:", error)
     return false
   }
 }
 
 // Get connected address without prompting for connection
 export async function getConnectedAddress(): Promise<string | null> {
-  console.log("🔍 getConnectedAddress: Getting current address...")
+  console.log("getConnectedAddress: Getting current address...")
   
   if (typeof window === "undefined" || !window.ethereum) {
-    console.log("❌ MetaMask not available")
+    console.log("MetaMask not available")
     return null
   }
 
@@ -332,31 +332,31 @@ export async function getConnectedAddress(): Promise<string | null> {
     }
     
     const address = metaMaskProvider.selectedAddress
-    console.log("✅ Current connected address:", address)
+    console.log("Current connected address:", address)
     return address
   } catch (error) {
-    console.error("❌ Error getting connected address:", error)
+    console.error("Error getting connected address:", error)
     return null
   }
 }
 
 export async function getProvider() {
-  console.log("🔍 getProvider: Getting provider...")
+  console.log("getProvider: Getting provider...")
   if (!provider) {
-    console.log("🔍 getProvider: No cached provider, connecting...")
+    console.log("getProvider: No cached provider, connecting...")
     await connectWallet()
   }
-  console.log("✅ getProvider: Provider ready")
+  console.log("getProvider: Provider ready")
   return provider!
 }
 
 export async function getSigner() {
-  console.log("🔍 getSigner: Getting signer...")
+  console.log("getSigner: Getting signer...")
   if (!signer) {
-    console.log("🔍 getSigner: No cached signer, connecting...")
+    console.log("getSigner: No cached signer, connecting...")
     await connectWallet()
   }
-  console.log("✅ getSigner: Signer ready")
+  console.log("getSigner: Signer ready")
   return signer!
 }
 
@@ -366,15 +366,15 @@ export class SkillPassContracts {
   private networkConfig: any
   
   constructor(chainId?: number) {
-    console.log("🔍 SkillPassContracts: Constructor called with chainId:", chainId)
+    console.log("SkillPassContracts: Constructor called with chainId:", chainId)
     this.networkConfig = getNetworkConfig(chainId)
-    console.log("✅ SkillPassContracts: Network config loaded:", this.networkConfig)
+    console.log("SkillPassContracts: Network config loaded:", this.networkConfig)
   }
   
   static getInstance(chainId?: number) {
-    console.log("🔍 SkillPassContracts: Getting instance with chainId:", chainId)
+    console.log("SkillPassContracts: Getting instance with chainId:", chainId)
     if (!SkillPassContracts.instance) {
-      console.log("🔍 SkillPassContracts: Creating new instance...")
+      console.log("SkillPassContracts: Creating new instance...")
       SkillPassContracts.instance = new SkillPassContracts(chainId)
     }
     return SkillPassContracts.instance
@@ -382,8 +382,8 @@ export class SkillPassContracts {
   
   // Get contract instances
   async getReputationToken() {
-    console.log("🔍 getReputationToken: Getting contract instance...")
-    console.log("🔍 getReputationToken: Contract address:", this.networkConfig.ReputationToken)
+    console.log("getReputationToken: Getting contract instance...")
+    console.log("getReputationToken: Contract address:", this.networkConfig.ReputationToken)
     
     // Use provider for read-only operations, no signer needed
     if (!provider) {
@@ -399,13 +399,13 @@ export class SkillPassContracts {
       provider
     )
     
-    console.log("✅ getReputationToken: Contract instance created")
+    console.log("getReputationToken: Contract instance created")
     return contract
   }
   
   async getSkillNFT() {
-    console.log("🔍 getSkillNFT: Getting contract instance...")
-    console.log("🔍 getSkillNFT: Contract address:", this.networkConfig.SkillNFT)
+    console.log("getSkillNFT: Getting contract instance...")
+    console.log("getSkillNFT: Contract address:", this.networkConfig.SkillNFT)
     
     // Use provider for read-only operations, no signer needed
     if (!provider) {
@@ -421,13 +421,13 @@ export class SkillPassContracts {
       provider
     )
     
-    console.log("✅ getSkillNFT: Contract instance created")
+    console.log("getSkillNFT: Contract instance created")
     return contract
   }
   
   async getSkillRevenue() {
-    console.log("🔍 getSkillRevenue: Getting contract instance...")
-    console.log("🔍 getSkillRevenue: Contract address:", this.networkConfig.SkillRevenue)
+    console.log("getSkillRevenue: Getting contract instance...")
+    console.log("getSkillRevenue: Contract address:", this.networkConfig.SkillRevenue)
     
     // Use provider for read-only operations, no signer needed
     if (!provider) {
@@ -443,57 +443,54 @@ export class SkillPassContracts {
       provider
     )
     
-    console.log("✅ getSkillRevenue: Contract instance created")
+    console.log("getSkillRevenue: Contract instance created")
     return contract
   }
   
   // Convenience methods
   async getUserReputation(address: string) {
-    console.log("🔍 getUserReputation: Getting reputation for address:", address)
+    console.log("getUserReputation: Getting reputation for address:", address)
     try {
-      // Skip validation - bypass approach
-      console.log("🔄 getUserReputation: Using bypass approach - skipping validation")
-      
       // Direct provider initialization
       if (!provider) {
-        console.log("🔄 getUserReputation: Initializing provider directly...")
+        console.log("getUserReputation: Initializing provider directly...")
         if (!window.ethereum) {
           throw new Error("MetaMask is not installed")
         }
         provider = new ethers.BrowserProvider(window.ethereum)
-        console.log("✅ getUserReputation: Provider initialized")
+        console.log("getUserReputation: Provider initialized")
       }
       
       // Direct contract access
-      console.log("🔄 getUserReputation: Creating contract directly...")
+      console.log("getUserReputation: Creating contract directly...")
       const reputationToken = new ethers.Contract(
         this.networkConfig.ReputationToken,
         REPUTATION_TOKEN_ABI,
         provider
       )
-      console.log("✅ getUserReputation: Got reputation token contract")
+      console.log("getUserReputation: Got reputation token contract")
       
-      console.log("🔄 getUserReputation: Calling balanceOf...")
+      console.log("getUserReputation: Calling balanceOf...")
       const balance = await reputationToken.balanceOf(address)
-      console.log("🔍 getUserReputation: Balance raw:", balance.toString())
+      console.log("getUserReputation: Balance raw:", balance.toString())
       
-      console.log("🔄 getUserReputation: Calling getReputationScore...")
+      console.log("getUserReputation: Calling getReputationScore...")
       const score = await reputationToken.getReputationScore(address)
-      console.log("🔍 getUserReputation: Score raw:", score.toString())
+      console.log("getUserReputation: Score raw:", score.toString())
       
       const result = {
         balance: ethers.formatEther(balance),
         score: ethers.formatEther(score)
       }
       
-      console.log("✅ getUserReputation: Final result:", result)
+      console.log("getUserReputation: Final result:", result)
       return result
     } catch (error: any) {
-      console.error("❌ getUserReputation: Error:", error)
+      console.error("getUserReputation: Error:", error)
       
-      // Provide more helpful error messages
+      // More helpful error messages
       if (error.code === 'BAD_DATA' || error.message.includes('could not decode result data')) {
-        console.log("🔍 getUserReputation: Contract read failed - likely wrong network")
+        console.log("getUserReputation: Contract read failed - likely wrong network")
         throw new Error(
           `Unable to read from contracts. Please switch to Sepolia Testnet in MetaMask.`
         )
@@ -505,8 +502,8 @@ export class SkillPassContracts {
   
   // MOCK FALLBACK - Returns sample data if RPC fails
   async getUserReputationMock(address: string) {
-    console.log("🎭 getUserReputationMock: Using mock data for demo")
-    console.log("🎭 Address:", address)
+    console.log("getUserReputationMock: Using mock data for demo")
+    console.log("Address:", address)
     
     // Return sample data that looks realistic
     const result = {
@@ -514,64 +511,64 @@ export class SkillPassContracts {
       score: "2500"      // 2500 reputation points
     }
     
-    console.log("🎭 MOCK SUCCESS:", result)
+    console.log("MOCK SUCCESS:", result)
     return result
   }
   
   // SMART FALLBACK - Try RPC first, fall back to mock
   async getUserReputationSmart(address: string) {
-    console.log("🧠 getUserReputationSmart: Trying RPC first, fallback to mock")
+    console.log("getUserReputationSmart: Trying RPC first, fallback to mock")
     
     try {
       // Try the static RPC call first
       const result = await this.getUserReputationStatic(address)
-      console.log("🧠 RPC SUCCESS:", result)
+      console.log("RPC SUCCESS:", result)
       return result
     } catch (error: any) {
-      console.log("🧠 RPC failed, using mock fallback:", error.message)
+      console.log("RPC failed, using mock fallback:", error.message)
       
       // If RPC fails (CORS, network, etc), use mock data
       return await this.getUserReputationMock(address)
     }
   }
   
-  // COMPLETELY STATIC - No MetaMask at all, direct RPC
+  // Direct RPC call
   async getUserReputationStatic(address: string) {
-    console.log("🔥 getUserReputationStatic: STATIC RPC CALL - No MetaMask")
-    console.log("🔥 Address:", address)
-    console.log("🔥 Contract:", this.networkConfig.ReputationToken)
-    console.log("🔥 RPC URL:", this.networkConfig.rpcUrl)
+    console.log("getUserReputationStatic: STATIC RPC CALL - No MetaMask")
+    console.log("Address:", address)
+    console.log("Contract:", this.networkConfig.ReputationToken)
+    console.log("RPC URL:", this.networkConfig.rpcUrl)
     
     try {
       // Use the public RPC URL directly - no MetaMask
-      console.log("🔥 Creating static provider from RPC URL...")
+      console.log("Creating static provider from RPC URL...")
       const staticProvider = new ethers.JsonRpcProvider(this.networkConfig.rpcUrl)
       
-      console.log("🔥 Creating contract with static provider...")
+      console.log("Creating contract with static provider...")
       const contract = new ethers.Contract(
         this.networkConfig.ReputationToken,
         ["function balanceOf(address) view returns (uint256)", "function getReputationScore(address) view returns (uint256)"],
         staticProvider
       )
       
-      console.log("🔥 Static balanceOf call...")
+      console.log("Static balanceOf call...")
       const balance = await contract.balanceOf(address)
-      console.log("🔥 Balance result:", balance.toString())
+      console.log("Balance result:", balance.toString())
       
-      console.log("🔥 Static getReputationScore call...")  
+      console.log("Static getReputationScore call...")  
       const score = await contract.getReputationScore(address)
-      console.log("🔥 Score result:", score.toString())
+      console.log("Score result:", score.toString())
       
       const result = {
         balance: ethers.formatEther(balance),
         score: ethers.formatEther(score)
       }
       
-      console.log("🔥 STATIC SUCCESS:", result)
+      console.log("getUserReputationStatic success:", result)
       return result
       
     } catch (error: any) {
-      console.error("🔥 STATIC FAILED:", error)
+      console.error("getUserReputationStatic failed:", error)
       
       // More specific error handling
       if (error.message?.includes('could not decode result data')) {
@@ -586,12 +583,12 @@ export class SkillPassContracts {
   }
   
   async mintSkill(category: string, name: string, description: string, metadataUri?: string) {
-    console.log("🔍 mintSkill: Starting mint process...")
-    console.log("🔍 mintSkill: Parameters:", { category, name, description, metadataUri })
+    console.log("mintSkill: Starting mint process...")
+    console.log("mintSkill: Parameters:", { category, name, description, metadataUri })
     
     try {
       const skillNFT = await this.getSkillNFTWithSigner()
-      console.log("✅ mintSkill: Got SkillNFT contract with signer")
+      console.log("mintSkill: Got SkillNFT contract with signer")
       
       const uri = metadataUri || `data:application/json,${encodeURIComponent(JSON.stringify({
         name,
@@ -600,23 +597,23 @@ export class SkillPassContracts {
         image: "https://skillpass.app/placeholder-skill.png"
       }))}`
       
-      console.log("🔍 mintSkill: Metadata URI:", uri)
+      console.log("mintSkill: Metadata URI:", uri)
       
-      console.log("🔍 mintSkill: Calling contract.mintSkill()...")
+      console.log("mintSkill: Calling contract.mintSkill()...")
       const tx = await skillNFT.mintSkill(category, name, description, uri)
-      console.log("✅ mintSkill: Transaction sent:", tx.hash)
+      console.log("mintSkill: Transaction sent:", tx.hash)
       
-      console.log("🔍 mintSkill: Waiting for transaction confirmation...")
+      console.log("mintSkill: Waiting for transaction confirmation...")
       const receipt = await tx.wait()
-      console.log("✅ mintSkill: Transaction confirmed:", receipt)
-      console.log("✅ mintSkill: Block number:", receipt.blockNumber)
-      console.log("✅ mintSkill: Gas used:", receipt.gasUsed.toString())
+      console.log("mintSkill: Transaction confirmed:", receipt)
+      console.log("mintSkill: Block number:", receipt.blockNumber)
+      console.log("mintSkill: Gas used:", receipt.gasUsed.toString())
       
       return receipt
     } catch (error: any) {
-      console.error("❌ mintSkill: Error during minting:", error)
-      console.error("❌ mintSkill: Error message:", error.message)
-      console.error("❌ mintSkill: Error stack:", error.stack)
+      console.error("mintSkill: Error during minting:", error)
+      console.error("mintSkill: Error message:", error.message)
+      console.error("mintSkill: Error stack:", error.stack)
       throw error
     }
   }
@@ -662,15 +659,15 @@ export class SkillPassContracts {
     }
   }
   
-  // Keep old endorseSkill method for backward compatibility
+  // Old endorseSkill method for backward compatibility
   async endorseSkill(skillId: string, stakeAmount: string, evidence: string) {
-    console.log("⚠️ endorseSkill: DEPRECATED - Use investInSkill instead")
+    console.log("endorseSkill: DEPRECATED - Now using investInSkill")
     return this.investInSkill(skillId, stakeAmount)
   }
   
   // Helper methods for write operations that need signers
   async getReputationTokenWithSigner() {
-    console.log("🔍 getReputationTokenWithSigner: Getting contract with signer...")
+    console.log("getReputationTokenWithSigner: Getting contract with signer...")
     const signer = await getSigner()
     const contract = new ethers.Contract(
       this.networkConfig.ReputationToken,
@@ -681,7 +678,7 @@ export class SkillPassContracts {
   }
   
   async getSkillNFTWithSigner() {
-    console.log("🔍 getSkillNFTWithSigner: Getting contract with signer...")
+    console.log("getSkillNFTWithSigner: Getting contract with signer...")
     const signer = await getSigner()
     const contract = new ethers.Contract(
       this.networkConfig.SkillNFT,
@@ -692,7 +689,7 @@ export class SkillPassContracts {
   }
   
   async getSkillRevenueWithSigner() {
-    console.log("🔍 getSkillRevenueWithSigner: Getting contract with signer...")
+    console.log("getSkillRevenueWithSigner: Getting contract with signer...")
     const signer = await getSigner()
     const contract = new ethers.Contract(
       this.networkConfig.SkillRevenue,
@@ -703,8 +700,8 @@ export class SkillPassContracts {
   }
   
   async getSkillStakingWithSigner() {
-    console.log("🔍 getSkillStakingWithSigner: Getting contract with signer...")
-    console.log("⚠️ DEPRECATED: Use getSkillRevenueWithSigner instead")
+    console.log("getSkillStakingWithSigner: Getting contract with signer...")
+    console.log("DEPRECATED: Use getSkillRevenueWithSigner instead")
     const signer = await getSigner()
     const contract = new ethers.Contract(
       this.networkConfig.SkillStaking,
