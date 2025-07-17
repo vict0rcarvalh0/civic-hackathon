@@ -190,46 +190,20 @@ Visit [http://localhost:3000](http://localhost:3000) to see your application.
 - Evidence submission and resolution
 - Community governance
 
-## 🗄️ Available Scripts
-
-### Database Management
-```bash
-npm run docker:up          # Start PostgreSQL container
-npm run docker:down        # Stop PostgreSQL container
-npm run docker:logs        # View PostgreSQL logs
-
-npm run db:generate        # Generate Drizzle migrations
-npm run db:migrate         # Apply migrations to database
-npm run db:seed           # Seed database with sample data
-npm run db:setup          # Complete setup (migrate + seed)
-npm run db:reset          # Drop database and rebuild
-npm run db:studio         # Open Drizzle Studio (database GUI)
-```
-
-### Development
-```bash
-npm run dev               # Start development server
-npm run build             # Build for production
-npm run start             # Start production server
-npm run lint              # Run ESLint
-```
-
 ---
 
 ## 🏗️ Architecture
 
 ### Frontend
-- **Next.js 14** with App Router
+- **Next.js** with App Router
 - **TypeScript** for type safety
 - **Tailwind CSS** for styling
 - **shadcn/ui** component library
-- **Dark theme** with glass morphism design
 
 ### Backend
 - **Next.js API Routes** for server logic
 - **Drizzle ORM** for database operations
 - **PostgreSQL** for data persistence
-- **Future blockchain integration** ready
 
 ### Database
 - **PostgreSQL** with comprehensive schema
