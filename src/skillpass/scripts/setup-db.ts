@@ -9,14 +9,6 @@ const execAsync = promisify(exec)
 async function setupDatabase() {
   try {
     console.log('🚀 Setting up SkillPass database...\n')
-    console.log(process.env)
-    
-    // Check if DATABASE_URL is set
-    // if (!process.env.DATABASE_URL) {
-      // console.error('❌ DATABASE_URL environment variable is not set')
-      // console.log('💡 Make sure to set DATABASE_URL in your .env file')
-      // process.exit(1)
-    // }
     
     console.log('📦 Installing dependencies...')
     await execAsync('npm install --force')
