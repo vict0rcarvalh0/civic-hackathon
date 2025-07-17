@@ -1,6 +1,6 @@
-# SkillPass - Decentralized Skills Validation Platform
+# SkillPass - Decentralized Skills Validation & Investment Platform
 
-SkillPass is a blockchain-based platform for validating professional skills through community endorsements backed by reputation staking. Users can showcase their expertise through soulbound NFT credentials while peers stake their reputation to validate skills.
+SkillPass is a blockchain-based platform for validating professional skills through community endorsements backed by reputation staking. Users can showcase their expertise through soulbound NFT credentials while peers stake their reputation to validate skills and **earn real yield from skill owner job revenue**.
 
 ## Real Problem
 
@@ -8,30 +8,33 @@ SkillPass is a blockchain-based platform for validating professional skills thro
 - "Proving" knowledge depends on screenshots or portfolio links.
 - Recommendations/references are centralized and unverifiable.
 - Freelancers face distrust on platforms like Fiverr and Upwork.
+- **No financial incentive for skill validators - just social proof.**
 
 ---
 
-## Solution: SkillPass
+## 💡 Solution: SkillPass 
 
-Credential and endorsement system with third-party reputation staking.
+Credential and endorsement system with third-party reputation staking **plus real investment returns**.
 
 ---
 
-## Use Cases
+## 🎯 Use Cases
 
 - Web3 devs validating technical knowledge with community backing.
 - Translation, design, writing—where social proof matters more than a diploma.
 - Mentors endorsing mentees with skin in the game.
 - Web3 communities filtering who is reputable based on social staking.
+- **Investors earning 15-45% APY from skill owner job completions.**
 
-### How it works
+### 🔄 How it works
 
-1. User logs in with Civic Embedded Wallet and creates their profile.
+1. User logs in with Civic Auth and creates their profile.
 2. Adds skills (e.g., React, Solana dev, designer, translator, etc.).
-3. Other users can "endorse" a skill, staking reputation/tokens to validate.
-4. If the endorsed person commits fraud, the "staker" loses their stake.
-5. Profiles get a dynamic social/professional score, publicly visible.
-6. Everything is recorded in a soulbound NFT with validated skills and endorsements.
+3. Other users can "invest" in a skill, staking REPR tokens to validate.
+4. **Skill owners complete jobs → 7% of revenue shared with investors.**
+5. **Investors earn monthly yield from real skill monetization.**
+6. Profiles get a dynamic social/professional score, publicly visible.
+7. Everything is recorded in a soulbound NFT with validated skills and endorsements.
 
 
 ## 🚀 Quick Start
@@ -50,12 +53,13 @@ Create a `.env` file in the project root:
 # Database
 DATABASE_URL="postgresql://skillpass_user:skillpass_password@localhost:5432/skillpass_db"
 
-# Blockchain (Optional - for future integration)
-ETHEREUM_RPC_URL="your_ethereum_rpc_url"
-PRIVATE_KEY="your_private_key"
-SKILL_NFT_CONTRACT="your_deployed_contract_address"
-REPUTATION_TOKEN_CONTRACT="your_deployed_contract_address"
-SKILL_STAKING_CONTRACT="your_deployed_contract_address"
+# Civic Auth
+CIVIC_CLIENT_ID="your_civic_client_id"
+
+# Deployed Smart Contracts (Sepolia Testnet)
+NEXT_PUBLIC_REPUTATION_TOKEN_ADDRESS="0x0b01D922072bE2EDe46154120e2791ae389f70c6"
+NEXT_PUBLIC_SKILL_NFT_ADDRESS="0x6E3C6eC404381a0DC312dbe79FDC544e0639427F"
+NEXT_PUBLIC_SKILL_REVENUE_ADDRESS="0xD80B39C6D68d4F137BDb69232d26a88ad26a42E8"
 
 # Next.js
 NEXTAUTH_SECRET="your_nextauth_secret"
@@ -101,7 +105,13 @@ Visit [http://localhost:3000](http://localhost:3000) to see your application.
 - Validation status (pending, minted, verified)
 - Evidence (portfolio links, certificates, testimonials)
 
-### Endorsements (`endorsements`)
+### Investments (`investments`) **NEW**
+- Investment tracking (amount, expected yield, APY)
+- Earnings data (total earned, claimed, pending)
+- Performance metrics (jobs completed, monthly revenue)
+- Risk assessment and blockchain transaction data
+
+### Endorsements (`endorsements`) **LEGACY**
 - Staking information (amount staked, endorser details)
 - Evidence and reasoning
 - Blockchain transaction data
@@ -158,22 +168,26 @@ npm run lint              # Run ESLint
 
 ## 🎯 Features
 
-### Current Implementation
-- ✅ User profiles and reputation system
-- ✅ Skills management and categorization
-- ✅ Endorsement tracking and validation
-- ✅ Real-time leaderboards (skills and users)
-- ✅ Dashboard with statistics and activity
-- ✅ Dark theme with modern UI/UX
-- ✅ Database with comprehensive schema
-- ✅ API endpoints for all functionality
+### ✅ Current Implementation
+- User profiles and reputation system
+- Skills management and categorization  
+- **Investment platform with real APY (15-45%)**
+- **Smart contracts deployed on Sepolia testnet**
+- **REPR token integration with MetaMask**
+- **NFT minting for skills**
+- **Revenue sharing from job completions**
+- Real-time leaderboards (skills and users)
+- Dashboard with statistics and activity
+- Dark theme with modern UI/UX
+- Database with comprehensive schema
+- API endpoints for all functionality
+- **Civic Auth Web3 integration**
 
-### Blockchain Integration (Ready)
-- 🔄 Smart contracts for skills NFTs
-- 🔄 Reputation token system
-- 🔄 Staking and challenge mechanisms
-- 🔄 IPFS for metadata storage
-- 🔄 Ethereum/Polygon integration
+### 📋 Future Implementations
+- IPFS for metadata storage
+- Solana Virtual Machine(SVM) support
+- Governance token for platform decisions
+- Advanced dispute resolution mechanisms
 
 ## 📁 Project Structure
 
@@ -182,24 +196,30 @@ src/skillpass/
 ├── app/                          # Next.js App Router
 │   ├── api/                      # API routes
 │   │   ├── dashboard/            # Dashboard data
-│   │   ├── leaderboard/          # Leaderboard data
-│   │   └── skills/               # Skills CRUD
-│   ├── dashboard/                # Dashboard page
-│   ├── leaderboard/              # Leaderboard page
-│   └── layout.tsx                # Root layout
+│   │   ├── investments/          # Investment platform APIs
+│   │   ├── skills/               # Skills CRUD & endorsable
+│   │   └── auth/                 # Civic Auth integration
+│   ├── dashboard/                # Dashboard pages
+│   │   ├── invest/               # Investment interface
+│   │   └── analytics/            # Investment analytics
+│   └── layout.tsx                # Root layout with Civic Auth
 ├── components/                   # React components
 │   ├── ui/                       # shadcn/ui components
+│   ├── skill-detail-dialog.tsx  # Investment skill details
 │   └── navigation.tsx            # Navigation component
-├── lib/                          # Utilities and database
-│   ├── db.ts                     # Database schema and client
-│   ├── seed.ts                   # Database seed data
-│   └── blockchain.ts             # Blockchain integration (ready)
+├── lib/                          # Utilities and integrations
+│   ├── db.ts                     # Database schema (includes investments)
+│   ├── web3.ts                   # Smart contract integration
+│   ├── contracts.ts              # Contract addresses & ABIs
+│   └── seed.ts                   # Database seed data
 ├── scripts/                      # Setup and utility scripts
-│   └── setup-db.ts               # Database setup script
-├── contracts/                    # Smart contracts
-│   ├── SkillNFT.sol             # Skills as NFTs
-│   ├── ReputationToken.sol      # Reputation token
-│   └── SkillStaking.sol         # Staking and challenges
+├── contracts/                    # Smart contracts (Foundry)
+│   ├── src/
+│   │   ├── SkillNFT.sol         # Skills as NFTs
+│   │   ├── ReputationToken.sol  # REPR token
+│   │   └── SkillRevenue.sol     # Investment platform
+│   ├── script/                   # Deployment scripts
+│   └── DEPLOYMENT.md             # Contract deployment guide
 └── docker-compose.yml            # PostgreSQL setup
 ```
 
@@ -239,14 +259,27 @@ The database comes pre-seeded with:
 
 ## 🚀 Deployment
 
-### Database
-- PostgreSQL on cloud provider (AWS RDS, Vercel Postgres, etc.)
-- Update `DATABASE_URL` in production environment
+### 🔴 **Live on Sepolia Testnet**
 
-### Application
-- Deploy to Vercel, Netlify, or similar platform
-- Set environment variables in deployment platform
-- Run migrations: `npm run db:migrate`
+The SkillPass investment platform is **live and functional** on Sepolia testnet:
+
+- **Frontend**: Full investment interface operational
+- **Smart Contracts**: Deployed and verified on Sepolia
+- **Database**: PostgreSQL with investment tracking
+- **Blockchain Integration**: REPR tokens, NFT minting, revenue sharing
+
+**To test the platform:**
+1. Connect MetaMask to Sepolia testnet
+2. Get Sepolia ETH from [faucets](https://sepoliafaucet.com/)
+3. The app will mint you 1M REPR tokens automatically
+4. Create skills, invest in skills, earn real APY!
+
+### 🎯 **Important Setup Notes**
+
+- **MetaMask Required**: Users need MetaMask for blockchain interactions
+- **Sepolia Network**: App automatically prompts network switching
+- **Real Transactions**: All investments are real blockchain transactions
+- **Civic Auth**: Uses Civic Web3 Auth for secure login
 
 ## 🤝 Contributing
 
