@@ -339,9 +339,9 @@ The SkillPass investment platform is **live and functional** on Sepolia testnet:
 - **Smart Contracts**: Deployed and verified on Sepolia
 - **Database**: PostgreSQL with investment tracking
 - **Blockchain Integration**: REPR tokens, NFT minting, revenue sharing
-    - [https://sepolia.etherscan.io/address/0x0b01D922072bE2EDe46154120e2791ae389f70c6] (https://sepolia.etherscan.io/address/0x0b01D922072bE2EDe46154120e2791ae389f70c6)
-    - [https://sepolia.etherscan.io/address/0x6E3C6eC404381a0DC312dbe79FDC544e0639427F] (https://sepolia.etherscan.io/address/0x6E3C6eC404381a0DC312dbe79FDC544e0639427F)
-    - [https://sepolia.etherscan.io/address/0xD80B39C6D68d4F137BDb69232d26a88ad26a42E8] (https://sepolia.etherscan.io/address/0xD80B39C6D68d4F137BDb69232d26a88ad26a42E8)
+    - https://sepolia.etherscan.io/address/0x0b01D922072bE2EDe46154120e2791ae389f70c6
+    - https://sepolia.etherscan.io/address/0x6E3C6eC404381a0DC312dbe79FDC544e0639427F
+    - https://sepolia.etherscan.io/address/0xD80B39C6D68d4F137BDb69232d26a88ad26a42E8
 
 **To test the platform:**
 1. Connect MetaMask to Sepolia testnet
