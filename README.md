@@ -36,6 +36,68 @@ Credential and endorsement system with third-party reputation staking **plus rea
 6. Profiles get a dynamic social/professional score, publicly visible.
 7. Everything is recorded in a soulbound NFT with validated skills and endorsements.
 
+--- 
+
+## Civic Integration
+
+SkillPass uses [Civic Auth](https://docs.civic.com/integration/nextjs#auth-%2B-web3) for secure, Web3-native authentication. Civic enables users to log in with their wallet, verify identity, and access protected features. Here’s how Civic is integrated:
+
+### 1. Civic Auth Plugin Setup
+- Uses `@civic/auth-web3/nextjs` for Next.js.
+- Configured in `next.config.ts`:
+
+```ts
+import { createCivicAuthPlugin } from "@civic/auth-web3/nextjs"
+import type { NextConfig } from "next";
+
+const nextConfig: NextConfig = {
+};
+
+const withCivicAuth = createCivicAuthPlugin({
+  clientId: "YOUR_CIVIC_CLIENT_ID"
+});
+
+export default withCivicAuth(nextConfig)
+```
+- If using JS config, remove the type annotation.
+
+### 2. Frontend Provider
+- The app wraps its layout with the Civic Auth provider:
+
+```tsx
+import { CivicAuthProvider } from "@civic/auth/nextjs";
+
+function Layout({ children }) {
+  return (
+    <CivicAuthProvider>
+      {children}
+    </CivicAuthProvider>
+  );
+}
+```
+
+### 3. User Context & Wallet Registration
+- Uses Civic’s React hooks (`useUser`) to access the authenticated user.
+- On login, user wallet addresses (Ethereum/Solana) are registered via `/api/wallet/register`.
+- If a user doesn’t have a wallet, the app can auto-create one using Civic’s embedded wallet.
+
+### 4. API Route Protection
+- API routes and pages that require authentication use Civic’s session/context to check for a valid user.
+- Example: Only authenticated users can create skills, invest, or endorse.
+
+### 5. Web3 + Auth
+- Civic Auth is used with MetaMask and Solana wallets for seamless Web3 login.
+- The user’s wallet address is used as their unique identifier across the platform and for blockchain actions.
+
+### 6. Session Management
+- Civic handles PKCE, token storage, and session refresh automatically.
+- The backend can access the authenticated user via Civic’s `getUser` helper in API routes.
+
+### 7. Logout & Security
+- Logout is handled via Civic’s logout endpoint, which clears tokens and redirects the user.
+- All sensitive actions (minting, investing, profile updates) require an active Civic session.
+
+---
 
 ## 🚀 Quick Start
 
@@ -96,6 +158,8 @@ npm run dev
 
 Visit [http://localhost:3000](http://localhost:3000) to see your application.
 
+---
+
 ## 📊 Database Schema
 
 ### Users (`user_profiles`)
@@ -150,6 +214,8 @@ npm run start             # Start production server
 npm run lint              # Run ESLint
 ```
 
+---
+
 ## 🏗️ Architecture
 
 ### Frontend
@@ -170,6 +236,8 @@ npm run lint              # Run ESLint
 - **Drizzle migrations** for version control
 - **Seed data** for development and testing
 
+---
+
 ## 🎯 Features
 - User profiles and reputation system
 - Skills management and categorization  
@@ -184,6 +252,8 @@ npm run lint              # Run ESLint
 - Database with comprehensive schema
 - API endpoints for all functionality
 - **Civic Auth Web3 integration**
+
+---
 
 ## 📁 Project Structure
 
@@ -219,6 +289,8 @@ src/skillpass/
 └── docker-compose.yml            # PostgreSQL setup
 ```
 
+---
+
 ## 🔧 Development Workflow
 
 ### Adding New Features
@@ -235,6 +307,8 @@ src/skillpass/
 2. Test with fresh seed data
 3. Verify API endpoints work correctly
 4. Test frontend integration
+
+---
 
 ## Sample Data
 
@@ -253,6 +327,8 @@ The database comes pre-seeded with:
 - Lisa Rodriguez (Product Manager) - 9.1 reputation
 - Alex Thompson (Smart Contract Developer) - 8.9 reputation
 
+---
+
 ## 🚀 Deployment
 
 ### **Live on Sepolia Testnet**
@@ -263,6 +339,9 @@ The SkillPass investment platform is **live and functional** on Sepolia testnet:
 - **Smart Contracts**: Deployed and verified on Sepolia
 - **Database**: PostgreSQL with investment tracking
 - **Blockchain Integration**: REPR tokens, NFT minting, revenue sharing
+    - [https://sepolia.etherscan.io/address/0x0b01D922072bE2EDe46154120e2791ae389f70c6] (https://sepolia.etherscan.io/address/0x0b01D922072bE2EDe46154120e2791ae389f70c6)
+    - [https://sepolia.etherscan.io/address/0x6E3C6eC404381a0DC312dbe79FDC544e0639427F] (https://sepolia.etherscan.io/address/0x6E3C6eC404381a0DC312dbe79FDC544e0639427F)
+    - [https://sepolia.etherscan.io/address/0xD80B39C6D68d4F137BDb69232d26a88ad26a42E8] (https://sepolia.etherscan.io/address/0xD80B39C6D68d4F137BDb69232d26a88ad26a42E8)
 
 **To test the platform:**
 1. Connect MetaMask to Sepolia testnet
