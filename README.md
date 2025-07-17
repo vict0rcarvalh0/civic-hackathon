@@ -323,10 +323,7 @@ The SkillPass investment platform is **live and functional** on Sepolia testnet:
 3. The app will mint you 1M REPR tokens automatically
 4. Create skills, invest in skills, earn real APY!
 
-## 📝 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
 ## 🔗 Links
 
 - [Live Demo](https://www.youtube.com/watch?v=wzw4u-9rCZg)
+- [Frontend Deployed](https://civic-hackathon.vercel.app/)
