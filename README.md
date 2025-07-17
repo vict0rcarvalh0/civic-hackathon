@@ -12,13 +12,13 @@ SkillPass is a blockchain-based platform for validating professional skills thro
 
 ---
 
-## 💡 Solution: SkillPass 
+## Solution: SkillPass 
 
 Credential and endorsement system with third-party reputation staking **plus real investment returns**.
 
 ---
 
-## 🎯 Use Cases
+## Use Cases
 
 - Web3 devs validating technical knowledge with community backing.
 - Translation, design, writing—where social proof matters more than a diploma.
@@ -26,7 +26,7 @@ Credential and endorsement system with third-party reputation staking **plus rea
 - Web3 communities filtering who is reputable based on social staking.
 - **Investors earning 15-45% APY from skill owner job completions.**
 
-### 🔄 How it works
+### How it works
 
 1. User logs in with Civic Auth and creates their profile.
 2. Adds skills (e.g., React, Solana dev, designer, translator, etc.).
@@ -43,7 +43,8 @@ Credential and endorsement system with third-party reputation staking **plus rea
 
 - Node.js 18+ 
 - Docker & Docker Compose
-- PostgreSQL (via Docker)
+- MetaMask: Users need MetaMask for blockchain interactions
+- Sepolia Network: App automatically prompts network switching
 
 ### 1. Environment Setup
 
@@ -167,8 +168,6 @@ npm run lint              # Run ESLint
 - **Seed data** for development and testing
 
 ## 🎯 Features
-
-### ✅ Current Implementation
 - User profiles and reputation system
 - Skills management and categorization  
 - **Investment platform with real APY (15-45%)**
@@ -182,12 +181,6 @@ npm run lint              # Run ESLint
 - Database with comprehensive schema
 - API endpoints for all functionality
 - **Civic Auth Web3 integration**
-
-### 📋 Future Implementations
-- IPFS for metadata storage
-- Solana Virtual Machine(SVM) support
-- Governance token for platform decisions
-- Advanced dispute resolution mechanisms
 
 ## 📁 Project Structure
 
@@ -240,7 +233,7 @@ src/skillpass/
 3. Verify API endpoints work correctly
 4. Test frontend integration
 
-## 🌟 Sample Data
+## Sample Data
 
 The database comes pre-seeded with:
 
@@ -259,7 +252,7 @@ The database comes pre-seeded with:
 
 ## 🚀 Deployment
 
-### 🔴 **Live on Sepolia Testnet**
+### **Live on Sepolia Testnet**
 
 The SkillPass investment platform is **live and functional** on Sepolia testnet:
 
@@ -274,33 +267,10 @@ The SkillPass investment platform is **live and functional** on Sepolia testnet:
 3. The app will mint you 1M REPR tokens automatically
 4. Create skills, invest in skills, earn real APY!
 
-### 🎯 **Important Setup Notes**
-
-- **MetaMask Required**: Users need MetaMask for blockchain interactions
-- **Sepolia Network**: App automatically prompts network switching
-- **Real Transactions**: All investments are real blockchain transactions
-- **Civic Auth**: Uses Civic Web3 Auth for secure login
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create feature branch: `git checkout -b feature/amazing-feature`
-3. Make changes and test thoroughly
-4. Ensure database migrations work: `npm run db:reset`
-5. Commit changes: `git commit -m 'Add amazing feature'`
-6. Push to branch: `git push origin feature/amazing-feature`
-7. Open a Pull Request
-
 ## 📝 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## 🔗 Links
 
-- [Live Demo](https://skillpass.vercel.app) (Coming Soon)
-- [Documentation](https://docs.skillpass.com) (Coming Soon)
-- [Discord Community](https://discord.gg/skillpass) (Coming Soon)
-
----
-
-Built with ❤️ for the future of professional validation
+- [Live Demo](https://www.youtube.com/watch?v=wzw4u-9rCZg)

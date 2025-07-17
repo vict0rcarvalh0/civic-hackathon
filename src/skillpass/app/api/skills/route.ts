@@ -6,10 +6,13 @@ import { eq, and, desc } from 'drizzle-orm'
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
+    console.log('🔍 Skills API: Received request body:', JSON.stringify(body, null, 2))
+    
     const { name, category, description, evidence, walletAddress, tokenId, transactionHash, blockNumber, contractAddress } = body
 
     // Validate required fields
     if (!name || !category || !description) {
+      console.error('❌ Skills API: Missing required fields')
       return NextResponse.json(
         { success: false, error: 'Missing required fields: name, category, and description are required' },
         { status: 400 }
@@ -19,6 +22,8 @@ export async function POST(request: NextRequest) {
     // For blockchain integration, we expect these fields from the frontend
     const userId = walletAddress || 'demo-user-' + Date.now()
     const userWallet = walletAddress || '0x' + Math.random().toString(16).substr(2, 40)
+
+    console.log('🔍 Skills API: Processing skill creation for user:', userId)
 
     // Create metadata URI
     const metadata = {
@@ -46,7 +51,7 @@ export async function POST(request: NextRequest) {
       evidence: evidence ? { portfolio: [evidence] } : null,
       tokenId: tokenId?.toString() || null, // From blockchain mint
       contractAddress: contractAddress || null, // SkillNFT contract address
-      blockNumber: blockNumber || null,
+      blockNumber: blockNumber ? Number(blockNumber) : null, // Ensure it's a number
       transactionHash: transactionHash || null,
       ipfsHash: null,
       metadataUri: metadataUri,
@@ -58,14 +63,61 @@ export async function POST(request: NextRequest) {
       updatedAt: new Date()
     }
 
+    console.log('🔍 Skills API: About to insert skill:', JSON.stringify(newSkill, null, 2))
+
+    // Check if a skill with this token_id already exists (for blockchain minting conflicts)
+    if (newSkill.tokenId) {
+      const existingSkillWithToken = await db
+        .select()
+        .from(skills)
+        .where(eq(skills.tokenId, newSkill.tokenId))
+        .limit(1)
+      
+      if (existingSkillWithToken.length > 0) {
+        console.log('🔍 Skills API: Found existing skill with same token_id, updating instead of inserting')
+        
+        // Update the existing skill with new transaction details
+        await db
+          .update(skills)
+          .set({
+            name: newSkill.name,
+            category: newSkill.category,
+            description: newSkill.description,
+            evidence: newSkill.evidence,
+            walletAddress: newSkill.walletAddress,
+            contractAddress: newSkill.contractAddress,
+            blockNumber: newSkill.blockNumber,
+            transactionHash: newSkill.transactionHash,
+            metadataUri: newSkill.metadataUri,
+            verified: true,
+            status: 'verified',
+            updatedAt: new Date()
+          })
+          .where(eq(skills.tokenId, newSkill.tokenId))
+        
+        console.log('✅ Skills API: Existing skill updated successfully')
+        
+        // Return the updated skill data
+        const updatedSkill = { ...existingSkillWithToken[0], ...newSkill }
+        return NextResponse.json({
+          success: true,
+          skill: updatedSkill,
+          message: 'Skill updated successfully with new transaction details'
+        })
+      }
+    }
+
     // Insert the skill into database
     await db.insert(skills).values(newSkill)
+    console.log('✅ Skills API: Skill inserted successfully')
 
     // Create or update user profile if it doesn't exist
     try {
+      console.log('🔍 Skills API: Checking user profile for wallet:', userWallet)
       const existingProfile = await db.select().from(userProfiles).where(eq(userProfiles.walletAddress, userWallet)).limit(1)
       
       if (existingProfile.length === 0) {
+        console.log('🔍 Skills API: Creating new user profile')
         await db.insert(userProfiles).values({
           id: nanoid(),
           walletAddress: userWallet,
@@ -84,7 +136,9 @@ export async function POST(request: NextRequest) {
           createdAt: new Date(),
           updatedAt: new Date()
         })
+        console.log('✅ Skills API: New user profile created')
       } else {
+        console.log('🔍 Skills API: Updating existing user profile')
         // Update skills count
         await db.update(userProfiles)
           .set({ 
@@ -93,22 +147,43 @@ export async function POST(request: NextRequest) {
             updatedAt: new Date()
           })
           .where(eq(userProfiles.walletAddress, userWallet))
+        console.log('✅ Skills API: User profile updated')
       }
-    } catch (profileError) {
-      console.error('Error updating user profile:', profileError)
-      // Don't fail the skill creation if profile update fails
+    } catch (profileError: any) {
+      console.error('❌ Skills API: Error updating user profile:', profileError)
+      console.error('❌ Skills API: Profile error message:', profileError.message)
     }
 
+    console.log('✅ Skills API: Skill creation completed successfully')
     return NextResponse.json({
       success: true,
       skill: newSkill,
       message: 'Skill created successfully'
     })
 
-  } catch (error) {
-    console.error('Error creating skill:', error)
+  } catch (error: any) {
+    console.error('❌ Skills API: Error creating skill:', error)
+    console.error('❌ Skills API: Error type:', error.constructor.name)
+    console.error('❌ Skills API: Error message:', error.message)
+    console.error('❌ Skills API: Error stack:', error.stack)
+    
+    // More specific error handling
+    if (error.message?.includes('duplicate key')) {
+      return NextResponse.json(
+        { success: false, error: 'Skill with this data already exists' },
+        { status: 409 }
+      )
+    }
+    
+    if (error.message?.includes('foreign key')) {
+      return NextResponse.json(
+        { success: false, error: 'Database constraint error' },
+        { status: 400 }
+      )
+    }
+    
     return NextResponse.json(
-      { success: false, error: 'Internal server error' },
+      { success: false, error: 'Internal server error', details: error.message },
       { status: 500 }
     )
   }
