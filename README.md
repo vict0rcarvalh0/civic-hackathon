@@ -327,5 +327,5 @@ The SkillPass investment platform is **live and functional** on Sepolia testnet:
 
 ## 🔗 Links
 
-- [Live Demo](https://www.youtube.com/watch?v=wzw4u-9rCZg)
-- [Frontend Deployed](https://civic-hackathon.vercel.app/)
+- [Demo Video](https://www.youtube.com/watch?v=wzw4u-9rCZg)
+- [Live Demo](https://skillpass-weld.vercel.app/)

@@ -18,6 +18,11 @@ export const metadata: Metadata = {
   description:
     "Build your Web3 reputation with skill endorsements backed by crypto stakes. Get validated by your peers with skin in the game.",
   generator: "skillpass.app",
+  icons: {
+    icon: "icon.ico",
+    shortcut: "/icon.ico",
+    apple: "/icon.ico",
+  },
 }
 
 export default function RootLayout({
