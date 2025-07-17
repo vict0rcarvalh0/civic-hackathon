@@ -1,11 +1,13 @@
 # SkillPass Smart Contracts Deployment
 
+> **Last Updated**: July 16, 2025 - Latest deployment with self-investment fix
+
 ## Contract Addresses 
 
 ### Sepolia Testnet (Production)
-- **ReputationToken**: `0xC39FA067a647c5016Ce9117756542aF98BB5E821`
-- **SkillNFT**: `0x68afa62EB1d3309d36Bb4B7072a12CB23Eb1ccF7`
-- **SkillRevenue**: `0x4D91E17b6e408870BDcC0617aCc3A1201CAcA30c` (Investment Platform)
+- **ReputationToken**: `0x0b01D922072bE2EDe46154120e2791ae389f70c6`
+- **SkillNFT**: `0x6E3C6eC404381a0DC312dbe79FDC544e0639427F`
+- **SkillRevenue**: `0xD80B39C6D68d4F137BDb69232d26a88ad26a42E8` (Investment Platform)
 - **Network**: Sepolia Testnet
 - **Chain ID**: 11155111
 - **RPC**: `https://eth-sepolia.public.blastapi.io`

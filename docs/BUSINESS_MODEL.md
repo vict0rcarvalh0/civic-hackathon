@@ -161,19 +161,19 @@ contract SkillPool {
 
 ## **Implementation Roadmap**
 
-### Phase 1: Revenue Streams (Week 1-2)
+### Phase 1: Revenue Streams
 - [ ] Add job completion fee mechanism
 - [ ] Implement platform transaction fees  
 - [ ] Create premium subscription tiers
 - [ ] Build revenue tracking system
 
-### Phase 2: Yield Distribution (Week 3-4)
+### Phase 2: Yield Distribution
 - [ ] Deploy enhanced staking contracts
 - [ ] Add APY calculation engine
 - [ ] Build yield claiming interface
 - [ ] Implement auto-compound features
 
-### Phase 3: Advanced Features (Week 5-6)
+### Phase 3: Advanced Features
 - [ ] Risk-adjusted returns
 - [ ] Skill performance analytics
 - [ ] Portfolio optimization tools

@@ -1,227 +1,273 @@
-# SkillPass
+# SkillPass - Decentralized Skills Validation Platform
 
-**Passaporte de habilidades com staking de reputação para credibilidade**
+SkillPass is a blockchain-based platform for validating professional skills through community endorsements backed by reputation staking. Users can showcase their expertise through soulbound NFT credentials while peers stake their reputation to validate skills.
 
----
+## Real Problem
 
-## 💡 Inspiração
-
-Gitcoin Passport prova que você é um humano confiável. Mas e se fôssemos além, criando um sistema onde suas habilidades são validadas on-chain e outros usuários podem apostar reputação em você? Imagine um “LinkedIn com skin in the game”.
-
----
-
-## 🚩 Problema Real
-
-- Em ambientes Web3 ou freelas, é difícil saber se alguém é confiável.
-- “Provar” conhecimento depende de prints ou links de portfólio.
-- Recomendação/referência é centralizada e não comprovável.
-- Freelancers sofrem com desconfiança em plataformas como Fiverr e Upwork.
+- In Web3 or freelance environments, it's hard to know if someone is trustworthy.
+- "Proving" knowledge depends on screenshots or portfolio links.
+- Recommendations/references are centralized and unverifiable.
+- Freelancers face distrust on platforms like Fiverr and Upwork.
 
 ---
 
-## ✅ Solução: SkillPass
+## Solution: SkillPass
 
-Sistema de credenciais e endorsements com staking de reputação por terceiros.
-
-### Como funciona
-
-1. Usuário entra com Civic Embedded Wallet e cria seu perfil.
-2. Adiciona skills (ex: React, Solana dev, designer, tradutor, etc.).
-3. Outros usuários podem "endorsar" uma skill, apostando reputação/token para validar.
-4. Se o endorsado cometer fraude, o “apostador” perde stake.
-5. Perfis ganham pontuação social/profissional dinâmica, visível publicamente.
-6. Tudo registrado em NFT soulbound com as skills validadas + endorsements.
+Credential and endorsement system with third-party reputation staking.
 
 ---
 
-## 🛠️ Stack Técnico
+## Use Cases
 
-- **Civic Wallet** para onboarding e identidade.
-- **Soulbound NFTs** para representar as skills.
-- **Staking Contract** (ex: ERC-20 + reputação) para validações.
-- **Frontend React** com perfil estilo Web3CV + “endorse-to-stake” UX.
-- **Polygon/Base** como rede de baixo custo.
+- Web3 devs validating technical knowledge with community backing.
+- Translation, design, writing—where social proof matters more than a diploma.
+- Mentors endorsing mentees with skin in the game.
+- Web3 communities filtering who is reputable based on social staking.
+
+### How it works
+
+1. User logs in with Civic Embedded Wallet and creates their profile.
+2. Adds skills (e.g., React, Solana dev, designer, translator, etc.).
+3. Other users can "endorse" a skill, staking reputation/tokens to validate.
+4. If the endorsed person commits fraud, the "staker" loses their stake.
+5. Profiles get a dynamic social/professional score, publicly visible.
+6. Everything is recorded in a soulbound NFT with validated skills and endorsements.
+
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+- Node.js 18+ 
+- Docker & Docker Compose
+- PostgreSQL (via Docker)
+
+### 1. Environment Setup
+
+Create a `.env` file in the project root:
+
+```bash
+# Database
+DATABASE_URL="postgresql://skillpass_user:skillpass_password@localhost:5432/skillpass_db"
+
+# Blockchain (Optional - for future integration)
+ETHEREUM_RPC_URL="your_ethereum_rpc_url"
+PRIVATE_KEY="your_private_key"
+SKILL_NFT_CONTRACT="your_deployed_contract_address"
+REPUTATION_TOKEN_CONTRACT="your_deployed_contract_address"
+SKILL_STAKING_CONTRACT="your_deployed_contract_address"
+
+# Next.js
+NEXTAUTH_SECRET="your_nextauth_secret"
+NEXTAUTH_URL="http://localhost:3000"
+```
+
+### 2. Database Setup
+
+Start PostgreSQL with Docker:
+```bash
+npm run docker:up
+```
+
+Set up database schema and seed data:
+```bash
+npm run db:setup
+```
+
+This will:
+- Install dependencies
+- Generate Drizzle migrations
+- Create database tables
+- Seed with sample users, skills, and endorsements
+
+### 3. Start Development Server
+
+```bash
+npm run dev
+```
+
+Visit [http://localhost:3000](http://localhost:3000) to see your application.
+
+## 📊 Database Schema
+
+### Users (`user_profiles`)
+- Profile information (display name, bio, avatar)
+- Reputation metrics (score, skills count, endorsements)
+- Social links (website, Twitter, LinkedIn)
+
+### Skills (`skills`)
+- Skill metadata (name, description, category)
+- Blockchain data (token ID, contract address, transaction hash)
+- Validation status (pending, minted, verified)
+- Evidence (portfolio links, certificates, testimonials)
+
+### Endorsements (`endorsements`)
+- Staking information (amount staked, endorser details)
+- Evidence and reasoning
+- Blockchain transaction data
+- Challenge/resolution status
+
+### Challenges (`challenges`)
+- Dispute mechanism for skill validation
+- Evidence submission and resolution
+- Community governance
+
+## 🗄️ Available Scripts
+
+### Database Management
+```bash
+npm run docker:up          # Start PostgreSQL container
+npm run docker:down        # Stop PostgreSQL container
+npm run docker:logs        # View PostgreSQL logs
+
+npm run db:generate        # Generate Drizzle migrations
+npm run db:migrate         # Apply migrations to database
+npm run db:seed           # Seed database with sample data
+npm run db:setup          # Complete setup (migrate + seed)
+npm run db:reset          # Drop database and rebuild
+npm run db:studio         # Open Drizzle Studio (database GUI)
+```
+
+### Development
+```bash
+npm run dev               # Start development server
+npm run build             # Build for production
+npm run start             # Start production server
+npm run lint              # Run ESLint
+```
+
+## 🏗️ Architecture
+
+### Frontend
+- **Next.js 14** with App Router
+- **TypeScript** for type safety
+- **Tailwind CSS** for styling
+- **shadcn/ui** component library
+- **Dark theme** with glass morphism design
+
+### Backend
+- **Next.js API Routes** for server logic
+- **Drizzle ORM** for database operations
+- **PostgreSQL** for data persistence
+- **Future blockchain integration** ready
+
+### Database
+- **PostgreSQL** with comprehensive schema
+- **Drizzle migrations** for version control
+- **Seed data** for development and testing
+
+## 🎯 Features
+
+### Current Implementation
+- ✅ User profiles and reputation system
+- ✅ Skills management and categorization
+- ✅ Endorsement tracking and validation
+- ✅ Real-time leaderboards (skills and users)
+- ✅ Dashboard with statistics and activity
+- ✅ Dark theme with modern UI/UX
+- ✅ Database with comprehensive schema
+- ✅ API endpoints for all functionality
+
+### Blockchain Integration (Ready)
+- 🔄 Smart contracts for skills NFTs
+- 🔄 Reputation token system
+- 🔄 Staking and challenge mechanisms
+- 🔄 IPFS for metadata storage
+- 🔄 Ethereum/Polygon integration
+
+## 📁 Project Structure
+
+```
+src/skillpass/
+├── app/                          # Next.js App Router
+│   ├── api/                      # API routes
+│   │   ├── dashboard/            # Dashboard data
+│   │   ├── leaderboard/          # Leaderboard data
+│   │   └── skills/               # Skills CRUD
+│   ├── dashboard/                # Dashboard page
+│   ├── leaderboard/              # Leaderboard page
+│   └── layout.tsx                # Root layout
+├── components/                   # React components
+│   ├── ui/                       # shadcn/ui components
+│   └── navigation.tsx            # Navigation component
+├── lib/                          # Utilities and database
+│   ├── db.ts                     # Database schema and client
+│   ├── seed.ts                   # Database seed data
+│   └── blockchain.ts             # Blockchain integration (ready)
+├── scripts/                      # Setup and utility scripts
+│   └── setup-db.ts               # Database setup script
+├── contracts/                    # Smart contracts
+│   ├── SkillNFT.sol             # Skills as NFTs
+│   ├── ReputationToken.sol      # Reputation token
+│   └── SkillStaking.sol         # Staking and challenges
+└── docker-compose.yml            # PostgreSQL setup
+```
+
+## 🔧 Development Workflow
+
+### Adding New Features
+
+1. **Database Changes**: Update schema in `lib/db.ts`
+2. **API Endpoints**: Create routes in `app/api/`
+3. **Frontend Components**: Add components in `components/`
+4. **Pages**: Create pages in `app/`
+5. **Migrations**: Run `npm run db:generate` for schema changes
+
+### Testing Database Changes
+
+1. Reset database: `npm run db:reset`
+2. Test with fresh seed data
+3. Verify API endpoints work correctly
+4. Test frontend integration
+
+## 🌟 Sample Data
+
+The database comes pre-seeded with:
+
+- **6 Sample Users** with diverse profiles and expertise
+- **11 Skills** across different categories (Frontend, AI/ML, Design, DevOps, etc.)
+- **24+ Endorsements** showing cross-validation between users
+- **Realistic Data** including reputation scores, staking amounts, and evidence
+
+### Sample Users
+- Sarah Chen (Full-stack Developer) - 9.8 reputation
+- Mike Johnson (ML Engineer) - 9.6 reputation  
+- Emma Wilson (UX Designer) - 9.4 reputation
+- David Kim (DevOps Engineer) - 9.3 reputation
+- Lisa Rodriguez (Product Manager) - 9.1 reputation
+- Alex Thompson (Smart Contract Developer) - 8.9 reputation
+
+## 🚀 Deployment
+
+### Database
+- PostgreSQL on cloud provider (AWS RDS, Vercel Postgres, etc.)
+- Update `DATABASE_URL` in production environment
+
+### Application
+- Deploy to Vercel, Netlify, or similar platform
+- Set environment variables in deployment platform
+- Run migrations: `npm run db:migrate`
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create feature branch: `git checkout -b feature/amazing-feature`
+3. Make changes and test thoroughly
+4. Ensure database migrations work: `npm run db:reset`
+5. Commit changes: `git commit -m 'Add amazing feature'`
+6. Push to branch: `git push origin feature/amazing-feature`
+7. Open a Pull Request
+
+## 📝 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🔗 Links
+
+- [Live Demo](https://skillpass.vercel.app) (Coming Soon)
+- [Documentation](https://docs.skillpass.com) (Coming Soon)
+- [Discord Community](https://discord.gg/skillpass) (Coming Soon)
 
 ---
 
-## 📈 Casos de Uso
-
-- Devs Web3 validando conhecimento técnico com backing da comunidade.
-- Traduções, design, redação — onde prova social conta mais que diploma.
-- Mentores endossando mentorados com skin in the game.
-- Comunidades Web3 filtrando quem é “reputável” com base no staking social.
-
----
-
-# Pitch
-
-## 🎯 Projeto: SkillPass
-
-Um passaporte de habilidades com staking de reputação para validação descentralizada de talentos.
-
----
-
-### 🧠 Problema
-
-Profissionais autônomos e criadores enfrentam o desafio de provar competência. Currículos e perfis online são centralizados, fáceis de falsificar e pouco confiáveis — especialmente no Web3, onde identidades são pseudônimas.
-
----
-
-### 💡 Solução
-
-SkillPass é uma plataforma onde usuários podem:
-
-- Criar perfil descentralizado usando Civic Embedded Wallet.
-- Adicionar habilidades como NFTs soulbound.
-- Receber endorsements de outros usuários que apostam tokens/reputação em suas skills.
-- Construir reputação comprovada on-chain, validada por terceiros com “skin in the game”.
-
-Endossar envolve risco: se o endossado engana ou entrega mal, o validador pode perder stake. Isso gera confiança criptoeconômica no processo de validação de habilidades.
-
----
-
-### 🛠️ Como funciona
-
-1. Usuário entra com a wallet Civic e cria seu perfil SkillPass.
-2. Adiciona skills como “Solidity”, “UX Design”, “Tradução”, etc.
-3. Colega ou mentor pode endossar essa skill, apostando tokens em garantia.
-4. Skills e endorsements viram NFTs soulbound, compondo um perfil reputacional público.
-5. Se um usuário agir de má fé, os endorsers podem ter penalidades.
-
----
-
-### 🧩 Por que usar blockchain + Civic
-
-- Identidade confiável com onboarding rápido usando Civic Embedded Wallet.
-- Imutabilidade e interoperabilidade dos dados reputacionais.
-- Incentivo/desincentivo on-chain para validar competências com responsabilidade.
-- Uso em outros ecossistemas Web3: DAOs, grant systems, hiring.
-
----
-
-### 📦 Stack (sugestão para hackathon)
-
-- Civic Embedded Wallet para onboarding.
-- Soulbound NFT (ERC-721) para representar cada skill.
-- Smart Contract (Solidity / Foundry) com:
-    - Registro de skills
-    - Mecanismo de endorsement com staking
-    - Penalização automática por denúncias comprovadas
-- Frontend React com Tailwind para perfis, staking e skill visualization.
-- Polygon ou Base como rede L2 barata e rápida.
-
----
-
-### 📈 Impacto
-
-- Facilita contratação e colaboração entre perfis anônimos ou globais.
-- Estimula validação social descentralizada.
-- Reduz fraude e fricção em plataformas de freelas, DAOs, hackathons.
-- Base para passaportes Web3 de carreira, acopláveis em dApps e comunidades.
-
----
-
-# Arquitetura Técnica
-
-## 🏗️ Visão Geral
-
-O SkillPass é composto por:
-
-- **Frontend (React/Next.js):** interface para acessar, adicionar habilidades e endossar.
-- **Smart Contracts (Solidity/Foundry):** lógica de registro de skills, staking, endorsements e penalidades.
-- **Soulbound NFT Registry:** cada skill endossada vira um NFT intransferível vinculado ao usuário.
-- **Civic Embedded Wallet:** login rápido, onboarding com identidade verificada.
-- **Banco de dados leve (opcional):** cache de perfis públicos e skills para busca e indexação rápida (ex: Supabase).
-
----
-
-## 🔄 Fluxo de Usuário
-
-1. **Onboarding:** Usuário cria perfil com Civic Wallet, vinculando identidade ao endereço EVM.
-2. **Adição de Habilidades:** Escolhe skills de catálogo ou adiciona livremente. Cada skill registrada via contrato, mintando NFT soulbound.
-3. **Endosso com Stake:** Outro usuário valida a skill apostando tokens. Stake fica bloqueado em contrato, vinculado ao endorsement.
-4. **Penalidades e Disputas:** Denúncias podem levar a penalidades para endorsers em caso de fraude.
-5. **Visualização Pública:** Perfis acessíveis em `/profile/:address` com skills, reputação e endorsers.
-
----
-
-## 🔐 Contratos Inteligentes (Módulos)
-
-- **SkillPassRegistry:** Registro de perfis, habilidades e NFTs.
-- **EndorsementStaking:** Função de endorseSkill() com valor, mapeamento de endossos, desbloqueio e penalidades.
-- **SoulboundSkillNFT:** ERC-721 modificado (non-transferable), metadata dinâmica.
-
----
-
-## 🧠 Extras (para hackathon)
-
-- Score de reputação agregada (skills, stake, diversidade de validadores).
-- Delegated endorsements (DAOs usando multisigs).
-- Gamificação com XP/Level por skill.
-- Leaderboards por área.
-
----
-
-# 🎨 Documentação de Telas e UX — SkillPass dApp
-
-## 1. Tela Inicial / Landing Page
-
-- Hero com slogan: “Seu passaporte de habilidades na Web3”
-- Botão: “Criar SkillPass com Wallet Civic”
-- Visualização de skills de outros usuários (Leaderboard)
-- Explicação rápida: “Skills + Endossos + Reputação Stakeada”
-- Footer com links (GitHub, hackathon, FAQ)
-
----
-
-## 2. Perfil Público (`/profile/:address`)
-
-- Banner com wallet + identidade (via Civic)
-- Lista de habilidades:
-    - Nome da skill
-    - Quantidade de endossos
-    - Valor total stakeado
-    - Endossantes (avatars/addresses)
-    - Badge de reputação (bronze, prata, ouro)
-- Botão: “Endossar uma skill”
-
----
-
-## 3. Dashboard do Usuário (autenticado)
-
-- Identidade Civic (nome/verificado ou pseudônimo)
-- Lista de skills próprias (status, endossos recebidos)
-- Opção de remover ou editar descrição
-- Botão: “Adicionar nova skill”
-- Botão: “Conectar outras wallets” (futuro)
-
----
-
-## 4. Adicionar Skill
-
-- Campo: Nome da Skill (autocomplete)
-- Campo: Descrição breve (opcional)
-- Botão: “Adicionar”
-- Feedback: “Skill adicionada com sucesso! Agora peça endossos.”
-
----
-
-## 5. Modal de Endosso
-
-- Visualização do perfil e da skill
-- Campo: Valor a ser stakeado (ex: 0.01 ETH mínimo)
-- Info: “Seu stake estará travado enquanto essa skill for válida. Se ela for fraudulenta, você pode ser penalizado.”
-- Botão: Confirmar (chama endorseSkill)
-- Feedback de sucesso com tx hash
-
----
-
-## 6. Leaderboard / Descoberta
-
-- Filtros por área: Dev, Design, Community, Translators, etc.
-- Cards com:
-    - Nome do usuário
-    - Skills mais fortes
-    - Score total (stake + endossos)
-    - Link para perfil
-
+Built with ❤️ for the future of professional validation

@@ -203,9 +203,9 @@ export default function AboutPage() {
 
           <div className="flex justify-center space-x-6">
             {[
-              { icon: Twitter, href: "#", label: "Twitter" },
-              { icon: Github, href: "#", label: "GitHub" },
-              { icon: Mail, href: "mailto:hello@skillpass.app", label: "Email" },
+              { icon: Twitter, href: "https://x.com/vict0rcarvalh0o", label: "Twitter" },
+              { icon: Github, href: "https://github.com/vict0rcarvalh0", label: "GitHub" },
+              { icon: Mail, href: "mailto:victordecarvalho342@gmail.com", label: "Email" },
             ].map((social, index) => (
               <a
                 key={index}
