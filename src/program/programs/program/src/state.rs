@@ -1,30 +1,32 @@
 use anchor_lang::prelude::*;
 
 // Constants
-pub const INITIAL_REPUTATION_SUPPLY: u64 = 10_000_000_000_000; // 10M tokens
+pub const INITIAL_REPUTATION_SUPPLY: u64 = 10_000_000_000_000; // 10M tokens (9 decimals)
 pub const MAX_REPUTATION_SUPPLY: u64 = 100_000_000_000_000; // 100M tokens
 pub const MIN_INVESTMENT: u64 = 50_000_000_000; // 50 REPR minimum
 pub const MIN_STAKE: u64 = 10_000_000_000; // 10 REPR minimum
 pub const CHALLENGE_PERIOD: i64 = 7 * 24 * 60 * 60; // 7 days in seconds
+pub const REPUTATION_DECIMALS: u8 = 9;
 
 // Share percentages (basis points)
 pub const INVESTOR_SHARE: u64 = 7000; // 70% to investors
 pub const SKILL_OWNER_SHARE: u64 = 2000; // 20% to skill owner
 pub const PLATFORM_SHARE: u64 = 1000; // 10% to platform
+pub const JOB_COMPLETION_FEE: u64 = 1000; // 10% of job revenue allocated to distribution
 pub const SLASH_PERCENTAGE: u64 = 50; // 50% slash on false endorsement
 pub const REWARD_PERCENTAGE: u64 = 10; // 10% reward for correct endorsement
 
-// Account sizes
-pub const PROGRAM_STATE_LEN: usize = 8 + 32 + 8 + 8 + 8 + 8 + 8 + 8 + 1; // 8 + authority + total_skills + total_investments + total_revenue + reputation_mint + skill_mint + treasury + bump
-pub const REPUTATION_STATE_LEN: usize = 8 + 32 + 8 + 8 + 8 + 8 + 8 + 1; // 8 + user + reputation_score + last_activity + total_earned + total_slashed + bump
-pub const SKILL_LEN: usize = 8 + 32 + 32 + 64 + 64 + 64 + 64 + 8 + 8 + 8 + 1 + 8 + 1; // 8 + creator + category + name + description + metadata_uri + created_at + total_staked + endorsement_count + verified + skill_id + bump
-pub const INVESTMENT_POOL_LEN: usize = 8 + 8 + 8 + 8 + 8 + 8 + 8 + 8 + 8 + 1; // 8 + skill_id + total_invested + monthly_revenue + total_revenue_earned + last_distribution + investor_count + skill_owner_earnings + current_apy + bump
-pub const INVESTMENT_LEN: usize = 8 + 32 + 8 + 8 + 8 + 8 + 1; // 8 + investor + skill_id + amount + last_claim_time + total_claimed + bump
-pub const REVENUE_BREAKDOWN_LEN: usize = 8 + 8 + 8 + 8 + 8 + 8 + 1; // 8 + skill_id + job_completions + platform_fees + subscription_fees + verification_fees + bump
-pub const ENDORSEMENT_LEN: usize = 8 + 32 + 8 + 8 + 1 + 64 + 1; // 8 + endorser + staked_amount + timestamp + active + evidence + bump
-pub const STAKE_INFO_LEN: usize = 8 + 8 + 8 + 8 + 1 + 8 + 1; // 8 + skill_id + total_staked + endorsement_count + average_stake + challenged + challenge_end_time + bump
-pub const STAKER_REWARDS_LEN: usize = 8 + 32 + 8 + 8 + 1; // 8 + user + total_rewards + last_claim_time + bump
-pub const TREASURY_LEN: usize = 8 + 32 + 8 + 8 + 1; // 8 + authority + total_fees + total_distributed + bump
+// Account sizes (updated for SPL integration)
+pub const PROGRAM_STATE_LEN: usize = 8 + 32 + 8 + 8 + 8 + 32 + 32 + 32 + 1; // 8 + authority + total_skills + total_investments + total_revenue + reputation_mint + skill_collection_mint + treasury + bump
+pub const REPUTATION_STATE_LEN: usize = 8 + 32 + 8 + 8 + 8 + 8 + 1; // 8 + user + reputation_score + last_activity + total_earned + total_slashed + bump
+pub const SKILL_LEN: usize = 8 + 32 + 32 + 32 + 64 + 64 + 64 + 64 + 8 + 8 + 8 + 1 + 8 + 1; // 8 + mint + creator + metadata + category + name + description + metadata_uri + created_at + total_staked + endorsement_count + verified + skill_id + bump
+pub const INVESTMENT_POOL_LEN: usize = 8 + 8 + 8 + 8 + 8 + 8 + 8 + 8 + 8 + 1; // unchanged
+pub const INVESTMENT_LEN: usize = 8 + 32 + 8 + 8 + 8 + 8 + 1; // unchanged
+pub const REVENUE_BREAKDOWN_LEN: usize = 8 + 8 + 8 + 8 + 8 + 8 + 1; // unchanged
+pub const ENDORSEMENT_LEN: usize = 8 + 32 + 8 + 8 + 1 + 64 + 1; // unchanged
+pub const STAKE_INFO_LEN: usize = 8 + 8 + 8 + 8 + 1 + 8 + 1; // unchanged
+pub const STAKER_REWARDS_LEN: usize = 8 + 32 + 8 + 8 + 1; // unchanged
+pub const TREASURY_LEN: usize = 8 + 32 + 32 + 8 + 8 + 1; // 8 + authority + treasury_token_account + total_fees + total_distributed + bump
 
 #[account]
 pub struct ProgramState {
@@ -32,8 +34,8 @@ pub struct ProgramState {
     pub total_skills: u64,
     pub total_investments: u64,
     pub total_revenue: u64,
-    pub reputation_mint: Pubkey,
-    pub skill_mint: Pubkey,
+    pub reputation_mint: Pubkey, // SPL Token mint for REPR tokens
+    pub skill_collection_mint: Pubkey, // Metaplex collection mint for skills
     pub treasury: Pubkey,
     pub bump: u8,
 }
@@ -58,11 +60,13 @@ impl ReputationState {
 
 #[account]
 pub struct Skill {
+    pub mint: Pubkey, // NFT mint for this skill
     pub creator: Pubkey,
+    pub metadata: Pubkey, // Metaplex metadata account
     pub category: String,
     pub name: String,
     pub description: String,
-    pub metadata_uri: String,
+    pub metadata_uri: String, // JSON metadata URI
     pub created_at: i64,
     pub total_staked: u64,
     pub endorsement_count: u64,
@@ -164,6 +168,7 @@ impl StakerRewards {
 #[account]
 pub struct Treasury {
     pub authority: Pubkey,
+    pub treasury_token_account: Pubkey, // ATA for holding REPR tokens
     pub total_fees: u64,
     pub total_distributed: u64,
     pub bump: u8,

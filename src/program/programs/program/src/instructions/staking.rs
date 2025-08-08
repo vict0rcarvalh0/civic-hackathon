@@ -1,25 +1,50 @@
 use anchor_lang::prelude::*;
+use anchor_spl::{
+    associated_token::AssociatedToken,
+    token::{Mint, Token, TokenAccount, Transfer},
+};
 use crate::state::*;
 use crate::errors::*;
 
 #[derive(Accounts)]
 #[instruction(skill_id: u64)]
 pub struct EndorseSkill<'info> {
-    #[account(mut, seeds = [b"program_state"], bump)]
+    #[account(
+        mut,
+        seeds = [b"program_state"],
+        bump,
+        has_one = reputation_mint
+    )]
     pub program_state: Account<'info, ProgramState>,
-    
-    #[account(mut, seeds = [b"skill", skill_mint.key().as_ref()], bump)]
+
+    #[account(
+        seeds = [b"reputation_mint"],
+        bump
+    )]
+    pub reputation_mint: Account<'info, Mint>,
+
+    #[account(
+        mut,
+        associated_token::mint = reputation_mint,
+        associated_token::authority = endorser,
+    )]
+    pub endorser_token_account: Account<'info, TokenAccount>,
+
+    #[account(
+        seeds = [b"skill", skill.mint.as_ref()],
+        bump = skill.bump
+    )]
     pub skill: Account<'info, Skill>,
-    
+
     #[account(
         init_if_needed,
         payer = endorser,
         space = StakeInfo::LEN,
-        seeds = [b"stake_info", skill_mint.key().as_ref()],
+        seeds = [b"stake_info", skill.mint.as_ref()],
         bump
     )]
     pub stake_info: Account<'info, StakeInfo>,
-    
+
     #[account(
         init_if_needed,
         payer = endorser,
@@ -28,17 +53,23 @@ pub struct EndorseSkill<'info> {
         bump
     )]
     pub endorsement: Account<'info, Endorsement>,
-    
+
     #[account(mut, seeds = [b"treasury"], bump)]
     pub treasury: Account<'info, Treasury>,
-    
-    /// CHECK: Skill mint
-    pub skill_mint: AccountInfo<'info>,
-    
+
+    #[account(
+        mut,
+        associated_token::mint = reputation_mint,
+        associated_token::authority = treasury,
+    )]
+    pub treasury_token_account: Account<'info, TokenAccount>,
+
     #[account(mut)]
     pub endorser: Signer<'info>,
-    
+
     pub system_program: Program<'info, System>,
+    pub token_program: Program<'info, Token>,
+    pub associated_token_program: Program<'info, AssociatedToken>,
     pub rent: Sysvar<'info, Rent>,
 }
 
@@ -47,16 +78,19 @@ pub struct EndorseSkill<'info> {
 pub struct ChallengeSkill<'info> {
     #[account(mut, seeds = [b"program_state"], bump)]
     pub program_state: Account<'info, ProgramState>,
-    
-    #[account(mut, seeds = [b"stake_info", skill_mint.key().as_ref()], bump)]
+
+    #[account(
+        seeds = [b"skill", skill.mint.as_ref()],
+        bump = skill.bump
+    )]
+    pub skill: Account<'info, Skill>,
+
+    #[account(mut, seeds = [b"stake_info", skill.mint.as_ref()], bump)]
     pub stake_info: Account<'info, StakeInfo>,
-    
+
     #[account(mut, seeds = [b"reputation_state", challenger.key().as_ref()], bump)]
     pub challenger_reputation: Account<'info, ReputationState>,
-    
-    /// CHECK: Skill mint
-    pub skill_mint: AccountInfo<'info>,
-    
+
     #[account(mut)]
     pub challenger: Signer<'info>,
 }
@@ -64,26 +98,68 @@ pub struct ChallengeSkill<'info> {
 #[derive(Accounts)]
 #[instruction(skill_id: u64)]
 pub struct ResolveChallenge<'info> {
-    #[account(mut, seeds = [b"program_state"], bump)]
+    #[account(
+        mut,
+        seeds = [b"program_state"],
+        bump,
+        has_one = authority,
+        has_one = reputation_mint
+    )]
     pub program_state: Account<'info, ProgramState>,
-    
-    #[account(mut, seeds = [b"stake_info", skill_mint.key().as_ref()], bump)]
+
+    #[account(
+        seeds = [b"reputation_mint"],
+        bump
+    )]
+    pub reputation_mint: Account<'info, Mint>,
+
+    #[account(
+        seeds = [b"skill", skill.mint.as_ref()],
+        bump = skill.bump
+    )]
+    pub skill: Account<'info, Skill>,
+
+    #[account(mut, seeds = [b"stake_info", skill.mint.as_ref()], bump)]
     pub stake_info: Account<'info, StakeInfo>,
-    
+
     #[account(mut, seeds = [b"treasury"], bump)]
     pub treasury: Account<'info, Treasury>,
-    
-    /// CHECK: Skill mint
-    pub skill_mint: AccountInfo<'info>,
-    
+
+    #[account(
+        mut,
+        associated_token::mint = reputation_mint,
+        associated_token::authority = treasury,
+    )]
+    pub treasury_token_account: Account<'info, TokenAccount>,
+
     pub authority: Signer<'info>,
+
+    pub token_program: Program<'info, Token>,
 }
 
 #[derive(Accounts)]
 pub struct ClaimStakingRewards<'info> {
-    #[account(mut, seeds = [b"program_state"], bump)]
+    #[account(
+        mut,
+        seeds = [b"program_state"],
+        bump,
+        has_one = reputation_mint
+    )]
     pub program_state: Account<'info, ProgramState>,
-    
+
+    #[account(
+        seeds = [b"reputation_mint"],
+        bump
+    )]
+    pub reputation_mint: Account<'info, Mint>,
+
+    #[account(
+        mut,
+        associated_token::mint = reputation_mint,
+        associated_token::authority = staker,
+    )]
+    pub staker_token_account: Account<'info, TokenAccount>,
+
     #[account(
         init_if_needed,
         payer = staker,
@@ -92,14 +168,23 @@ pub struct ClaimStakingRewards<'info> {
         bump
     )]
     pub staker_rewards: Account<'info, StakerRewards>,
-    
+
     #[account(mut, seeds = [b"treasury"], bump)]
     pub treasury: Account<'info, Treasury>,
-    
+
+    #[account(
+        mut,
+        associated_token::mint = reputation_mint,
+        associated_token::authority = treasury,
+    )]
+    pub treasury_token_account: Account<'info, TokenAccount>,
+
     #[account(mut)]
     pub staker: Signer<'info>,
-    
+
     pub system_program: Program<'info, System>,
+    pub token_program: Program<'info, Token>,
+    pub associated_token_program: Program<'info, AssociatedToken>,
     pub rent: Sysvar<'info, Rent>,
 }
 
@@ -109,7 +194,7 @@ pub fn endorse_skill(
     stake_amount: u64,
     evidence: String,
 ) -> Result<()> {
-    let skill = &mut ctx.accounts.skill;
+    let skill = &ctx.accounts.skill;
     let stake_info = &mut ctx.accounts.stake_info;
     let endorsement = &mut ctx.accounts.endorsement;
     let clock = Clock::get()?;
@@ -119,11 +204,32 @@ pub fn endorse_skill(
     require!(stake_amount > 0, SkillPassError::InvalidAmount);
     require!(!evidence.is_empty(), SkillPassError::InvalidAmount);
     require!(skill.creator != ctx.accounts.endorser.key(), SkillPassError::CannotEndorseOwnSkill);
+    require!(
+        ctx.accounts.endorser_token_account.amount >= stake_amount,
+        SkillPassError::InsufficientReputationTokens
+    );
     
     // Check if already endorsed
     if endorsement.endorser == ctx.accounts.endorser.key() && endorsement.active {
         return Err(SkillPassError::AlreadyEndorsed.into());
     }
+
+    // Transfer stake to treasury
+    let cpi_accounts = Transfer {
+        from: ctx.accounts.endorser_token_account.to_account_info(),
+        to: ctx.accounts.treasury_token_account.to_account_info(),
+        authority: ctx.accounts.endorser.to_account_info(),
+    };
+    
+    let cpi_program = ctx.accounts.token_program.to_account_info();
+    let signer_seeds: &[&[&[u8]]] = &[&[b"treasury", &[ctx.accounts.treasury.bump]]];
+    let cpi_ctx = CpiContext::new_with_signer(
+        cpi_program,
+        cpi_accounts,
+        signer_seeds,
+    );
+    
+    anchor_spl::token::transfer(cpi_ctx, stake_amount)?;
     
     // Initialize stake info if needed
     if stake_info.skill_id == 0 {
@@ -133,6 +239,7 @@ pub fn endorse_skill(
         stake_info.average_stake = 0;
         stake_info.challenged = false;
         stake_info.challenge_end_time = 0;
+        stake_info.bump = ctx.bumps.stake_info;
     }
     
     // Record endorsement
@@ -147,21 +254,12 @@ pub fn endorse_skill(
     stake_info.endorsement_count += 1;
     stake_info.average_stake = stake_info.total_staked / stake_info.endorsement_count;
     
-    // Update skill metrics
-    skill.total_staked = stake_info.total_staked;
-    skill.endorsement_count = stake_info.endorsement_count;
-    
-    // Auto-verify if enough endorsements and stake
-    if stake_info.total_staked >= 1000_000_000_000 && stake_info.endorsement_count >= 5 {
-        skill.verified = true;
-        msg!("Skill automatically verified!");
-    }
-    
     msg!("Skill endorsed successfully!");
     msg!("Skill ID: {}", skill_id);
     msg!("Endorser: {}", ctx.accounts.endorser.key());
     msg!("Stake amount: {}", stake_amount);
     msg!("Evidence: {}", endorsement.evidence);
+    msg!("Total staked: {}", stake_info.total_staked);
     
     Ok(())
 }
@@ -201,25 +299,33 @@ pub fn resolve_challenge(
     require!(stake_info.challenged, SkillPassError::SkillNotChallenged);
     require!(clock.unix_timestamp >= stake_info.challenge_end_time, SkillPassError::ChallengePeriodNotEnded);
     
+    if skill_is_valid {
+        // Reward correct endorsers (tokens stay in treasury, rewards tracked separately)
+        msg!("Challenge resolved: Skill is VALID");
+        msg!("Correct endorsers will receive rewards");
+        
+        // Calculate reward amount for correct endorsers
+        let reward_amount = (stake_info.total_staked * REWARD_PERCENTAGE) / 100;
+        treasury.total_fees += reward_amount; // Track as fees for distribution
+        
+        msg!("Endorser reward pool: {}", reward_amount);
+    } else {
+        // Slash incorrect endorsers (tokens are already in treasury)
+        msg!("Challenge resolved: Skill is INVALID");
+        msg!("Incorrect endorsers have been slashed");
+        
+        // Calculate slashed amount
+        let slashed_amount = (stake_info.total_staked * SLASH_PERCENTAGE) / 100;
+        treasury.total_fees += slashed_amount;
+        
+        msg!("Total slashed: {}", slashed_amount);
+    }
+    
     // Reset challenge state
     stake_info.challenged = false;
     stake_info.challenge_end_time = 0;
     
-    if skill_is_valid {
-        // Reward correct endorsers
-        msg!("Challenge resolved: Skill is VALID");
-        msg!("Rewarding correct endorsers...");
-    } else {
-        // Slash incorrect endorsers
-        msg!("Challenge resolved: Skill is INVALID");
-        msg!("Slashing incorrect endorsers...");
-        
-        // Update treasury with slashed amounts
-        let slashed_amount = (stake_info.total_staked * SLASH_PERCENTAGE) / 100;
-        treasury.total_fees += slashed_amount;
-    }
-    
-    // Reset stake info
+    // Reset stake info (endorsements are resolved)
     stake_info.total_staked = 0;
     stake_info.endorsement_count = 0;
     stake_info.average_stake = 0;
@@ -233,19 +339,44 @@ pub fn resolve_challenge(
 
 pub fn claim_rewards(ctx: Context<ClaimStakingRewards>) -> Result<()> {
     let staker_rewards = &mut ctx.accounts.staker_rewards;
-    let treasury = &mut ctx.accounts.treasury;
+    
+    // Get treasury key and bump before mutable borrow
+    let treasury_bump = ctx.accounts.treasury.bump;
     
     // Validate rewards
     require!(staker_rewards.total_rewards > 0, SkillPassError::NoRewardsToClaim);
-    
+
     let reward_amount = staker_rewards.total_rewards;
+
+    // Check treasury has enough tokens
+    require!(
+        ctx.accounts.treasury_token_account.amount >= reward_amount,
+        SkillPassError::InsufficientReputationTokens
+    );
+
+    // Transfer rewards from treasury to staker
+    let cpi_accounts = Transfer {
+        from: ctx.accounts.treasury_token_account.to_account_info(),
+        to: ctx.accounts.staker_token_account.to_account_info(),
+        authority: ctx.accounts.treasury.to_account_info(),
+    };
+    
+    let cpi_program = ctx.accounts.token_program.to_account_info();
+    let signer_seeds: &[&[&[u8]]] = &[&[b"treasury", &[treasury_bump]]];
+    let cpi_ctx = CpiContext::new_with_signer(
+        cpi_program,
+        cpi_accounts,
+        signer_seeds,
+    );
+    
+    anchor_spl::token::transfer(cpi_ctx, reward_amount)?;
     
     // Reset rewards
     staker_rewards.total_rewards = 0;
     staker_rewards.last_claim_time = Clock::get()?.unix_timestamp;
     
     // Update treasury
-    treasury.total_distributed += reward_amount;
+    ctx.accounts.treasury.total_distributed += reward_amount;
     
     msg!("Staking rewards claimed successfully!");
     msg!("Staker: {}", ctx.accounts.staker.key());
