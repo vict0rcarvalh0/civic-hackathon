@@ -5,6 +5,9 @@ pub enum SkillPassError {
     #[msg("Insufficient reputation tokens")]
     InsufficientReputationTokens,
     
+    #[msg("Maximum reputation supply exceeded")]
+    MaxReputationSupplyExceeded,
+    
     #[msg("Below minimum investment amount")]
     BelowMinimumInvestment,
     
@@ -20,60 +23,42 @@ pub enum SkillPassError {
     #[msg("Already endorsed this skill")]
     AlreadyEndorsed,
     
-    #[msg("Skill does not exist")]
-    SkillDoesNotExist,
+    #[msg("No endorsements to challenge")]
+    NoEndorsementsToChallenge,
     
-    #[msg("Investment pool does not exist")]
-    InvestmentPoolDoesNotExist,
-    
-    #[msg("No investment found")]
-    NoInvestmentFound,
-    
-    #[msg("No yield to claim")]
-    NoYieldToClaim,
-    
-    #[msg("No rewards to claim")]
-    NoRewardsToClaim,
-    
-    #[msg("Challenge period not ended")]
-    ChallengePeriodNotEnded,
-    
-    #[msg("Skill not challenged")]
-    SkillNotChallenged,
+    #[msg("Already challenged")]
+    AlreadyChallenged,
     
     #[msg("Insufficient reputation to challenge")]
     InsufficientReputationToChallenge,
     
-    #[msg("Cannot withdraw during active challenge")]
-    CannotWithdrawDuringActiveChallenge,
+    #[msg("Skill not challenged")]
+    SkillNotChallenged,
     
-    #[msg("Max supply exceeded")]
-    MaxSupplyExceeded,
+    #[msg("Challenge period not ended")]
+    ChallengePeriodNotEnded,
+    
+    #[msg("No rewards to claim")]
+    NoRewardsToClaim,
+    
+    #[msg("No investment in this skill")]
+    NoInvestmentInSkill,
+    
+    #[msg("No yield to claim")]
+    NoYieldToClaim,
+    
+    #[msg("Skill doesn't exist")]
+    SkillDoesNotExist,
     
     #[msg("Invalid skill ID")]
     InvalidSkillId,
     
+    #[msg("Unauthorized operation")]
+    Unauthorized,
+    
     #[msg("Invalid amount")]
     InvalidAmount,
     
-    #[msg("Unauthorized")]
-    Unauthorized,
-    
-    #[msg("Invalid mint")]
-    InvalidMint,
-    
-    #[msg("Invalid token account")]
-    InvalidTokenAccount,
-    
-    #[msg("Transfer failed")]
-    TransferFailed,
-    
-    #[msg("Invalid metadata")]
-    InvalidMetadata,
-    
-    #[msg("Invalid treasury")]
-    InvalidTreasury,
-    
-    #[msg("Invalid program state")]
-    InvalidProgramState,
+    #[msg("Invalid timestamp")]
+    InvalidTimestamp,
 } 

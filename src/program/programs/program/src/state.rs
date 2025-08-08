@@ -1,19 +1,47 @@
 use anchor_lang::prelude::*;
 
-// Global program state
+// Constants
+pub const INITIAL_REPUTATION_SUPPLY: u64 = 10_000_000_000_000; // 10M tokens
+pub const MAX_REPUTATION_SUPPLY: u64 = 100_000_000_000_000; // 100M tokens
+pub const MIN_INVESTMENT: u64 = 50_000_000_000; // 50 REPR minimum
+pub const MIN_STAKE: u64 = 10_000_000_000; // 10 REPR minimum
+pub const CHALLENGE_PERIOD: i64 = 7 * 24 * 60 * 60; // 7 days in seconds
+
+// Share percentages (basis points)
+pub const INVESTOR_SHARE: u64 = 7000; // 70% to investors
+pub const SKILL_OWNER_SHARE: u64 = 2000; // 20% to skill owner
+pub const PLATFORM_SHARE: u64 = 1000; // 10% to platform
+pub const SLASH_PERCENTAGE: u64 = 50; // 50% slash on false endorsement
+pub const REWARD_PERCENTAGE: u64 = 10; // 10% reward for correct endorsement
+
+// Account sizes
+pub const PROGRAM_STATE_LEN: usize = 8 + 32 + 8 + 8 + 8 + 8 + 8 + 8 + 1; // 8 + authority + total_skills + total_investments + total_revenue + reputation_mint + skill_mint + treasury + bump
+pub const REPUTATION_STATE_LEN: usize = 8 + 32 + 8 + 8 + 8 + 8 + 8 + 1; // 8 + user + reputation_score + last_activity + total_earned + total_slashed + bump
+pub const SKILL_LEN: usize = 8 + 32 + 32 + 64 + 64 + 64 + 64 + 8 + 8 + 8 + 1 + 8 + 1; // 8 + creator + category + name + description + metadata_uri + created_at + total_staked + endorsement_count + verified + skill_id + bump
+pub const INVESTMENT_POOL_LEN: usize = 8 + 8 + 8 + 8 + 8 + 8 + 8 + 8 + 8 + 1; // 8 + skill_id + total_invested + monthly_revenue + total_revenue_earned + last_distribution + investor_count + skill_owner_earnings + current_apy + bump
+pub const INVESTMENT_LEN: usize = 8 + 32 + 8 + 8 + 8 + 8 + 1; // 8 + investor + skill_id + amount + last_claim_time + total_claimed + bump
+pub const REVENUE_BREAKDOWN_LEN: usize = 8 + 8 + 8 + 8 + 8 + 8 + 1; // 8 + skill_id + job_completions + platform_fees + subscription_fees + verification_fees + bump
+pub const ENDORSEMENT_LEN: usize = 8 + 32 + 8 + 8 + 1 + 64 + 1; // 8 + endorser + staked_amount + timestamp + active + evidence + bump
+pub const STAKE_INFO_LEN: usize = 8 + 8 + 8 + 8 + 1 + 8 + 1; // 8 + skill_id + total_staked + endorsement_count + average_stake + challenged + challenge_end_time + bump
+pub const STAKER_REWARDS_LEN: usize = 8 + 32 + 8 + 8 + 1; // 8 + user + total_rewards + last_claim_time + bump
+pub const TREASURY_LEN: usize = 8 + 32 + 8 + 8 + 1; // 8 + authority + total_fees + total_distributed + bump
+
 #[account]
 pub struct ProgramState {
     pub authority: Pubkey,
-    pub reputation_mint: Pubkey,
-    pub skill_mint: Pubkey,
-    pub treasury: Pubkey,
     pub total_skills: u64,
     pub total_investments: u64,
     pub total_revenue: u64,
+    pub reputation_mint: Pubkey,
+    pub skill_mint: Pubkey,
+    pub treasury: Pubkey,
     pub bump: u8,
 }
 
-// Reputation token state
+impl ProgramState {
+    pub const LEN: usize = PROGRAM_STATE_LEN;
+}
+
 #[account]
 pub struct ReputationState {
     pub user: Pubkey,
@@ -24,10 +52,12 @@ pub struct ReputationState {
     pub bump: u8,
 }
 
-// Skill NFT state
+impl ReputationState {
+    pub const LEN: usize = REPUTATION_STATE_LEN;
+}
+
 #[account]
 pub struct Skill {
-    pub mint: Pubkey,
     pub creator: Pubkey,
     pub category: String,
     pub name: String,
@@ -41,7 +71,10 @@ pub struct Skill {
     pub bump: u8,
 }
 
-// Investment pool state
+impl Skill {
+    pub const LEN: usize = SKILL_LEN;
+}
+
 #[account]
 pub struct InvestmentPool {
     pub skill_id: u64,
@@ -55,7 +88,10 @@ pub struct InvestmentPool {
     pub bump: u8,
 }
 
-// Individual investment state
+impl InvestmentPool {
+    pub const LEN: usize = INVESTMENT_POOL_LEN;
+}
+
 #[account]
 pub struct Investment {
     pub investor: Pubkey,
@@ -63,11 +99,13 @@ pub struct Investment {
     pub amount: u64,
     pub last_claim_time: i64,
     pub total_claimed: u64,
-    pub pending_yield: u64,
     pub bump: u8,
 }
 
-// Revenue breakdown
+impl Investment {
+    pub const LEN: usize = INVESTMENT_LEN;
+}
+
 #[account]
 pub struct RevenueBreakdown {
     pub skill_id: u64,
@@ -78,11 +116,13 @@ pub struct RevenueBreakdown {
     pub bump: u8,
 }
 
-// Skill endorsement state
+impl RevenueBreakdown {
+    pub const LEN: usize = REVENUE_BREAKDOWN_LEN;
+}
+
 #[account]
 pub struct Endorsement {
     pub endorser: Pubkey,
-    pub skill_id: u64,
     pub staked_amount: u64,
     pub timestamp: i64,
     pub active: bool,
@@ -90,7 +130,10 @@ pub struct Endorsement {
     pub bump: u8,
 }
 
-// Stake info for skills
+impl Endorsement {
+    pub const LEN: usize = ENDORSEMENT_LEN;
+}
+
 #[account]
 pub struct StakeInfo {
     pub skill_id: u64,
@@ -102,16 +145,22 @@ pub struct StakeInfo {
     pub bump: u8,
 }
 
-// Staker rewards
+impl StakeInfo {
+    pub const LEN: usize = STAKE_INFO_LEN;
+}
+
 #[account]
 pub struct StakerRewards {
-    pub staker: Pubkey,
+    pub user: Pubkey,
     pub total_rewards: u64,
-    pub total_slashed: u64,
+    pub last_claim_time: i64,
     pub bump: u8,
 }
 
-// Platform treasury
+impl StakerRewards {
+    pub const LEN: usize = STAKER_REWARDS_LEN;
+}
+
 #[account]
 pub struct Treasury {
     pub authority: Pubkey,
@@ -120,56 +169,6 @@ pub struct Treasury {
     pub bump: u8,
 }
 
-// Constants
-pub const INITIAL_REPUTATION_SUPPLY: u64 = 10_000_000_000_000; // 10M tokens (9 decimals)
-pub const MAX_REPUTATION_SUPPLY: u64 = 100_000_000_000_000; // 100M tokens
-pub const MIN_INVESTMENT: u64 = 50_000_000_000; // 50 REPR tokens
-pub const MIN_STAKE: u64 = 10_000_000_000; // 10 REPR tokens
-pub const CHALLENGE_PERIOD: i64 = 7 * 24 * 60 * 60; // 7 days in seconds
-pub const SLASH_PERCENTAGE: u64 = 50; // 50% slash
-pub const REWARD_PERCENTAGE: u64 = 10; // 10% reward
-pub const INVESTOR_SHARE: u64 = 7000; // 70% to investors
-pub const SKILL_OWNER_SHARE: u64 = 2000; // 20% to skill owner
-pub const PLATFORM_SHARE: u64 = 1000; // 10% to platform
-pub const JOB_COMPLETION_FEE: u64 = 1000; // 10% of job revenue
-
-// Helper functions
-impl ProgramState {
-    pub const LEN: usize = 8 + 32 + 32 + 32 + 32 + 8 + 8 + 8 + 1;
-}
-
-impl ReputationState {
-    pub const LEN: usize = 8 + 32 + 8 + 8 + 8 + 8 + 1;
-}
-
-impl Skill {
-    pub const LEN: usize = 8 + 32 + 32 + 64 + 64 + 64 + 64 + 8 + 8 + 8 + 1 + 8 + 1;
-}
-
-impl InvestmentPool {
-    pub const LEN: usize = 8 + 8 + 8 + 8 + 8 + 8 + 8 + 8 + 8 + 1;
-}
-
-impl Investment {
-    pub const LEN: usize = 8 + 32 + 8 + 8 + 8 + 8 + 8 + 1;
-}
-
-impl RevenueBreakdown {
-    pub const LEN: usize = 8 + 8 + 8 + 8 + 8 + 8 + 1;
-}
-
-impl Endorsement {
-    pub const LEN: usize = 8 + 32 + 8 + 8 + 8 + 1 + 64 + 1;
-}
-
-impl StakeInfo {
-    pub const LEN: usize = 8 + 8 + 8 + 8 + 8 + 1 + 8 + 1;
-}
-
-impl StakerRewards {
-    pub const LEN: usize = 8 + 32 + 8 + 8 + 1;
-}
-
 impl Treasury {
-    pub const LEN: usize = 8 + 32 + 8 + 8 + 1;
+    pub const LEN: usize = TREASURY_LEN;
 } 
