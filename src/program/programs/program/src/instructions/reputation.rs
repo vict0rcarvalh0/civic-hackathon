@@ -95,8 +95,8 @@ pub struct SlashReputationTokens<'info> {
     )]
     pub treasury_token_account: Account<'info, TokenAccount>,
     
-    /// CHECK: This is the user who will be slashed
-    pub user: AccountInfo<'info>,
+    #[account(mut)]
+    pub user: Signer<'info>,
     
     #[account(mut)]
     pub authority: Signer<'info>,

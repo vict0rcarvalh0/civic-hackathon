@@ -17,16 +17,16 @@ pub const SLASH_PERCENTAGE: u64 = 50; // 50% slash on false endorsement
 pub const REWARD_PERCENTAGE: u64 = 10; // 10% reward for correct endorsement
 
 // Account sizes (updated for SPL integration)
-pub const PROGRAM_STATE_LEN: usize = 8 + 32 + 8 + 8 + 8 + 32 + 32 + 32 + 1; // 8 + authority + total_skills + total_investments + total_revenue + reputation_mint + skill_collection_mint + treasury + bump
-pub const REPUTATION_STATE_LEN: usize = 8 + 32 + 8 + 8 + 8 + 8 + 1; // 8 + user + reputation_score + last_activity + total_earned + total_slashed + bump
-pub const SKILL_LEN: usize = 8 + 32 + 32 + 32 + 64 + 64 + 64 + 64 + 8 + 8 + 8 + 1 + 8 + 1; // 8 + mint + creator + metadata + category + name + description + metadata_uri + created_at + total_staked + endorsement_count + verified + skill_id + bump
-pub const INVESTMENT_POOL_LEN: usize = 8 + 8 + 8 + 8 + 8 + 8 + 8 + 8 + 8 + 1; // unchanged
-pub const INVESTMENT_LEN: usize = 8 + 32 + 8 + 8 + 8 + 8 + 1; // unchanged
-pub const REVENUE_BREAKDOWN_LEN: usize = 8 + 8 + 8 + 8 + 8 + 8 + 1; // unchanged
-pub const ENDORSEMENT_LEN: usize = 8 + 32 + 8 + 8 + 1 + 64 + 1; // unchanged
-pub const STAKE_INFO_LEN: usize = 8 + 8 + 8 + 8 + 1 + 8 + 1; // unchanged
-pub const STAKER_REWARDS_LEN: usize = 8 + 32 + 8 + 8 + 1; // unchanged
-pub const TREASURY_LEN: usize = 8 + 32 + 32 + 8 + 8 + 1; // 8 + authority + treasury_token_account + total_fees + total_distributed + bump
+pub const PROGRAM_STATE_LEN: usize = 8 + 32 + 8 + 8 + 8 + 32 + 32 + 32 + 1; // safe
+pub const REPUTATION_STATE_LEN: usize = 8 + 32 + 8 + 8 + 8 + 8 + 1; // safe
+pub const SKILL_LEN: usize = 8 + 32 + 32 + 32 + 64 + 64 + 64 + 64 + 8 + 8 + 8 + 1 + 8 + 1; // safe (strings padded)
+pub const INVESTMENT_POOL_LEN: usize = 8 + 72 + 64; // fields (65) + extra slack
+pub const INVESTMENT_LEN: usize = 8 + 32 + 8 + 8 + 8 + 8 + 1 + 16; // slack
+pub const REVENUE_BREAKDOWN_LEN: usize = 8 + 40 + 64; // fields (41) + slack
+pub const ENDORSEMENT_LEN: usize = 8 + 32 + 8 + 8 + 1 + 64 + 1 + 32; // slack for string
+pub const STAKE_INFO_LEN: usize = 8 + (8 + 8 + 8 + 8 + 1 + 8 + 1) + 64; // fields (42) + slack
+pub const STAKER_REWARDS_LEN: usize = 8 + 32 + 8 + 8 + 1 + 16; // slack
+pub const TREASURY_LEN: usize = 8 + 32 + 32 + 8 + 8 + 1 + 16; // slack
 
 #[account]
 pub struct ProgramState {
